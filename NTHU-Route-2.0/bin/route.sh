@@ -101,8 +101,8 @@ make -C ${NTHU_ROUTE_PATH}/src -j 128
 echo -e "\nInfo: Running the NTHU Route 2.0 ..."
 rm -rf $GUIDE_FILE
 echo -e "Running the command: './route -cap $CAP_FILE -net $NET_FILE -output $GUIDE_FILE |& tee $LOG_FILE'"
-# ./route -cap $CAP_FILE -net $NET_FILE -output $GUIDE_FILE |& tee $LOG_FILE
-./route --cap $CAP_FILE --net $NET_FILE --out $GUIDE_FILE |& tee $LOG_FILE
+./route -cap $CAP_FILE -net $NET_FILE -output $GUIDE_FILE |& tee $LOG_FILE
+# ./route --cap $CAP_FILE --net $NET_FILE --out $GUIDE_FILE |& tee $LOG_FILE
 if [[ -e "$GUIDE_FILE" ]]; then
     echo -e "\nInfo: Finish running the testcase $TESTCASE_NUM, please check the result"
     echo -e "-> The .guide file will be in the $GUIDE_FOLDER\n"

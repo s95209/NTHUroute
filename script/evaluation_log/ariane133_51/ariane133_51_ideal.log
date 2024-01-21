@@ -1,0 +1,33 @@
+layer 0 name=metal1  min_length=400.00 dir=0
+layer 1 name=metal2  min_length=400.00 dir=1
+layer 2 name=metal3  min_length=400.00 dir=0
+layer 3 name=metal4  min_length=400.00 dir=1
+layer 4 name=metal5  min_length=400.00 dir=0
+layer 5 name=metal6  min_length=400.00 dir=1
+layer 6 name=metal7  min_length=400.00 dir=0
+layer 7 name=metal8  min_length=400.00 dir=1
+layer 8 name=metal9  min_length=400.00 dir=0
+layer 9 name=metal10  min_length=400.00 dir=1
+Num nets = 128673
+Grid Graph Size (x, y, z)= 844 x 1144 x 10
+Layer = 1, overflow_cnt= 0, layer_overflows = 8363.481117, overflow cost = 836.348112
+Layer = 2, overflow_cnt= 0, layer_overflows = 6202.330315, overflow cost = 1456.581143
+Layer = 3, overflow_cnt= 0, layer_overflows = 25522.641157, overflow cost = 4008.845259
+Layer = 4, overflow_cnt= 0, layer_overflows = 79137.808329, overflow cost = 11922.626092
+Layer = 5, overflow_cnt= 0, layer_overflows = 33114.915780, overflow cost = 15234.117670
+Layer = 6, overflow_cnt= 0, layer_overflows = 431321.764969, overflow cost = 58366.294167
+Layer = 7, overflow_cnt= 0, layer_overflows = 317650.727258, overflow cost = 90131.366892
+Layer = 8, overflow_cnt= 0, layer_overflows = 510794.040794, overflow cost = 141210.770972
+Layer = 9, overflow_cnt= 0, layer_overflows = 553723.128387, overflow cost = 196583.083811
+
+--------------------------------- Result -------------------------------------
+
+Number of open nets:                    0
+Total wirelength:              3562219.51
+wirelength cost:               9374265.62
+via cost:                    3129552.0000
+overflow cost:                196583.0838
+total cost:                 12700400.7085
+
+------ The above result is under the condition of 'Demand = 0! (IDEAL)' ------
+

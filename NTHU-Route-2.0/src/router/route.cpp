@@ -275,6 +275,7 @@ extern void parallel_prefix_sum(long long *input, long long *output, long long n
 extern int parallel_sum(const std::vector<long long>& input);
 int main(int argc, char *argv[])
 {
+    // omp_set_num_threads(8);
 /*
     using namespace std::chrono;
     std::cout << "Maximum number of threads: " << omp_get_max_threads() << std::endl;

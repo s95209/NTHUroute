@@ -31,7 +31,7 @@ The architecture of the folder:
 
 ## C. makefile
 
-- Go to `./NTHU-Route-2.0/ASP_DAC_2024/src`.
+- Go to `./NTHU-Route-2.0/src`.
 - Edit the *boost dir* in the makefile.
 - Run the following code:
 
@@ -44,7 +44,7 @@ The architecture of the folder:
 
 ## D. To run NTHU Route 2.0
 
-- Go to `./NTHU-Route-2.0/ASP_DAC_2024/bin`.
+- Go to `./NTHU-Route-2.0/bin`.
 - Run the following code:
 
 ```shell=
@@ -98,14 +98,29 @@ The architecture of the folder:
 
 - ```docker images```
 
-### 5. To run the container
+### 5. To list the container information
 
+- ```sudo docker ps [-a (optional)]```
+- use `-a` will also list the stopped image.
+
+### 6. To run the container
 - ```sudo docker run -it [Author]/[Image name]```
+
 - ```sudo docker run -it pacificfeng/ispd2024_gpu_env```
 
-### 6. To exit the container
+- `Author` is optional.
+
+### 7. To exit the container
 
 - ```exit```
+
+### 8. To stop the container
+
+- ```sudo docker stop [Container ID]```
+
+### 9. To delete the container
+
+- ```sudo docker rm [Container ID]```
 
 <br>
 

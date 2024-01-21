@@ -3,3 +3,5 @@
 *.log
 *.txt
 benchmarks
+script/debug_log
+!script/evaluation_log/**/*.log

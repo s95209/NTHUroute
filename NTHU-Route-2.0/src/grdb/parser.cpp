@@ -25,6 +25,8 @@ using std::endl;
 
 extern std::string TESTCASE_NAME;
 extern RoutingParameters *routing_parameter;
+
+std::vector<int> layerDirections;
  
 struct hash_tuple
 { // hash binary tuple
@@ -263,7 +265,6 @@ void Parser24::parseCapFile()
     // std::vector<std::vector<std::vector<double>>> GcellCapacity(nLayers, std::vector<std::vector<double>>(xSize, std::vector<double>(ySize)));
     this->GcellCapacity.assign(nLayers, std::vector<std::vector<double>>(xSize, std::vector<double>(ySize)));
     
-    std::vector<int> layerDirections;
     std::vector<double> layerMinLengths;
 
     for (int l = 0; l < nLayers; ++l) {

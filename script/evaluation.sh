@@ -23,7 +23,8 @@ echo "   1. $TESTCASE1"
 echo "   2. $TESTCASE2"
 echo "   3. $TESTCASE3"
 echo "   4. $TESTCASE4"
-echo "   6. $TESTCASE6\n"
+echo "   5. $TESTCASE5"
+echo "   6. $TESTCASE6"
 echo -e "   7. $TESTCASE7\n"
 read -p "Enter the index (1-7) to select a data: " TESTCASE_NUM
 echo "=================================================================="
@@ -48,6 +49,13 @@ else
     echo -e "\nInfo: Folder 'evaluation_log' already exists ..."
 fi
 
+if [[ ! -d "debug_log" ]]; then
+    mkdir "./debug_log"
+    echo -e "\nInfo: Folder 'debug_log' created ..."
+else
+    echo -e "\nInfo: Folder 'debug_log' already exists ..."
+fi
+
 rm ./evaluator
 make
 
@@ -56,17 +64,18 @@ if (($TESTCASE_NUM >= 1 && $TESTCASE_NUM <= ${#DATA_LIST[@]})); then
     echo -e "The selected benchmark = $selected_data \n"
 
     mkdir -p "./evaluation_log/$selected_data"
+    mkdir -p "./debug_log/$selected_data"
 
     echo -e "\nInfo: Testcase= $selected_data"
 
-    DEBUG_LOG="./evaluation_log/$selected_data/${selected_data}_debug.log"
-    CAP_LOG="./evaluation_log/$selected_data/${selected_data}_capacity.log"
+    DEBUG_LOG="./debug_log/$selected_data/${selected_data}_debug.log"
     
     if [ $# -eq 0 ]; then
         GUIDE_FILE="$OUTPUT_PATH/$selected_data/${selected_data}.output"
         LOG_FILE="./evaluation_log/$selected_data/${selected_data}.log"
     else 
-        GUIDE_FILE="$OUTPUT_PATH/$selected_data/${selected_data}_${1}.output"
+        # GUIDE_FILE="$OUTPUT_PATH/$selected_data/${selected_data}_${1}.output"
+        GUIDE_FILE="$OUTPUT_PATH/$selected_data/${selected_data}.output"
         LOG_FILE="./evaluation_log/$selected_data/${selected_data}_${1}.log"
     fi
 
@@ -79,7 +88,7 @@ if (($TESTCASE_NUM >= 1 && $TESTCASE_NUM <= ${#DATA_LIST[@]})); then
     fi
 
 
-    ./evaluator "$INPUT_PATH/$selected_data.cap" "$INPUT_PATH/$selected_data.net" "$GUIDE_FILE" "$DEBUG_LOG" "$CAP_LOG" |& tee "$LOG_FILE"
+    ./evaluator "$INPUT_PATH/$selected_data.cap" "$INPUT_PATH/$selected_data.net" "$GUIDE_FILE" "$DEBUG_LOG" |& tee "$LOG_FILE"
 else
     echo "Invalid input. Please enter a number between 1 and ${#DATA_LIST[@]}."
 fi
