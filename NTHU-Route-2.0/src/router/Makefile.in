@@ -1,0 +1,59 @@
+# These definitions will be included by top Makefile
+boost_library = /usr/include/boost
+router_library = $(libdir)/librouter.a
+rsyn_lef_library = $(libdir)/liblef.a
+rsyn_def_library = $(libdir)/libdef.a
+
+router_library_objects =	            \
+	$(objdir)/router/parameter.o        \
+	$(objdir)/router/Construct_2d_tree.o\
+	$(objdir)/router/Range_router.o     \
+	$(objdir)/router/Route_2pinnets.o	\
+	$(objdir)/router/Layerassignment.o	\
+	$(objdir)/router/CoalaDB.o  		\
+	$(objdir)/router/Coala.o  			\
+	$(objdir)/router/CoalaReroute.o 	\
+	$(objdir)/router/sum.o 				\
+	$(objdir)/cugr/db/*.o				\
+	$(objdir)/cugr/gr_db/*.o 			\
+	$(objdir)/cugr/utils/*.o			\
+	$(objdir)/rsyn/*.o
+
+#$(objdir)/router/converter.o
+
+router_exec =	    \
+	$(bindir)/route
+
+# Libraries on which the executables in $(router_execs) depend.
+# External libraries like libz are not in this list.
+
+router_dep_libs =		\
+	$(router_library)	\
+	$(flute_library)	\
+	$(rmst_library)	\
+	$(util_library)		\
+	$(misc_library)     \
+	$(grdb_library)		\
+	$(rsyn_lef_library)	\
+	$(rsyn_def_library)
+
+
+# Libraries needed to link the executables in $(router_execs)
+router_link_libs =      \
+	$(router_dep_libs)  \
+	$(Zlibrary)
+
+#===========================================================
+
+router_all:   $(router_library) $(router_exec)
+
+$(router_library):   $(router_library_objects)
+	ar rv $@ $?
+
+$(bindir)/route:   $(objdir)/router/route.o $(router_dep_libs)
+	$(LINK_CXX) $(objdir)/router/route.o $(router_link_libs) -lboost_system -lboost_filesystem -lpthread -fopenmp -o $@
+
+router_clean:
+	rm -f $(router_library) $(router_exec)
+	rm -rf $(objdir)/router;   mkdir -p $(objdir)/router
+	cd router;  rm -f $(StandardGarbage)
