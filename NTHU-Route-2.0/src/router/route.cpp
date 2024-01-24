@@ -10,13 +10,13 @@
 
 #include <vector>
 
+#include <filesystem>  // Include the <filesystem> header
+
 #include <omp.h>
 
 #include "parameter.h"
 
 #include "Construct_2d_tree.h"
-
-
 
 #include "grdb/RoutingRegion.h"
 
@@ -36,9 +36,9 @@
 
 #include "Coala.h"
 
-
-
 double LARGE_NUM = 100000000;
+
+string route_dict;
 
 void dataPreparetion(ParameterAnalyzer &ap, Builder *builder, std::shared_ptr<std::vector<std::vector<int>>> &layerOneCap);
 
@@ -56,6 +56,8 @@ extern double GAMER_TIME;
 extern double PATH_SEARCH_TIME;
 extern double MAZE_TIME;
 extern double DP_TIME;
+
+#define MAX_THREAD_NUM 8
 
 std::string TESTCASE_NAME;
 
@@ -275,7 +277,6 @@ extern void parallel_prefix_sum(long long *input, long long *output, long long n
 extern int parallel_sum(const std::vector<long long>& input);
 int main(int argc, char *argv[])
 {
-    // omp_set_num_threads(8);
 /*
     using namespace std::chrono;
     std::cout << "Maximum number of threads: " << omp_get_max_threads() << std::endl;
@@ -381,6 +382,14 @@ int main(int argc, char *argv[])
     std::chrono::steady_clock::time_point startRoute = std::chrono::steady_clock::now();
 
     clock_t t0 = clock();
+
+    // to get the absolute path of the binary route for flute operation
+    char* routeAbsolutePath = realpath(argv[0], nullptr);
+    std::filesystem::path routePath(routeAbsolutePath);
+    route_dict = routePath.parent_path().string();
+
+    // to set the maximun thread constraints for the openmp
+    omp_set_num_threads(MAX_THREAD_NUM);
 
     ParameterAnalyzer ap(argc, argv);
 
@@ -515,6 +524,8 @@ int main(int argc, char *argv[])
 
     fout.close();
 
+    free(routeAbsolutePath);
+
     return 0;
 }
 
@@ -566,6 +577,5 @@ void dataPreparetion(ParameterAnalyzer &ap, Builder *builder, std::shared_ptr<st
     }
 
     parser->parse(builder);
-
 }
 

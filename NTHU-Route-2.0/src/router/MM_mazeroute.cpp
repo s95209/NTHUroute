@@ -9,7 +9,7 @@
 #include <omp.h>
 #include <chrono>
 
-// #define GAMER
+#define GAMER
 
 using namespace Jm;
 using namespace std;
@@ -748,7 +748,7 @@ bool Multisource_multisink_mazeroute::gamer_p2(vector<MMM_element*> &sinks)
     bool do_horizontal = false;
     int numRows = this->max_t-this->min_b+1;
     int numCols = this->max_r-this->min_l+1;
-    #pragma omp parallel
+    #pragma omp parallel 
     {
         for (int iter = 0; iter<Iter; ++iter) {
             if (do_horizontal) {
