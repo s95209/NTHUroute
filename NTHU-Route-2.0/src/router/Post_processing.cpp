@@ -37,7 +37,7 @@ bool check_path_no_overflow(vector<Coordinate_2d*> *path, int net_id, int inc_fl
 		int dir = get_direction_2d((*path)[i],(*path)[i+1]);
         //There are two modes:
         // 1. inc_flag = 0: Just report if the specified edge is overflowd
-        // 2. inc_flag = 1: Check if the specified edge will be overflowed if wd add a demond on it.
+        // 2. inc_flag = 1: Check if the specified edge will be overflowed if wd add a demand on it.
 		if (inc_flag==0)
 		{
             if(congestionMap2d->edge((*path)[i]->x, (*path)[i]->y, dir).isOverflow())
@@ -58,7 +58,7 @@ bool check_path_no_overflow(vector<Coordinate_2d*> *path, int net_id, int inc_fl
 	return true;
 }
 
-//Obtain a cost of a path, including via cost.
+// obtain a cost of a path, including via cost.
 void compute_path_total_cost_and_distance(Two_pin_element_2d *element, Monotonic_element* mn)
 {
 	int distance;

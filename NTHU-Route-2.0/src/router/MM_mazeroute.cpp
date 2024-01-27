@@ -826,6 +826,7 @@ bool Multisource_multisink_mazeroute::gamer_p3(vector<MMM_element*> &sinks)
     return (best_sink != nullptr);
 }
 
+// use in main stage (mm maze routing)
 bool Multisource_multisink_mazeroute::mm_maze_route_p2(Two_pin_element_2d *element,
         double bound_cost, int bound_distance, int bound_via_num,
         Coordinate_2d start, Coordinate_2d end)
@@ -986,6 +987,7 @@ PATH_SEARCH_TIME += (std::chrono::duration_cast<std::chrono::duration<double>>(p
 	return find_path_flag;
 }
 
+// use in post processing (refinement stage)
 bool Multisource_multisink_mazeroute::mm_maze_route_p3(Two_pin_element_2d *element,
         double bound_cost, int bound_distance, int bound_via_num,
         Coordinate_2d start, Coordinate_2d end)

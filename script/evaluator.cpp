@@ -22,6 +22,7 @@
 char *debug_argv;
 
 #define DBU 2000
+#define OF_FACTOR 50
 
 #define IDEAL
 // #define DEBUG
@@ -669,6 +670,7 @@ bool NVR_DB::read_gr_solution(const char *input) {
     double wl_cost = 0;
     double total_wl = 0;
     double via_cost = 0;
+    double total_via = 0;
     double overflow_cost = 0;
     double overflow_slope = 0.5;
 
@@ -742,18 +744,20 @@ bool NVR_DB::read_gr_solution(const char *input) {
 
         overflow_cost += layer_overflows * gg.unit_overflow_cost();
         via_cost += double(total_vias[z]) * gg.unit_via_cost();
+        total_via += double(total_vias[z]);
         wl_cost += double(layer_wl) * gg.unit_length_cost();
         total_wl += double(layer_wl);
         printf("Layer = %d, overflow_cnt= %d, layer_overflows = %lf, overflow cost = %lf\n", z, num_overflow,
                layer_overflows, overflow_cost);
     }
 
-    double total_cost = overflow_cost + via_cost + wl_cost;
+    double total_cost = overflow_cost + via_cost + OF_FACTOR * wl_cost;
 
     printf("\n--------------------------------- Result -------------------------------------\n\n");
     printf("Number of open nets: %20d\n", total_opens);
     printf("Total wirelength:    %20.2lf\n", total_wl / DBU);
     printf("wirelength cost:     %20.2lf\n", wl_cost);
+    printf("Total via:           %20.4lf\n", total_via);
     printf("via cost:            %20.4lf\n", via_cost);
     printf("overflow cost:       %20.4lf\n", overflow_cost);
     printf("total cost:          %20.4lf\n", total_cost);

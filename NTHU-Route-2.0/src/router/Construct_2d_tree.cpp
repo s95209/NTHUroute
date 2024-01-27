@@ -646,6 +646,7 @@ void bbox_route(Two_pin_list_2d *list, const double value)
 
 	{
 
+		// to create the bounding box
 		if ((*it)->pin1.x > (*it)->pin2.x)
 
 		{
@@ -674,6 +675,7 @@ void bbox_route(Two_pin_list_2d *list, const double value)
 
 #endif
 
+		// to connect the net
 		if (x1 == x2) // vertical edge
 
 		{
@@ -723,6 +725,7 @@ void bbox_route(Two_pin_list_2d *list, const double value)
 	}
 
 	// check the flag of edges, if it is set to 1, then add demand on it.
+	// to add the demand of the wire
 
 	for (vector<Two_pin_element_2d *>::iterator it = list->begin();
 
@@ -769,7 +772,6 @@ void bbox_route(Two_pin_list_2d *list, const double value)
 				if (bboxRouteStateMap->color(i, y1, DIR_EAST) == 1)
 
 				{
-
 					congestionMap2d->edge(i, y1, DIR_EAST).cur_cap += u_value;
 
 					bboxRouteStateMap->color(i, y1, DIR_EAST) = 0;
@@ -858,6 +860,7 @@ void insert_all_two_pin_list(Two_pin_element_2d *mn_path_2d)
 	all_two_pin_list.push_back(mn_path);
 }
 
+// importance: overflow > WL > #via
 inline bool smaller_than_lower_bound(
 
 	double total_cost, int distance, int via_num,
@@ -904,6 +907,7 @@ inline bool smaller_than_lower_bound(
 
  * function in *route/route.cpp* .                                        */
 
+// Here, pre_evaluate_congestion_cost_fp = pre_evaluate_congestion_cost_all
 void (*pre_evaluate_congestion_cost_fp)(int i, int j, int dir);
 
 void pre_evaluate_congestion_cost_all(int i, int j, int dir)
@@ -916,12 +920,13 @@ void pre_evaluate_congestion_cost_all(int i, int j, int dir)
 
 	DirectionType dirType = static_cast<DirectionType>(Jr2JmDirArray[dir]);
 
+	// if capacity == 0, then the cost is very large
 	if (sign(congestionMap2d->edge(i, j, dirType).max_cap) == 0) {
 		cache->edge(i, j, dirType).cost = 1e9;
 		return;
 	}
 
-	if (used_cost_flag == HISTORY_COST)
+	if (used_cost_flag == HISTORY_COST)		// main stage for MM routing
 
 	{
 
@@ -938,7 +943,7 @@ void pre_evaluate_congestion_cost_all(int i, int j, int dir)
 										  (congestionMap2d->edge(i, j, dirType).history) * pow(cong, exponent);
 	}
 
-	else
+	else	// refinement stage
 
 	{
 		// cache->edge(i, j, dirType).cost = (congestionMap2d->edge(i, j, dirType).isFull()) 
@@ -1671,6 +1676,7 @@ void monotonic_routing_algorithm(int x1, int y1, int x2, int y2, int dir, int ne
 		}
 	}
 
+	// to judge whether go left or go top(down)
 	for (i = x1 + 1; i <= x2; ++i)
 
 	{
@@ -1814,7 +1820,6 @@ void update_congestion_map_insert_two_pin_net(Two_pin_element_2d *element)
 	for (int i = element->path.size() - 2; i >= 0; --i)
 
 	{
-		
 
 		// get an edge from congestion map - c_map_2d
 
@@ -1826,7 +1831,7 @@ void update_congestion_map_insert_two_pin_net(Two_pin_element_2d *element)
 
 		if (!insert_result.second)
 
-			++((insert_result.first)->second);
+			++((insert_result.first)->second);	// insert the routing edge
 
 		else
 
@@ -1866,9 +1871,9 @@ void update_congestion_map_remove_two_pin_net(Two_pin_element_2d *element)
 
 			congestionMap2d->edge(element->path[i]->x, element->path[i]->y, dir).used_net.find(element->net_id);
 
-		--(find_result->second);
+		--(find_result->second);	// delete the routing net
 
-		if (find_result->second == 0)
+		if (find_result->second == 0)	// if the routing net number becomes zero -> recalculate the congestion cost
 
 		{
 

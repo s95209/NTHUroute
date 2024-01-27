@@ -331,6 +331,7 @@ static void range_router(Two_pin_element_2d * two_pin)
 		vector<Coordinate_2d*>* bound_path =
             new vector<Coordinate_2d*>(two_pin->path);
 
+		// use monotonic routing first
         Monotonic_element mn;
         compute_path_total_cost_and_distance(two_pin, &mn);
 		double bound_cost = mn.total_cost;
@@ -362,6 +363,7 @@ static void range_router(Two_pin_element_2d * two_pin)
 
 		two_pin->done = done_iter;
 
+		// if after monotonic routing, there still contain overflow
 		if ( (find_path_flag == false) || !check_path_no_overflow(bound_path,two_pin->net_id, true)) {
 			Coordinate_2d start, end;
 
@@ -370,7 +372,7 @@ static void range_router(Two_pin_element_2d * two_pin)
             start.y = min(two_pin->pin1.y,two_pin->pin2.y);
             end.y = max(two_pin->pin1.y,two_pin->pin2.y);
 
-            int size = BOXSIZE_INC;
+            int size = BOXSIZE_INC;	// 10
             start.x = max(0, start.x - size);
             start.y = max(0, start.y - size);
             end.x = min(rr_map->get_gridx()-1, end.x+size);
