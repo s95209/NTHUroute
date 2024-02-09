@@ -1,0 +1,13 @@
+evaluator: evaluator.cpp:659: bool NVR_DB::read_gr_solution(const char*): Assertion `0' failed.
+layer 0 name=metal1  min_length=400.00 dir=0
+layer 1 name=metal2  min_length=400.00 dir=1
+layer 2 name=metal3  min_length=400.00 dir=0
+layer 3 name=metal4  min_length=400.00 dir=1
+layer 4 name=metal5  min_length=400.00 dir=0
+layer 5 name=metal6  min_length=400.00 dir=1
+layer 6 name=metal7  min_length=400.00 dir=0
+layer 7 name=metal8  min_length=400.00 dir=1
+layer 8 name=metal9  min_length=400.00 dir=0
+layer 9 name=metal10  min_length=400.00 dir=1
+Num nets = 128673
+Grid Graph Size (x, y, z)= 844 x 1144 x 10

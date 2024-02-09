@@ -1128,7 +1128,7 @@ void DP(int x, int y, int z) {
         is_end = true;
         for (i = 0; i < 4; ++i) // direction
         {
-            if (path_map[x][y].edge[i] == 1) // check leagal
+            if (path_map[x][y].edge[i] == 1) // check legal
             {
 #ifdef PRINT_DP_PIN
                 if (check_net) {
@@ -2066,7 +2066,7 @@ void DP(int x, int y, int z) {
                         else if ((dir == 2 || dir == 3) && prefer_direction[k][0] == 1)
                             break;
 #else
-                k = 0;
+                    k = 0;
 #endif
                     k_via_overflow = count_via_overflow_for_a_segment(temp->x, temp->y, k, z_max);
                     for (z = k + 1; z < max_zz; ++z)
@@ -2097,13 +2097,14 @@ void DP(int x, int y, int z) {
                                     k = z;
                                     k_via_overflow = z_via_overflow;
                                 }
-#else
-                        if ((cur_map_3d[temp->x][temp->y][k].edge_list[dir]->cur_cap
-                                 < cur_map_3d[temp->x][temp->y][k].edge_list[dir]->max_cap
-                             && abs(z - temp->z) < abs(k - temp->z))
-                            || (cur_map_3d[temp->x][temp->y][k].edge_list[dir]->cur_cap
-                                >= cur_map_3d[temp->x][temp->y][k].edge_list[dir]->max_cap))
-                            k = z;
+#else                           
+                                // connect via
+                                if ((cur_map_3d[temp->x][temp->y][k].edge_list[dir]->cur_cap
+                                         < cur_map_3d[temp->x][temp->y][k].edge_list[dir]->max_cap
+                                     && abs(z - temp->z) < abs(k - temp->z))
+                                    || (cur_map_3d[temp->x][temp->y][k].edge_list[dir]->cur_cap
+                                        >= cur_map_3d[temp->x][temp->y][k].edge_list[dir]->max_cap))
+                                    k = z;
 #endif
                             }
                             else {
@@ -2131,16 +2132,16 @@ void DP(int x, int y, int z) {
                                     }
                                 }
 #else
-                        if ((cur_map_3d[temp->x][temp->y][z].edge_list[dir]->cur_cap
-                                 - cur_map_3d[temp->x][temp->y][z].edge_list[dir]->max_cap
-                             < cur_map_3d[temp->x][temp->y][k].edge_list[dir]->cur_cap
-                                   - cur_map_3d[temp->x][temp->y][k].edge_list[dir]->max_cap)
-                            || (cur_map_3d[temp->x][temp->y][z].edge_list[dir]->cur_cap
-                                        - cur_map_3d[temp->x][temp->y][z].edge_list[dir]->max_cap
-                                    == cur_map_3d[temp->x][temp->y][k].edge_list[dir]->cur_cap
-                                           - cur_map_3d[temp->x][temp->y][k].edge_list[dir]->max_cap
-                                && abs(z - temp->z) < abs(k - temp->z)))
-                            k = z;
+                                if ((cur_map_3d[temp->x][temp->y][z].edge_list[dir]->cur_cap
+                                         - cur_map_3d[temp->x][temp->y][z].edge_list[dir]->max_cap
+                                     < cur_map_3d[temp->x][temp->y][k].edge_list[dir]->cur_cap
+                                           - cur_map_3d[temp->x][temp->y][k].edge_list[dir]->max_cap)
+                                    || (cur_map_3d[temp->x][temp->y][z].edge_list[dir]->cur_cap
+                                                - cur_map_3d[temp->x][temp->y][z].edge_list[dir]->max_cap
+                                            == cur_map_3d[temp->x][temp->y][k].edge_list[dir]->cur_cap
+                                                   - cur_map_3d[temp->x][temp->y][k].edge_list[dir]->max_cap
+                                        && abs(z - temp->z) < abs(k - temp->z)))
+                                    k = z;
 #endif
                             }
 #ifdef FOLLOW_PREFER

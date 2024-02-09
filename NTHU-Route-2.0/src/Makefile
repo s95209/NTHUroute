@@ -12,6 +12,10 @@ HOME_DIR := $(shell echo $$HOME)
 BoostLibDir = $(HOME_DIR)/boost_1_77_0/stage/lib/
 BoostIncDir = $(HOME_DIR)/boost_1_77_0/
 
+# For DOCKER-BUILD
+BoostLibDirDocker = /usr/local/lib
+BoostIncDirDocker = /usr/local/include
+
 ZlibIncDir =
 Zlibrary   = -lz
 ##  If your system does not have zlib 1.1.4 or above, download and
@@ -106,6 +110,10 @@ doc:
 
 tags:
 	ctags */*.cpp */*.h
+
+docker: BoostLibDir=$(BoostLibDirDocker)
+docker: BoostIncDir=$(BoostIncDirDocker)
+docker: all
 
 
 ##  Follow Peter Miller's advice in his paper "Recursive Make

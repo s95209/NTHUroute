@@ -627,7 +627,6 @@ void bbox_route(Two_pin_list_2d *list, const double value)
 {
 
 	int i, x1, y1, x2, y2;
-
 	double u_value;
 
 	if (value > 0)
@@ -650,14 +649,12 @@ void bbox_route(Two_pin_list_2d *list, const double value)
 		if ((*it)->pin1.x > (*it)->pin2.x)
 
 		{
-
 			swap((*it)->pin1.x, (*it)->pin2.x);
 		}
 
 		if ((*it)->pin1.y > (*it)->pin2.y)
 
 		{
-
 			swap((*it)->pin1.y, (*it)->pin2.y);
 		}
 
@@ -778,7 +775,7 @@ void bbox_route(Two_pin_list_2d *list, const double value)
 				}
 		}
 
-		else // box
+		else // box (with bending)
 
 		{
 
@@ -1026,7 +1023,7 @@ double get_cost_2d(int i, int j, int dir, int net_id, int *distance)
 
 		(*distance) = 1;
 
-		// Used in part II
+		// Used in part II : main stage
 
 		if (used_cost_flag == HISTORY_COST)
 
@@ -1557,6 +1554,7 @@ void monotonic_routing_algorithm(int x1, int y1, int x2, int y2, int dir, int ne
 
 	// The source can in left-top corner or left-bottom corner
 
+	// go right
 	for (i = x1 + 1; i <= x2; ++i)
 
 	{
@@ -1593,6 +1591,7 @@ void monotonic_routing_algorithm(int x1, int y1, int x2, int y2, int dir, int ne
 	}
 
 	// If source is in the left-top corner
+	// go down
 
 	if (dir == BACK)
 
@@ -1636,6 +1635,7 @@ void monotonic_routing_algorithm(int x1, int y1, int x2, int y2, int dir, int ne
 		// If source is in the left-bottom corner
 	}
 
+	// go top
 	else if (dir == FRONT)
 
 	{
@@ -1676,7 +1676,7 @@ void monotonic_routing_algorithm(int x1, int y1, int x2, int y2, int dir, int ne
 		}
 	}
 
-	// to judge whether go left or go top(down)
+	// to judge whether go right or go top(down)
 	for (i = x1 + 1; i <= x2; ++i)
 
 	{

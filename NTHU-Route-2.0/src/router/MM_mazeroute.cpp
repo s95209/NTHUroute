@@ -9,7 +9,7 @@
 #include <omp.h>
 #include <chrono>
 
-#define GAMER
+// #define GAMER
 
 using namespace Jm;
 using namespace std;
