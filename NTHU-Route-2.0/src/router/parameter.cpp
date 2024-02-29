@@ -251,6 +251,8 @@ void ParameterAnalyzer::analyze2() {
 
         {"output", 1, 0, 'O'},
 
+        {"mode", 1, 0, 'M'},
+
         {0, 0, 0, 0}
 
     };

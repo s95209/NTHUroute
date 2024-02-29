@@ -19,8 +19,13 @@ Layer = 6, overflow_cnt= 0, layer_overflows = 949053.906138, overflow cost = 159
 Layer = 7, overflow_cnt= 0, layer_overflows = 706687.712196, overflow cost = 230198.530888
 Layer = 8, overflow_cnt= 0, layer_overflows = 1108108.980730, overflow cost = 341009.428961
 Layer = 9, overflow_cnt= 0, layer_overflows = 1203693.005052, overflow cost = 461378.729466
-Number of open nets : 0
-wirelength cost 21494661.9926
-via cost 4770640.0000
-overflow cost 461378.7295
-total cost 26726680.7221
+
+--------------------------------- Result -------------------------------------
+
+Number of open nets:                    0
+Total wirelength:              8167968.29
+wirelength cost:              21494661.99
+Total via:                    626487.0000
+via cost:                    4770640.0000
+overflow cost:                461378.7295
+total cost:                 49334238.4659

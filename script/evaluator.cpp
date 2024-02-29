@@ -373,6 +373,10 @@ void segv_handler(int sig) {
 int main(int argc, char *argv[]) {
     debug_argv = argv[4];
 
+# ifdef IDEAL
+    std::cout << "This is ideal version!" << endl;
+# endif
+
     signal(SIGSEGV, segv_handler);
     NVR_DB rdb;
     if (!rdb.read_files(argc, argv)) {
