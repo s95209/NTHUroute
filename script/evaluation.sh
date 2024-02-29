@@ -75,7 +75,7 @@ if (($TESTCASE_NUM >= 1 && $TESTCASE_NUM <= ${#DATA_LIST[@]})); then
         LOG_FILE="./evaluation_log/$selected_data/${selected_data}.log"
     else 
         # GUIDE_FILE="$OUTPUT_PATH/$selected_data/${selected_data}_${1}.output"
-        GUIDE_FILE="$OUTPUT_PATH/$selected_data/${selected_data}.output"
+        GUIDE_FILE="$OUTPUT_PATH/$selected_data/${selected_data}_$1.output"
         LOG_FILE="./evaluation_log/$selected_data/${selected_data}_${1}.log"
     fi
 

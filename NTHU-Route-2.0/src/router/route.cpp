@@ -57,7 +57,7 @@ extern double PATH_SEARCH_TIME;
 extern double MAZE_TIME;
 extern double DP_TIME;
 
-#define MAX_THREAD_NUM 8
+#define MAX_THREAD_NUM 16
 
 std::string TESTCASE_NAME;
 
@@ -390,6 +390,7 @@ int main(int argc, char *argv[])
 
     // to set the maximun thread constraints for the openmp
     omp_set_num_threads(MAX_THREAD_NUM);
+    std::cout << "This is " << MAX_THREAD_NUM << " threads version!" << endl;
 
     ParameterAnalyzer ap(argc, argv);
 

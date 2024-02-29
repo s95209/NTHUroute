@@ -24,7 +24,7 @@ char *debug_argv;
 #define DBU 2000
 #define OF_FACTOR 50
 
-#define IDEAL
+// #define IDEAL
 // #define DEBUG
 
 enum NVR_Direction {
@@ -372,6 +372,10 @@ void segv_handler(int sig) {
 
 int main(int argc, char *argv[]) {
     debug_argv = argv[4];
+
+# ifdef IDEAL
+    std::cout << "This is ideal version!" << endl;
+# endif
 
     signal(SIGSEGV, segv_handler);
     NVR_DB rdb;
@@ -751,7 +755,7 @@ bool NVR_DB::read_gr_solution(const char *input) {
                layer_overflows, overflow_cost);
     }
 
-    double total_cost = overflow_cost + via_cost + OF_FACTOR * wl_cost;
+    double total_cost = OF_FACTOR * overflow_cost + via_cost + wl_cost;
 
     printf("\n--------------------------------- Result -------------------------------------\n\n");
     printf("Number of open nets: %20d\n", total_opens);

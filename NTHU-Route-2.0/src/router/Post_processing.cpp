@@ -67,6 +67,8 @@ void compute_path_total_cost_and_distance(Two_pin_element_2d *element, Monotonic
 	mn->total_cost=0;
 	mn->distance=0;
 	mn->via_num=0;
+
+	// to get through each net between the two pins
 	for(int i = element->path.size() - 2; i >= 0; --i)
 	{
 		int dir = get_direction_2d(element->path[i], element->path[i+1]);
@@ -74,7 +76,7 @@ void compute_path_total_cost_and_distance(Two_pin_element_2d *element, Monotonic
 		mn->distance += distance;
 		if (pre_dir != -1)
 		{
-            //if the wire need to bend, then we need to add via cost to it
+            //if the wire need to bend, then we need to add via cost to it (top(down) -> right(left))
 			if ((pre_dir < 2 && dir >= 2) || (pre_dir >= 2 && dir < 2))
 			{
 				mn->via_num += via_cost;
