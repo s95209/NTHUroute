@@ -13,19 +13,28 @@
 #include <vector>
 #include <utility>
 
+// print memory usage function
+#include <sys/resource.h>
+inline
+void printMemoryUsage() {
+    struct rusage r_usage;
+    getrusage(RUSAGE_SELF, &r_usage);
+    std::cout << "Memory usage: " << r_usage.ru_maxrss << " KB" << std::endl;
+}
+
 ///@brief The data structure for presenting the routing bins in global routing area.
 ///@details User can specify the data structure of routing bins by their own, and
 ///         the default data structure of routing bins is a integer.
 template<class T>
 class VertexPlane {
     public:
-                VertexPlane(int xSize,
-                            int ySize,
-                            T initialValue);
+        VertexPlane(int xSize,
+                    int ySize,
+                    T initialValue);
 
-                VertexPlane(const VertexPlane&);
+        VertexPlane(const VertexPlane&);
 
-                ~VertexPlane();
+        ~VertexPlane();
 
     void        operator=(const VertexPlane&);
 
@@ -233,97 +242,96 @@ void VertexPlane<T>::releasePlane ()
 template<class T>
 class EdgePlane {
     public:
-                EdgePlane(int xSize,
-                          int ySize,
-                          T initialValue,
-                          int edgeNumber = 2);
+        EdgePlane(int xSize,
+                    int ySize,
+                    T initialValue,
+                    int edgeNumber = 2);
 
-                EdgePlane(const EdgePlane&);
+        EdgePlane(const EdgePlane&);
 
-                ~EdgePlane();
+        ~EdgePlane();
 
-                void operator=(const EdgePlane&);
+        void operator=(const EdgePlane&);
 
-    ///@brief Change the size of plane. Every vertex will reset to initial value.
-    void        resize(int xSize, int ySize);
+        ///@brief Change the size of plane. Every vertex will reset to initial value.
+        void        resize(int xSize, int ySize);
 
-    ///@brief Get the map size in x-axis
-    int         getXSize () const;
+        ///@brief Get the map size in x-axis
+        int         getXSize () const;
 
-    ///@brief Get the map size in y-axis
-    int         getYSize () const;
+        ///@brief Get the map size in y-axis
+        int         getYSize () const;
 
-    ///@brief Reset every vertex to initial value.
-    void        reset();
+        ///@brief Reset every vertex to initial value.
+        void        reset();
 
-    ///@brief Get the initial value, and it can be changed.
-    T&          initialValue();
+        ///@brief Get the initial value, and it can be changed.
+        T&          initialValue();
 
-    ///@brief Get the initial value, and it is read-only.
-    const T&    initialValue() const;
+        ///@brief Get the initial value, and it is read-only.
+        const T&    initialValue() const;
 
-    ///@brief Get the specified edge
-    T&          edge(int x, int y, Jm::DirectionType);
+        ///@brief Get the specified edge
+        T&          edge(int x, int y, Jm::DirectionType);
 
-    ///@brief Get the specified edge, and the edge is read-only.
-    const T&    edge(int x, int y, Jm::DirectionType) const;
+        ///@brief Get the specified edge, and the edge is read-only.
+        const T&    edge(int x, int y, Jm::DirectionType) const;
 
-    ///@brief Get the specified edge. 
-    ///The direction id is using JR Direction 
-    /// (North, South, West, East) which is different from JR Driection
-    /// (North, South, East, West)
-    T&          edge(int x, int y, int dir);
+        ///@brief Get the specified edge. 
+        ///The direction id is using JR Direction 
+        /// (North, South, West, East) which is different from JR Driection
+        /// (North, South, East, West)
+        T&          edge(int x, int y, int dir);
 
-    ///@brief Get the specified edge, and the edge is read-only.
-    ///The direction id is using JR Direction 
-    /// (North, South, West, East) which is different from JR Driection
-    /// (North, South, East, West)
-    const T&    edge(int x, int y, int dir) const;
+        ///@brief Get the specified edge, and the edge is read-only.
+        ///The direction id is using JR Direction 
+        /// (North, South, West, East) which is different from JR Driection
+        /// (North, South, East, West)
+        const T&    edge(int x, int y, int dir) const;
 
     private:
     ///The routing bins used to connect the routing edges.
-    class Vertex {
-        public:
-                Vertex(T& initialValue);
-                T edge[2];
-    };
+        class Vertex {
+            public:
+                    Vertex(T& initialValue);
+                    T edge[2];
+        };
 
 	private:
-    ///The real data structure of plane
-    Vertex**   edgePlane_;
-    std::vector<Vertex>* edgePool_;
+        ///The real data structure of plane
+        Vertex**   edgePlane_;
+        std::vector<Vertex>* edgePool_;
 
-    ///Plane size
-    int         xSize_;
-    int         ySize_;
+        ///Plane size
+        int         xSize_;
+        int         ySize_;
 
-    ///The initial value
-    T           initialValue_;
-    int         edgeNumber_;
+        ///The initial value
+        T           initialValue_;
+        int         edgeNumber_;
 
-    static const int  transferTable[2][2];
-    static const int  Jr2JmTransferTable[4];
+        static const int  transferTable[2][2];
+        static const int  Jr2JmTransferTable[4];
 
     private:
-    ///Copy the edgePlane
-    void        copyPlane(const EdgePlane&);
+        ///Copy the edgePlane
+        void        copyPlane(const EdgePlane&);
 
-    ///Release the memory used by plane
-    void        releasePlane();
+        ///Release the memory used by plane
+        void        releasePlane();
 
-    ///Because the Vertex only contain the North, East edges, if the user
-    ///want to access the South, West edges, we will need to transfer
-    ///the coordinate and direction to the available value.
-    void        transferLocation(int* x, int* y,
-                                 int index) const;
+        ///Because the Vertex only contain the North, East edges, if the user
+        ///want to access the South, West edges, we will need to transfer
+        ///the coordinate and direction to the available value.
+        void        transferLocation(int* x, int* y,
+                                    int index) const;
 
-    ///This function will assign xxxPool_'s memeory resource to xxxPlane_ pointers
-    void        assignPoolResource ();
+        ///This function will assign xxxPool_'s memeory resource to xxxPlane_ pointers
+        void        assignPoolResource ();
 };
 
 template<class T>
-EdgePlane<T>::EdgePlane(int xSize, int ySize,
-                        T initialValue, int edgeNumber)
+EdgePlane<T>::EdgePlane(int xSize, int ySize, T initialValue, int edgeNumber)
 :edgePlane_(NULL),
  edgePool_(NULL),
  xSize_(xSize),
@@ -331,7 +339,18 @@ EdgePlane<T>::EdgePlane(int xSize, int ySize,
  initialValue_(initialValue),
  edgeNumber_(edgeNumber)
 {
+    std::cout << "||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||" << std::endl;
+    std::cout << "||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||" << std::endl;
+    printMemoryUsage();
+    std::cout << "EdgePlane() || copyPlane(int xSize, int ySize, T initialValue, int edgeNumber) || start" << std::endl;
+    std::cout << "EdgePlane() || copyPlane(int xSize, int ySize, T initialValue, int edgeNumber) || resize() || start" << std::endl;
+    std::cout << "xSize_: " << xSize_ << " ySize_: " << ySize_ << std::endl;
     resize(xSize_, ySize_);
+    printMemoryUsage();
+    std::cout << "EdgePlane() || copyPlane(int xSize, int ySize, T initialValue, int edgeNumber) || resize() || end" << std::endl;
+    std::cout << "EdgePlane() || copyPlane(int xSize, int ySize, T initialValue, int edgeNumber) || end" << std::endl;
+    std::cout << "||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||" << std::endl;
+    std::cout << "||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||" << std::endl;
 }
 
 template<class T>
@@ -343,7 +362,15 @@ EdgePlane<T>::EdgePlane(const EdgePlane& original)
  initialValue_(original.initialValue_),
  edgeNumber_(original.edgeNumber_)
 {
+    std::cout << "====================================" << std::endl;
+    printMemoryUsage();
+    std::cout << "EdgePlane(const EdgePlane& original) || start" << std::endl;
+
+    std::cout << "EdgePlane() || copyPlane() || start" << std::endl;
     copyPlane(original);
+    printMemoryUsage();
+    std::cout << "EdgePlane() || copyPlane() || end" << std::endl;
+    std::cout << "====================================" << std::endl;
 }
 
 template<class T>
@@ -439,20 +466,40 @@ const T& EdgePlane<T>::edge(int x, int y, int JrDir) const
 template<class T>
 void EdgePlane<T>::resize(int xSize, int ySize)
 {
+    std::cout << "EdgePlane() || copyPlane(int xSize, int ySize, T initialValue, int edgeNumber) || resize() || assert() || start" << std::endl;
     assert( xSize >= 0 );
     assert( ySize >= 0 );
+    std::cout << "EdgePlane() || copyPlane(int xSize, int ySize, T initialValue, int edgeNumber) || resize() || assert() || end" << std::endl;
 
+    std::cout << "EdgePlane() || copyPlane(int xSize, int ySize, T initialValue, int edgeNumber) || resize() || releasePlane() || start" << std::endl;
     releasePlane ();
-
+    std::cout << "EdgePlane() || copyPlane(int xSize, int ySize, T initialValue, int edgeNumber) || resize() || releasePlane() || end" << std::endl;
     //Do not move the following 3 lines before releaseColorMap()
+
 	xSize_ = xSize;
 	ySize_ = ySize;
     //edgeNumber_ = edgeNumber;
 
+    std::cout << "===================================" << std::endl;
+    std::cout << "EdgePlane() || copyPlane(int xSize, int ySize, T initialValue, int edgeNumber) || resize() || if() || start" << std::endl;
     if( (xSize_ != 0) && (ySize_ != 0)) {
-        edgePool_ = new std::vector<Vertex>( (xSize_ * ySize_), Vertex(initialValue_));
+
+        std::cout << "EdgePlane() || copyPlane(int xSize, int ySize, T initialValue, int edgeNumber) || resize() || if() || edgePool_ || start" << std::endl;
+        Vertex* tempv = new  Vertex(initialValue_);
+        std::cout << "EdgePlane() || copyPlane(int xSize, int ySize, T initialValue, int edgeNumber) || resize() || if() || edgePool_ || new  Vertex(initialValue_)" << std::endl;
+        std::cout << "xSize_: " << xSize_ << " ySize_: " << ySize_ << " xSize_ * ySize_: " << xSize_ * ySize_ << std::endl;
+        std::cout << "9999999999999999999999999999999" << std::endl;
+        
+        edgePool_ = new std::vector<Vertex>( (xSize_ * ySize_), *tempv);
+        std::cout << "9999999999999999999999999999999" << std::endl;
+        std::cout << "EdgePlane() || copyPlane(int xSize, int ySize, T initialValue, int edgeNumber) || resize() || if() || edgePool_ || end" << std::endl;
+
+        std::cout << "EdgePlane() || copyPlane(int xSize, int ySize, T initialValue, int edgeNumber) || resize() || if() || assignPoolResource() || start" << std::endl;
         assignPoolResource();
+        std::cout << "EdgePlane() || copyPlane(int xSize, int ySize, T initialValue, int edgeNumber) || resize() || if() || assignPoolResource() || end" << std::endl;
     }
+    std::cout << "EdgePlane() || copyPlane(int xSize, int ySize, T initialValue, int edgeNumber) || resize() || if() || end" << std::endl;
+    std::cout << "===================================" << std::endl;
 }
 
 template<class T>

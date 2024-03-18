@@ -354,18 +354,24 @@ void setup_flute_order(int *order)
 		order[i] = i;
 	}
 }
-
 /*assign the estimated track# to each edge*/
 
 void init_2d_map()
 
 {
+	std::cout << "====================================" << std::endl;
+	printMemoryUsage();
+	std::cout << "main() || construct_2d_tree() || gen_FR_congesttion_map() || init_2d_map() || new EdgePlane<Edge_2d>()  || start" << std::endl; 
 
+	printMemoryUsage();
 	congestionMap2d = new EdgePlane<Edge_2d>(rr_map->get_gridx(),
 
 											 rr_map->get_gridy(),
 
 											 Edge_2d());
+	printMemoryUsage();
+	std::cout << "main() || construct_2d_tree() || gen_FR_congesttion_map() || init_2d_map() || new EdgePlane<Edge_2d>()  || end" << std::endl; 
+	std::cout << "====================================" << std::endl;
 
 	for (int x = rr_map->get_gridx() - 2; x >= 0; --x)
 
@@ -1936,8 +1942,11 @@ void gen_FR_congestion_map()
 		rr_map->get_gridy(),
 
 		-1);
-
+	std::cout << "====================================" << std::endl;
+	std::cout << "main() || construct_2d_tree() || gen_FR_congesttion_map() || init_2d_map() || start" << std::endl;
 	init_2d_map(); // initial congestion map: calculating every edge's capacity
+	std::cout << "main() || construct_2d_tree() || gen_FR_congesttion_map() || init_2d_map() || end" << std::endl;
+	std::cout << "====================================" << std::endl;
 
 	init_2pin_list(); // initial 2-pin net container
 
@@ -4048,11 +4057,13 @@ double construct_2d_tree(RoutingRegion *rr)
 							  // 1. A 2D array that stores max congestion
 							  // 2. A 2D array that stores parent (x,y) during finding monotonic path
 	}
-
+	std::cout << "====================================" << std::endl;
+	std::cout << "main() || construct_2d_tree() || gen_FR_congesttion_map() || start" << std::endl;
 	gen_FR_congestion_map(); // Generate congestion map by flute, then route all nets by L-shap pattern routing with
 							 // congestion information from this map. After that, apply edge shifting to the result
 							 // to get the initial solution.
-
+	std::cout << "main() || construct_2d_tree() || gen_FR_congesttion_map() || end" << std::endl;
+	std::cout << "====================================" << std::endl;
 	cal_total_wirelength(); // The report value is the sum of demand on every edge
 
     main_start = std::chrono::high_resolution_clock::now();

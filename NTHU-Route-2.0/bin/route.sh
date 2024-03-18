@@ -25,7 +25,7 @@ TESTCASE4=mempool_group
 TESTCASE5=mempool_tile
 TESTCASE6=nvdla
 TESTCASE7=cluster
-
+TESTCASE8=mempool_cluster_large
 # to user interface
 echo "=================================================================="
 echo " Please select the testcase you want to run:"
@@ -35,8 +35,10 @@ echo "   3. $TESTCASE3"
 echo "   4. $TESTCASE4"
 echo "   5. $TESTCASE5"
 echo "   6. $TESTCASE6"
-echo -e "   7. $TESTCASE7\n"
-read -p "-> Your selection (enter 1~7) = " TESTCASE_NUM
+echo "   7. $TESTCASE7"
+echo "   8. $TESTCASE8"
+echo ""
+read -p "-> Your selection (enter 1~8) = " TESTCASE_NUM
 echo "=================================================================="
 
 # to obtain the testcase user would like to run
@@ -48,6 +50,7 @@ case $TESTCASE_NUM in
     5) TESTCASE=$TESTCASE5 ;;
     6) TESTCASE=$TESTCASE6 ;;
     7) TESTCASE=$TESTCASE7 ;;
+    8) TESTCASE=$TESTCASE8 ;;
     *) echo -e "Error: Invalid selection. Please check again. Exiting. \n"; exit 1 ;;
 esac
 echo -e "\nInfo: Runing the testcase $TESTCASE_NUM, processing ..."

@@ -50,7 +50,7 @@ extern void Post_processing();
 
 extern void Layer_assignment(const std::string&);
 
-extern void OutputResult(const char *);
+// extern void OutputResult(const char *);
 
 extern double GAMER_TIME;
 extern double PATH_SEARCH_TIME;
@@ -401,11 +401,11 @@ int main(int argc, char *argv[])
     // std::cout << "Testcase name: " << TESTCASE_NAME << '\n';
 
     // runISPD2018Flow(ap.get_lef_def()[0], ap.get_lef_def()[1], ap.get_guide());
-
+    std::cout << "222222222222222222222222222222222222" << std::endl;
     RoutingRegion *routingData = new RoutingRegion();
 
     // auto layerOneCap = std::make_shared<std::vector<std::vector<int>>>(std::vector<std::vector<int>>(grDatabase.getNumGrPoint(X), std::vector<int>(grDatabase.getNumGrPoint(Y), 0)));
-
+    std::cout << "00000000000000000000000000000000" << std::endl;
     parameter_set = ap.parameter(); // Global variable: routing parameters
 
     routing_parameter = ap.routing_param();
@@ -418,6 +418,7 @@ int main(int argc, char *argv[])
         std::string dir_path = guide_path.substr(0, pos+delimiter.length()); 
         return dir_path;
     };
+    std::cout << "11111111111111111111111111111111" << std::endl;
     auto write_params = [&](const std::string dir_path) {
         std::string param_path = dir_path + "param.txt";
         std::cout << "Writing parameter file to " << param_path << '\n';
@@ -451,21 +452,49 @@ int main(int argc, char *argv[])
     prog_start = high_resolution_clock::now();
 
     // clock_t t1 = clock();
-    
+    std::cout << "====================================" << std::endl;
+    std::cout << "====================================" << std::endl;
+    std::cout << "====================================" << std::endl;
+    std::cout << "====================================" << std::endl;
+    printMemoryUsage();
+    std::cout << "main() || construct_2d_tree() || start" << std::endl;
     construct_2d_tree(routingData);
-
+    printMemoryUsage();
+    std::cout << "main() || construct_2d_tree() || end" << std::endl;
+    std::cout << "====================================" << std::endl;
+    std::cout << "====================================" << std::endl;
+    std::cout << "====================================" << std::endl;
+    std::cout << "====================================" << std::endl;
     // clock_t t2 = clock();
 
+
+    std::cout << "====================================" << std::endl;
+    std::cout << "====================================" << std::endl;
+    std::cout << "====================================" << std::endl;
+    std::cout << "====================================" << std::endl;
+    std::cout << "main() || Post_processing() || start" << std::endl;
+    printMemoryUsage();
     post_start = std::chrono::high_resolution_clock::now();
     Post_processing();
     post_end = std::chrono::high_resolution_clock::now();
+    printMemoryUsage();
+    std::cout << "main() || construct_2d_tree() || end" << std::endl;
+    std::cout << "====================================" << std::endl;
+    std::cout << "====================================" << std::endl;
+    std::cout << "====================================" << std::endl;
+    std::cout << "====================================" << std::endl;
 
     // clock_t t3 = clock();
 
     // printf("\033[33mtime:\033[m %.2f %.2f %.2f\n", (double)(t2 - t1) / CLOCKS_PER_SEC, (double)(t3 - t2) / CLOCKS_PER_SEC, (double)(t3 - t1) / CLOCKS_PER_SEC);
 
 
-
+    std::cout << "====================================" << std::endl;
+    std::cout << "====================================" << std::endl;
+    std::cout << "====================================" << std::endl;
+    std::cout << "====================================" << std::endl;
+    std::cout << "main() || Layer_assignment() || start" << std::endl;
+    printMemoryUsage();
     if (ap.caseType() == 0)
     {
     }
@@ -475,6 +504,12 @@ int main(int argc, char *argv[])
         Layer_assignment(ap.get_outPR_file());
 	    la_end = std::chrono::high_resolution_clock::now();
     }
+    printMemoryUsage();
+    std::cout << "main() || construct_2d_tree() || end" << std::endl;
+    std::cout << "====================================" << std::endl;
+    std::cout << "====================================" << std::endl;
+    std::cout << "====================================" << std::endl;
+    std::cout << "====================================" << std::endl;
 
     prog_end = high_resolution_clock::now();
 
@@ -579,4 +614,3 @@ void dataPreparetion(ParameterAnalyzer &ap, Builder *builder, std::shared_ptr<st
 
     parser->parse(builder);
 }
-
