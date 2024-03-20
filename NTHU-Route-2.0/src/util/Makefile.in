@@ -2,8 +2,8 @@
 util_library = $(libdir)/libutil.a
 
 util_library_objects =	            \
-	$(objdir)/util/verifier.o       \
-	$(objdir)/util/traversemap.o
+	$(objdir)/util/traversemap.o	\
+#	$(objdir)/util/verifier.o
 
 util_exec =	   
 #	$(bindir)/verify
@@ -29,8 +29,7 @@ util_all:   $(util_library) $(util_exec)
 $(util_library):   $(util_library_objects)
 	ar rv $@ $?
 
-$(bindir)/verify:   $(objdir)/util/verify.o $(util_dep_libs)
-	$(LINK_CXX) $(objdir)/util/verify.o $(util_link_libs) -o $@
+#	$(bindir)/verify:   $(objdir)/util/verify.o $(util_dep_libs) $(LINK_CXX) $(objdir)/util/verify.o $(util_link_libs) -o $@
 
 util_clean:
 	rm -f $(util_library) $(util_exec)

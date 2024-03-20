@@ -24,7 +24,7 @@
 
 #include "misc/filehandler.h"
 
-#include "util/verifier.h"
+// #include "util/verifier.h"
 
 #include "db/Database.h"
 
@@ -40,8 +40,6 @@ double LARGE_NUM = 100000000;
 
 string route_dict;
 
-void dataPreparetion(ParameterAnalyzer &ap, Builder *builder, std::shared_ptr<std::vector<std::vector<int>>> &layerOneCap);
-
 void dataPreparetionISPD2024(ParameterAnalyzer &ap, Builder *builder);
 
 extern void construct_2d_tree(RoutingRegion *);
@@ -50,7 +48,7 @@ extern void Post_processing();
 
 extern void Layer_assignment(const std::string&);
 
-// extern void OutputResult(const char *);
+extern void OutputResult(const char *);
 
 extern double GAMER_TIME;
 extern double PATH_SEARCH_TIME;
@@ -574,43 +572,3 @@ void dataPreparetionISPD2024(ParameterAnalyzer &ap, Builder *builder)
     parser->parse(builder);
 }
 
-void dataPreparetion(ParameterAnalyzer &ap, Builder *builder, std::shared_ptr<std::vector<std::vector<int>>> &layerOneCap)
-
-{
-
-    assert(builder != NULL);
-
-
-
-    GRParser *parser;
-
-    if (ap.caseType() == 0)
-
-    {
-
-        parser = new Parser98(ap.input(), FileHandler::AutoFileType);
-
-    }
-
-    else if (ap.caseType() == 1)
-
-    {
-
-        parser = new Parser07(ap.input(), FileHandler::AutoFileType);
-
-    }
-
-    else
-
-    {
-
-        std::cout<<"address 1 = "<<layerOneCap<<"\n";
-
-        parser = new Parser18(layerOneCap);
-
-        std::cout << "using LEF/DEF testcases ! \n";
-
-    }
-
-    parser->parse(builder);
-}
