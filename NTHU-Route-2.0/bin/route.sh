@@ -1,115 +1,136 @@
 #!/bin/bash
-############################################
-# envirinement :                           #
-# python3                                  #
-# GCC >= 9.3.0                             #
-# Boost == 1.77.0                          #
-# OpenMP >= 4.5                            #
-# Bison >= 3.0.4                           #
-# zlib >= 1.2.7                            #
-# CMake >= 3.1                             #
-############################################
 
-# to specify the benchmarks path (can be modified)
-BENCHMARK_PATH="../../benchmarks/nangate45"
+BENCHMARK_PATH="../../ISPD2024_benchmarks/nangate45"
 NTHU_ROUTE_PATH="../"
-# change the relative path to absolute path
+
 BENCHMARK_PATH=$(realpath "$BENCHMARK_PATH")
 NTHU_ROUTE_PATH=$(realpath "$NTHU_ROUTE_PATH")
 
-# to specify the testcases
-TESTCASE1=ariane133_51
-TESTCASE2=ariane133_68
-TESTCASE3=bsg_chip
-TESTCASE4=mempool_group
-TESTCASE5=mempool_tile
-TESTCASE6=nvdla
-TESTCASE7=cluster
-TESTCASE8=mempool_cluster_large
-# to user interface
-echo "=================================================================="
-echo " Please select the testcase you want to run:"
-echo "   1. $TESTCASE1"
-echo "   2. $TESTCASE2"
-echo "   3. $TESTCASE3"
-echo "   4. $TESTCASE4"
-echo "   5. $TESTCASE5"
-echo "   6. $TESTCASE6"
-echo "   7. $TESTCASE7"
-echo "   8. $TESTCASE8"
-echo ""
-read -p "-> Your selection (enter 1~8) = " TESTCASE_NUM
-echo "=================================================================="
+TESTCASES=(
+ariane133_51
+ariane133_68
+bsg_chip
+nvdla
+mempool_tile
+mempool_group
+mempool_cluster
+tera_cluster
+ariane_68_rank
+bsg_chip_rank
+nvdla_rank
+mempool_tile_rank
+mempool_group_rank
+mempool_cluster_ranking
+tera_cluster_rank
+)
 
-# to obtain the testcase user would like to run
-case $TESTCASE_NUM in
-    1) TESTCASE=$TESTCASE1 ;;
-    2) TESTCASE=$TESTCASE2 ;;
-    3) TESTCASE=$TESTCASE3 ;;
-    4) TESTCASE=$TESTCASE4 ;;
-    5) TESTCASE=$TESTCASE5 ;;
-    6) TESTCASE=$TESTCASE6 ;;
-    7) TESTCASE=$TESTCASE7 ;;
-    8) TESTCASE=$TESTCASE8 ;;
-    *) echo -e "Error: Invalid selection. Please check again. Exiting. \n"; exit 1 ;;
-esac
-echo -e "\nInfo: Runing the testcase $TESTCASE_NUM, processing ..."
 
-# to specify the .cap file path
-CAP_FILE="$BENCHMARK_PATH/Simple_inputs/$TESTCASE.cap"
-if [ -e "$CAP_FILE" ]; then
-    echo -e "\nInfo: We have found the .cap file in $CAP_FILE ..."
-else
-    echo -e "\nError: The .cap file do not exist, please check again!"
-    echo -e "-> The required .cap file path: $CAP_FILE\n"
-    exit 1
+echo "Select a testcase to run:"
+echo "0. All testcases"
+for ((i=0; i<${#TESTCASES[@]}; i++)); do
+echo "$((i+1)). ${TESTCASES[$i]}"
+done
+read -p "Enter your choice (0-$((${#TESTCASES[@]}))): " choice
+
+
+if ! [[ $choice =~ ^[0-9]+$ ]] || [ $choice -lt 0 ] || [ $choice -gt ${#TESTCASES[@]} ]; then
+echo "Invalid choice. Exiting..."
+exit 1
 fi
 
-# to specify the .net file path
-NET_FILE="$BENCHMARK_PATH/Simple_inputs/$TESTCASE.net"
-if [ -e "$NET_FILE" ]; then
-    echo -e "\nInfo: We have found the .net file in $NET_FILE ..."
-else
-    echo -e "\nError: The .net file do not exist, please check again!"
-    echo -e "-> The required .net file path: $NET_FILE\n"
-    exit 1
-fi
 
-# to create the guide folder
 GUIDE_PATH="$BENCHMARK_PATH/guide"
-mkdir $GUIDE_PATH
-GUIDE_FOLDER="$GUIDE_PATH/$TESTCASE"
-if [[ ! -d "$GUIDE_FOLDER" ]]; then
-    mkdir "$GUIDE_FOLDER"
-    echo -e "\nInfo: Folder '$GUIDE_FOLDER' created ..."
+if [ ! -d "$GUIDE_PATH" ]; then
+mkdir -p "$GUIDE_PATH"
+echo "Created directory: $GUIDE_PATH"
 else
-    echo -e "\nInfo: Folder '$GUIDE_FOLDER' already exists ..."
+echo "Directory already exists: $GUIDE_PATH"
 fi
 
-# to create the .guide file path
-if [ $# -eq 0 ]; then
-    GUIDE_FILE="$GUIDE_FOLDER/$TESTCASE.output"
-    LOG_FILE="$GUIDE_FOLDER/$TESTCASE.log"
-else
-    GUIDE_FILE="$GUIDE_FOLDER/${TESTCASE}_$1.output"
-    LOG_FILE="$GUIDE_FOLDER/${TESTCASE}_$1.log"
-fi
 
-# to execute gthe Makefile
-echo -e "\nInfo: Runing the Makefile ..."
+echo -e "\nInfo: Running the Makefile ..."
 make -C ${NTHU_ROUTE_PATH}/src clean
-make -C ${NTHU_ROUTE_PATH}/src -j 128
+make -C ${NTHU_ROUTE_PATH}/src -j
 
-# to run the nthu route
-echo -e "\nInfo: Running the NTHU Route 2.0 ..."
-rm -rf $GUIDE_FILE
-echo -e "Running the command: './route -cap $CAP_FILE -net $NET_FILE -output $GUIDE_FILE |& tee $LOG_FILE'"
-./route -cap $CAP_FILE -net $NET_FILE -output $GUIDE_FILE |& tee $LOG_FILE
-# ./route --cap $CAP_FILE --net $NET_FILE --out $GUIDE_FILE |& tee $LOG_FILE
-if [[ -e "$GUIDE_FILE" ]]; then
-    echo -e "\nInfo: Finish running the testcase $TESTCASE_NUM, please check the result"
-    echo -e "-> The .guide file will be in the $GUIDE_FOLDER\n"
-else
-    echo -e "\nError: Something wrong while running the testcase $TESTCASE_NUM, please check again!"
-    echo -e "-> You can check if there exist .guide file in $GUIDE_FOLDER\n"
+if [ $choice -eq 0 ]; then
+
+
+for TESTCASE in "${TESTCASES[@]}"
+do
+echo "==================================================================="
+echo "Running testcase: $TESTCASE"
+
+# to specify the .cap and .net file path
+CAP_FILE="$BENCHMARK_PATH/Simple_inputs/$TESTCASE.cap"
+NET_FILE="$BENCHMARK_PATH/Simple_inputs/$TESTCASE.net"
+
+# check if .cap and .net files exist
+if [ ! -e "$CAP_FILE" ]; then
+  echo "Error: $CAP_FILE does not exist. Skipping..."
+  continue
 fi
+if [ ! -e "$NET_FILE" ]; then
+  echo "Error: $NET_FILE does not exist. Skipping..."
+  continue
+fi
+
+# create testcase folder
+GUIDE_FOLDER="$GUIDE_PATH/$TESTCASE"
+mkdir -p "$GUIDE_FOLDER"
+
+# specify .guide and .log file path
+GUIDE_FILE="$GUIDE_FOLDER/$TESTCASE.output"
+LOG_FILE="$GUIDE_FOLDER/$TESTCASE.log"
+
+# run NTHU Route  
+echo "Running command: ./route -cap $CAP_FILE -net $NET_FILE -output $GUIDE_FILE |& tee $LOG_FILE"
+./route -cap $CAP_FILE -net $NET_FILE -output $GUIDE_FILE |& tee $LOG_FILE
+
+if [ -e "$GUIDE_FILE" ]; then
+  echo "Finished running $TESTCASE"
+else
+  echo "Error: Something went wrong with $TESTCASE"  
+fi
+done
+else
+
+
+TESTCASE="${TESTCASES[$choice-1]}"
+echo "Running testcase: $TESTCASE"
+
+
+CAP_FILE="$BENCHMARK_PATH/Simple_inputs/$TESTCASE.cap"
+NET_FILE="$BENCHMARK_PATH/Simple_inputs/$TESTCASE.net"
+
+
+if [ ! -e "$CAP_FILE" ]; then
+echo "Error: $CAP_FILE does not exist. Exiting..."
+exit 1
+fi
+if [ ! -e "$NET_FILE" ]; then
+echo "Error: $NET_FILE does not exist. Exiting..."
+exit 1
+
+fi
+
+
+GUIDE_FOLDER="$GUIDE_PATH/$TESTCASE"
+mkdir -p "$GUIDE_FOLDER"
+
+
+GUIDE_FILE="$GUIDE_FOLDER/$TESTCASE.output"
+LOG_FILE="$GUIDE_FOLDER/$TESTCASE.log"
+
+
+echo "Running command: ./route -cap $CAP_FILE -net $NET_FILE -output $GUIDE_FILE |& tee $LOG_FILE"
+./route -cap $CAP_FILE -net $NET_FILE -output $GUIDE_FILE |& tee $LOG_FILE
+
+if [ -e "$GUIDE_FILE" ]; then
+echo "Finished running $TESTCASE"
+else
+echo "Error: Something went wrong with $TESTCASE"
+fi
+fi
+
+echo "=================================================================="
+echo "Finished running testcases"

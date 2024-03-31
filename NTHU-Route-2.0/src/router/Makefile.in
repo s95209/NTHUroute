@@ -30,12 +30,12 @@ router_exec =	    \
 router_dep_libs =		\
 	$(router_library)	\
 	$(flute_library)	\
-	$(rmst_library)	\
+	$(rmst_library)	    \
 	$(util_library)		\
 	$(misc_library)     \
 	$(grdb_library)		\
 	$(rsyn_lef_library)	\
-	$(rsyn_def_library)
+	$(rsyn_def_library) \
 
 
 # Libraries needed to link the executables in $(router_execs)
@@ -51,7 +51,7 @@ $(router_library):   $(router_library_objects)
 	ar rv $@ $?
 
 $(bindir)/route:   $(objdir)/router/route.o $(router_dep_libs)
-	$(LINK_CXX) $(objdir)/router/route.o $(router_link_libs) -lboost_system -lboost_filesystem -lpthread -fopenmp -o $@
+	$(LINK_CXX) $(objdir)/router/route.o $(router_link_libs) -lboost_system -lboost_filesystem -lboost_program_options -lpthread -fopenmp -o $@
 
 router_clean:
 	rm -f $(router_library) $(router_exec)

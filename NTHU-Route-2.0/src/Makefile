@@ -56,7 +56,7 @@ CxxOptions   = $(WarnOptions) $(DebugOptions)
 CXXFLAGS     = -std=c++17 $(CxxOptions) $(IncDirs) -w -fopenmp -I$(BoostIncDir)
 COMPILE_CXX  = $(CXX) $(CXXFLAGS)
 LINK_CXX     = $(CXX) $(CXXFLAGS) -L$(BoostLibDir)
-BoostLibraries = -lboost_system -lboost_filesystem
+BoostLibraries = -lboost_system -lboost_filesystem -lboost_program_options
 
 StandardGarbage = a.out core core.[0-9][0-9]* make.log xxx
 ##  Junk to be removed from each source directory by the 'clean' target.

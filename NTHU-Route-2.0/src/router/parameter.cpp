@@ -10,8 +10,6 @@
 
 #include <getopt.h>
 
-using namespace std;
-
 // pre-defined files' name
 
 #define TEST_BENCH_DIR "./"
@@ -193,9 +191,9 @@ ParameterAnalyzer::ParameterAnalyzer(int argc, char *argv[])
 
     this->analyze2();
 
-    cout << "Input file: \"" << this->inputFileName << "\"" << endl;
-
-    cout << "Output file: \"" << this->outputFileName << "\"" << endl;
+    std::cout << "Input Cap: \"" << this->inputCapName << "\"" << endl;
+    std::cout << "Input Net: \"" << this->inputNetName << "\"" << endl;
+    std::cout << "Output file: \"" << this->outputPRName << "\"" << endl;
 }
 
 void ParameterAnalyzer::analyze2() {
@@ -203,8 +201,6 @@ void ParameterAnalyzer::analyze2() {
     char cmd;
 
     bool defineOutput = false;
-
-    this->paraNO = 8;
 
     parameterSet.setSet();
 
@@ -269,177 +265,117 @@ void ParameterAnalyzer::analyze2() {
         }
 
         switch (cmd) {
-
+            
         case 0:
-
-            cout << "Wrong parameter entered!" << endl;
-
+            std::cout << "Wrong parameter entered!" << endl;
             break;
 
         case 1:
-
-            cout << "Part 2 Max Iteration set to " << parameter << endl;
-
+            std::cout << "Part 2 Max Iteration set to " << parameter << endl;
             parameterSet.iter_2d = atoi(parameter.c_str());
-
             routingParam.set_iteration_p2(atoi(parameter.c_str()));
-
             break;
 
         case 2:
-
-            cout << "Part 3 Max Iteration set to " << parameter << endl;
-
+            std::cout << "Part 3 Max Iteration set to " << parameter << endl;
             parameterSet.iter_p3 = atoi(parameter.c_str());
-
             routingParam.set_iteration_p3(atoi(parameter.c_str()));
-
             break;
 
         case 3:
-
-            cout << "P2 to P3 overflow threashold set to " << parameter << endl;
-
+            std::cout << "P2 to P3 overflow threashold set to " << parameter << endl;
             parameterSet.overflow_threshold = atoi(parameter.c_str());
-
             routingParam.set_overflow_threshold(atoi(parameter.c_str()));
-
             break;
 
         case 4:
-
-            cout << "P3 Initial Box Size set to " << parameter << endl;
-
+            std::cout << "P3 Initial Box Size set to " << parameter << endl;
             routingParam.set_init_box_size_p3(atoi(parameter.c_str()));
-
             break;
 
         case 5:
-
-            cout << "P3 Box Expand Size set to " << parameter << endl;
-
+            std::cout << "P3 Box Expand Size set to " << parameter << endl;
             routingParam.set_box_size_inc_p3(atoi(parameter.c_str()));
-
             break;
 
         case 6:
-
-            cout << "P2 BOXSIZE_INC set to " << parameter << endl;
-
+            std::cout << "P2 BOXSIZE_INC set to " << parameter << endl;
             BOXSIZE_INC = atoi(parameter.c_str());
-
             routingParam.set_init_box_size_p2(atoi(parameter.c_str()));
-
             break;
 
         case 7:
-
-            cout << "P2 Box Expand Size set to " << parameter << endl;
-
+            std::cout << "P2 Box Expand Size set to " << parameter << endl;
             routingParam.set_box_size_inc_p2(atoi(parameter.c_str()));
-
             break;
 
         case 8:
-
-            cout << "Monotonic Routing ";
-
+            std::cout << "Monotonic Routing ";
             enable = atoi(parameter.c_str()) == 1;
-
             routingParam.set_monotonic_en(enable);
 
             if (enable)
-
-                cout << "Enabled!" << endl;
-
+                std::cout << "Enabled!" << endl;
             else
-
-                cout << "Disabled!" << endl;
-
+                std::cout << "Disabled!" << endl;
             break;
 
         case 9:
-
-            cout << "Simple Mode enable - Routing Parameter Auto Fitting!" << endl;
-
+            std::cout << "Simple Mode enable - Routing Parameter Auto Fitting!" << endl;
             routingParam.set_simple_mode_en(true);
-
             break;
 
         case 'i':
-
-            cout << "Input file " << parameter << endl;
-
+            std::cout << "Input file " << parameter << endl;
             this->inputFileName.append(parameter);
-
             this->analyzeInput();
-
             parameterSet.setInputfile(parameter);
-
             break;
 
         case 'I':
-
-            cout << "Input file " << parameter << endl;
-
+            std::cout << "Input file " << parameter << endl;
             this->inputFileName.append(parameter);
-
             parameterSet.setInputfile(parameter);
-
             break;
 
         case 'L':
-
             this->LefFileName.append(parameter);
-
             break;
 
         case 'D':
-
             this->DefFileName.append(parameter);
-
             break;
 
         case 'P':
-
             this->ParamFileName.append(parameter);
-
             break;
 
         case 'o':
-
-            cout << "Output file " << parameter << endl;
-
+            std::cout << "Output file " << parameter << endl;
             this->outputFileName.append(parameter);
-
             this->analyzeOutput();
-
             parameterSet.setOutputfile(parameter);
-
             defineOutput = true;
-
             break;
 
         case 'G':
-
             this->outputGuideName.append(parameter);
+            break;
 
         case 'C':
-
             this->inputCapName = parameter; // For ISPD 2024
+            break;
 
         case 'N':
-
             this->inputNetName = parameter; // For ISPD 2024
+            break;
 
         case 'O':
-
             this->outputPRName = parameter; // For ISPD 2024
+            break;
 
         case '?':
-
-            cout << "Unknown parameter!" << endl;
-
+            std::cout << "Unknown parameter!" << endl;
             break;
         }
     }
@@ -773,7 +709,6 @@ int ParameterAnalyzer::caseType() {
 RoutingParameters::RoutingParameters()
 
 {
-
     /* Presetting Parameter */
 
     /* Common Setting */

@@ -434,28 +434,18 @@ inline int get_direction_2d(const Jm::Coordinate_2d *a, const Jm::Coordinate_2d 
 
 inline
 
-    void
-    printMemoryUsage(const char *msg)
+void printMemoryUsage()
 {
-
-    std::cout << msg << std::endl;
-
     // for print out memory usage
 
     std::ifstream mem("/proc/self/status");
 
     std::string memory;
-
-    for (unsigned i = 0; i < 13; i++)
-    {
-
-        getline(mem, memory);
-
-        if (i > 10)
-        {
-
-            std::cout << memory << std::endl;
-        }
+    int i = 0;
+    while(getline(mem, memory)){
+        if(i == 17) std::cout << i << ": " << memory << std::endl;
+        if(i == 27) std::cout << i << ": " << memory << std::endl;
+        ++i;
     }
 }
 

@@ -16,6 +16,7 @@
 // #define VERIFY_PIN_1
 #include "Construct_2d_tree.h"
 #include "misc/geometry.h"
+#include "grdb/parser.h"
 #include <algorithm>
 #include <queue>
 #include <set>

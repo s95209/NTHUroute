@@ -24,7 +24,7 @@
 
 #include "misc/filehandler.h"
 
-// #include "util/verifier.h"
+#include "util/verifier.h"
 
 #include "db/Database.h"
 
@@ -34,11 +34,11 @@
 
 #include "gr_db/GrDbTrans.h"
 
-#include "Coala.h"
-
 double LARGE_NUM = 100000000;
 
 string route_dict;
+
+void dataPreparetion(ParameterAnalyzer &ap, Builder *builder, std::shared_ptr<std::vector<std::vector<int>>> &layerOneCap);
 
 void dataPreparetionISPD2024(ParameterAnalyzer &ap, Builder *builder);
 
@@ -47,8 +47,6 @@ extern void construct_2d_tree(RoutingRegion *);
 extern void Post_processing();
 
 extern void Layer_assignment(const std::string&);
-
-extern void OutputResult(const char *);
 
 extern double GAMER_TIME;
 extern double PATH_SEARCH_TIME;
@@ -72,107 +70,6 @@ std::chrono::high_resolution_clock::time_point la_end;
 std::chrono::high_resolution_clock::time_point io_start;
 std::chrono::high_resolution_clock::time_point io_end;
 
-void readParams(const string &fileName) {
-  fstream fin(fileName.c_str());
-  string line;
-  if (fin.is_open()) {
-    while (fin.good()) {
-      getline(fin, line);
-      if (line[0] != '#') {
-        char delimiter=':';
-        int pos = line.find(delimiter);
-        string field = line.substr(0, pos);
-        string value = line.substr(pos + 1);
-        stringstream ss(value);
-        if (field == "rcong_min") {
-            routing_parameter->set_rcong_min(std::stod(value));
-            std::cout << "rcong_min:" << routing_parameter->get_rcong_min() << '\n';
-        }
-        else if (field == "rcong_diff") {
-            routing_parameter->set_rcong_diff(std::stod(value));
-            std::cout << "rcong_diff:" << routing_parameter->get_rcong_diff() << '\n';
-        }
-        else if (field == "rcongV_min") {
-            routing_parameter->set_rcongV_min(std::stod(value));
-            std::cout << "rcongV_min:" << routing_parameter->get_rcongV_min() << '\n';
-        }
-        else if (field == "rcongV_diff") {
-            routing_parameter->set_rcongV_diff(std::stod(value));
-            std::cout << "rcongV_diff:" << routing_parameter->get_rcongV_diff() << '\n';
-        }
-        else if (field == "rcongH_min") {
-            routing_parameter->set_rcongH_min(std::stod(value));
-            std::cout << "rcongH_min:" << routing_parameter->get_rcongH_min() << '\n';
-        }
-        else if (field == "rcongH_diff") {
-            routing_parameter->set_rcongH_diff(std::stod(value));
-            std::cout << "rcongH_diff:" << routing_parameter->get_rcongH_diff() << '\n';
-        }
-        else if (field == "rcongNonZeroV_min") {
-            routing_parameter->set_NonZeroV_min(std::stod(value));
-            std::cout << "rcongNonZeroV_min:" << routing_parameter->get_NonZeroV_min() << '\n';
-        }
-        else if (field == "rcongNonZeroV_diff") {
-            routing_parameter->set_NonZeroV_diff(std::stod(value));
-            std::cout << "rcongNonZeroV_diff:" << routing_parameter->get_NonZeroV_diff() << '\n';
-        }
-        else if (field == "rcongNonZeroH_min") {
-            routing_parameter->set_NonZeroH_min(std::stod(value));
-            std::cout << "rcongNonZeroH_min:" << routing_parameter->get_NonZeroH_min() << '\n';
-        }
-        else if (field == "rcongNonZeroH_diff") {
-            routing_parameter->set_NonZeroH_diff(std::stod(value));
-            std::cout << "rcongNonZeroH_diff:" << routing_parameter->get_NonZeroH_diff() << '\n';
-        }
-        else if (field == "init_reduct") {
-            routing_parameter->set_init_reduct(std::stod(value));
-            std::cout << "init_reduct:" << routing_parameter->get_init_reduct() << '\n';
-        }
-      }
-    }
-    fin.close();
-  }
-}
-
-void runISPD2018Flow(std::string lef_file, std::string def_file, std::string guide_file)
-
-{
-
-    Rsyn::Session session;
-
-    std::string lefFile = lef_file;
-
-    std::string defFile = def_file;
-
-    std::string outputFile = guide_file;
-
-    Rsyn::ISPD2018Reader reader;
-
-    const Rsyn::Json params = {
-
-        {"lefFile", lefFile},
-
-        {"defFile", defFile},
-
-    };
-
-    reader.load(params);
-
-    database.init();
-
-    grDatabase.init();
-
-}
-
-std::string getTestCaseName(const std::string &lef_file) {
-    std::string testcase_name;
-    std::string delimiter = "/";
-    size_t pos = lef_file.find_last_of(delimiter);
-    std::string tmp = lef_file.substr(pos+1);
-    pos = tmp.find(".");
-    testcase_name = tmp.substr(0, pos);
-    return testcase_name;
-}
 
 void transOutput(const std::string &in_file, const std::string &out_file)
 {
@@ -266,74 +163,8 @@ void transOutput(const std::string &in_file, const std::string &out_file)
     }
 }
 
-
-// extern void sum_std(const std::vector<int> &input);
-// extern void sum_pthread(const std::vector<int> &input);
-// extern void sum_omp(const std::vector<int> &input);
-// extern void parallel_prefix_sum(std::vector<long long>& input, std::vector<long long>& output);
-extern void parallel_prefix_sum(long long *input, long long *output, long long n);
-extern int parallel_sum(const std::vector<long long>& input);
 int main(int argc, char *argv[])
 {
-/*
-    using namespace std::chrono;
-    std::cout << "Maximum number of threads: " << omp_get_max_threads() << std::endl;
-    // std::vector<int> ints(testSize);
-    // std::vector<int> outs(testSize);
-    // for (auto &i : ints) {
-    //     i = 1;
-    // }
-    // auto seq_start = std::chrono::high_resolution_clock::now();
-    // std::inclusive_scan(ints.cbegin(), ints.cend(), outs.begin());
-    // auto seq_end = std::chrono::high_resolution_clock::now();
-    // duration<double> time_span = duration_cast<duration<double>>(seq_end - seq_start);
-    // std::cerr << std::endl <<"Overall time taken: " << time_span.count() << std::endl;
-
-    // auto par_start = std::chrono::high_resolution_clock::now();
-    // std::inclusive_scan(std::execution:par, ints.cbegin(), ints.cend(), outs.begin());
-    // auto par_end = std::chrono::high_resolution_clock::now();
-    // time_span = duration_cast<duration<double>>(par_end - par_start);
-    // std::cerr << std::endl <<"Overall time taken: " << time_span.count() << std::endl;
-
-    // omp_set_num_threads(128);
-    // int n = 9;
-    // std::vector<int> input(n);
-    // for (int i=0; i<n; ++i)
-    //     input[i] = i+1;
-    long long n = 1e6; // size of the array
-    // std::vector<long long> array(n);
-    long long *array = new long long[n];
-    long long *prefix_sum = new long long[n];
-
-    // Initialize the array with values from 1 to n
-    for (long long i = 0; i < n; i++) {
-        array[i] = i + 1;
-    }
-    std::cout << "Parallel prefix sum start\n";
-    auto start = std::chrono::high_resolution_clock::now();
-    parallel_prefix_sum(array, prefix_sum, n);
-    // prefix_sum[0] = array[0];
-    // for (long long i=1; i<n; ++i) {
-    //     prefix_sum[i] = prefix_sum[i-1] + array[i];
-    // }
-    // long long sum = prefix_sum[n-1];
-    auto end = std::chrono::high_resolution_clock::now();
-    // std::cout << "Sum: " << sum << std::endl;
-    for (long long i=1; i<n; ++i) {
-        assert(prefix_sum[i] == prefix_sum[i-1] + array[i]);
-    }
-    duration<double> time_span = duration_cast<duration<double>>(end - start);
-    std::cerr << std::endl <<"Overall time taken: " << time_span.count() << std::endl;
-    // int s1 = sum_std(input);
-    // int s2 = sum_pthread(input);
-    // int s3 = sum_omp(input);
-    // assert(s1 == n*(n+1)/2);
-    // assert(s2 == n*(n+1)/2);
-    // assert(s3 == n*(n+1)/2);
-    exit(0);
-*/
-    // omp_set_num_threads(32);
-    // Rsyn::Session::init();
 
     cout << "=======================================================" << endl
 
@@ -384,7 +215,9 @@ int main(int argc, char *argv[])
     // to get the absolute path of the binary route for flute operation
     char* routeAbsolutePath = realpath(argv[0], nullptr);
     std::filesystem::path routePath(routeAbsolutePath);
-    route_dict = routePath.parent_path().string();
+    
+    //in my case route_dict = /users/student/mr111/lywu22/ISPD2024/ISPD2024-NTHU_Route_2.0/NTHU-Route-2.0
+    route_dict = routePath.parent_path().string(); 
 
     // to set the maximun thread constraints for the openmp
     omp_set_num_threads(MAX_THREAD_NUM);
@@ -392,107 +225,26 @@ int main(int argc, char *argv[])
 
     ParameterAnalyzer ap(argc, argv);
 
-    // std::cout << "lef : " << ap.get_lef_def()[0] << " def : " << ap.get_lef_def()[1] << " gudie : " << ap.get_guide() << "\n";
-    // std::cout << "Parameter file: " << ap.get_param() << '\n';
+    cout << "000000000000000000000000000000000000000000000000" << endl;
 
-    // TESTCASE_NAME = getTestCaseName(ap.get_lef_def()[0]);
-    // std::cout << "Testcase name: " << TESTCASE_NAME << '\n';
-
-    // runISPD2018Flow(ap.get_lef_def()[0], ap.get_lef_def()[1], ap.get_guide());
-    std::cout << "222222222222222222222222222222222222" << std::endl;
-    RoutingRegion *routingData = new RoutingRegion();
-
-    // auto layerOneCap = std::make_shared<std::vector<std::vector<int>>>(std::vector<std::vector<int>>(grDatabase.getNumGrPoint(X), std::vector<int>(grDatabase.getNumGrPoint(Y), 0)));
-    std::cout << "00000000000000000000000000000000" << std::endl;
-    parameter_set = ap.parameter(); // Global variable: routing parameters
-
+    RoutingRegion* routingData = new RoutingRegion();
+    cout << "111111111111111111111111111111111111111111111111" << endl;
+    parameter_set = ap.parameter(); // Global variable: routing parameters //還沒assign值
+    cout << "222222222222222222222222222222222222222222222222" << endl;
     routing_parameter = ap.routing_param();
-
-    pre_evaluate_congestion_cost_fp = pre_evaluate_congestion_cost_all;
-
-    auto get_dir_path = [](std::string guide_path) { 
-        std::string delimiter = "/";
-        size_t pos = guide_path.find_last_of(delimiter);
-        std::string dir_path = guide_path.substr(0, pos+delimiter.length()); 
-        return dir_path;
-    };
-    std::cout << "11111111111111111111111111111111" << std::endl;
-    auto write_params = [&](const std::string dir_path) {
-        std::string param_path = dir_path + "param.txt";
-        std::cout << "Writing parameter file to " << param_path << '\n';
-        ofstream fout(param_path);
-        assert(fout.is_open());
-
-        fout << "rcong_min:" << routing_parameter->get_rcong_min() << '\n';
-        fout << "rcong_diff:" << routing_parameter->get_rcong_diff() << '\n';
-        fout << "rcongV_min:" << routing_parameter->get_rcongV_min() << '\n';
-        fout << "rcongV_diff:" << routing_parameter->get_rcongV_diff() << '\n';
-        fout << "rcongH_min:" << routing_parameter->get_rcongH_min() << '\n';
-        fout << "rcongH_diff:" << routing_parameter->get_rcongH_diff() << '\n';
-        fout << "rcongNonZeroV_min:" << routing_parameter->get_NonZeroV_min() << '\n';
-        fout << "rcongNonZeroV_diff:" << routing_parameter->get_NonZeroV_diff() << '\n';
-        fout << "rcongNonZeroH_min:" << routing_parameter->get_NonZeroH_min() << '\n';
-        fout << "rcongNonZeroH_diff:" << routing_parameter->get_NonZeroH_diff() << '\n';
-        fout << "init_reduct:" << routing_parameter->get_init_reduct() << '\n';
-
-        fout.close();
-    };
-
-    // std::string dir_path = get_dir_path(ap.get_guide());
-    // std::cout << "Dir path: " << dir_path << '\n';
-    // readParams(ap.get_param());
-    // write_params(dir_path);
-    // dataPreparetion(ap, routingData, layerOneCap);
+    
+    pre_evaluate_congestion_cost_fp = pre_evaluate_congestion_cost_all; //指向這個function
+    
     dataPreparetionISPD2024(ap, routingData);
-    // exit(0);
 
-    using namespace std::chrono;
-    prog_start = high_resolution_clock::now();
+    prog_start = std::chrono::high_resolution_clock::now();
 
-    // clock_t t1 = clock();
-    std::cout << "====================================" << std::endl;
-    std::cout << "====================================" << std::endl;
-    std::cout << "====================================" << std::endl;
-    std::cout << "====================================" << std::endl;
-    printMemoryUsage();
-    std::cout << "main() || construct_2d_tree() || start" << std::endl;
     construct_2d_tree(routingData);
-    printMemoryUsage();
-    std::cout << "main() || construct_2d_tree() || end" << std::endl;
-    std::cout << "====================================" << std::endl;
-    std::cout << "====================================" << std::endl;
-    std::cout << "====================================" << std::endl;
-    std::cout << "====================================" << std::endl;
-    // clock_t t2 = clock();
 
-
-    std::cout << "====================================" << std::endl;
-    std::cout << "====================================" << std::endl;
-    std::cout << "====================================" << std::endl;
-    std::cout << "====================================" << std::endl;
-    std::cout << "main() || Post_processing() || start" << std::endl;
-    printMemoryUsage();
     post_start = std::chrono::high_resolution_clock::now();
     Post_processing();
     post_end = std::chrono::high_resolution_clock::now();
-    printMemoryUsage();
-    std::cout << "main() || construct_2d_tree() || end" << std::endl;
-    std::cout << "====================================" << std::endl;
-    std::cout << "====================================" << std::endl;
-    std::cout << "====================================" << std::endl;
-    std::cout << "====================================" << std::endl;
 
-    // clock_t t3 = clock();
-
-    // printf("\033[33mtime:\033[m %.2f %.2f %.2f\n", (double)(t2 - t1) / CLOCKS_PER_SEC, (double)(t3 - t2) / CLOCKS_PER_SEC, (double)(t3 - t1) / CLOCKS_PER_SEC);
-
-
-    std::cout << "====================================" << std::endl;
-    std::cout << "====================================" << std::endl;
-    std::cout << "====================================" << std::endl;
-    std::cout << "====================================" << std::endl;
-    std::cout << "main() || Layer_assignment() || start" << std::endl;
-    printMemoryUsage();
     if (ap.caseType() == 0)
     {
     }
@@ -502,64 +254,59 @@ int main(int argc, char *argv[])
         Layer_assignment(ap.get_outPR_file());
 	    la_end = std::chrono::high_resolution_clock::now();
     }
-    printMemoryUsage();
-    std::cout << "main() || construct_2d_tree() || end" << std::endl;
-    std::cout << "====================================" << std::endl;
-    std::cout << "====================================" << std::endl;
-    std::cout << "====================================" << std::endl;
-    std::cout << "====================================" << std::endl;
 
-    prog_end = high_resolution_clock::now();
+    prog_end = std::chrono::high_resolution_clock::now();
 
     std::ofstream fout("./runtime.txt");
     assert(fout.is_open());
 
-    duration<double> time_span = duration_cast<duration<double>>(prog_end - prog_start);
+    std::chrono::duration<double> time_span = std::chrono::duration_cast<std::chrono::duration<double>>(prog_end - prog_start);
     std::cerr << std::endl <<"Runtime taken: " << time_span.count() << std::endl;
     fout << "Runtime taken: " << time_span.count() << std::endl;
 
-    // time_span = duration_cast<duration<double>>(pattern_end - pattern_start);
-    // std::cerr << std::endl <<"Pattern Route taken: " << time_span.count() << std::endl;
-    // fout << std::endl <<"Pattern Route taken: " << time_span.count() << std::endl;
 
-    time_span = duration_cast<duration<double>>(main_end - main_start);
+    time_span = std::chrono::duration_cast<std::chrono::duration<double>>(main_end - main_start);
     std::cerr << std::endl <<"Main Route taken: " << time_span.count() << std::endl;
     fout << std::endl <<"Main Route taken: " << time_span.count() << std::endl;
 
 
-    time_span = duration_cast<duration<double>>(post_end - post_start);
+    time_span = std::chrono::duration_cast<std::chrono::duration<double>>(post_end - post_start);
     std::cerr << std::endl <<"Post Route taken: " << time_span.count() << std::endl;
     fout << std::endl <<"Post Route taken: " << time_span.count() << std::endl;
+
 
     std::cerr << std::endl <<"Maze time taken: " << MAZE_TIME << std::endl;
     fout << std::endl <<"Maze time taken: " << MAZE_TIME << std::endl;
 
-    time_span = duration_cast<duration<double>>(io_end - io_start);
-    // std::cerr << std::endl <<"I/O taken: " << time_span.count() << std::endl;
-    // fout << std::endl <<"I/O taken: " << time_span.count() << std::endl;
 
+    time_span = std::chrono::duration_cast<std::chrono::duration<double>>(io_end - io_start);
     double IO_time = time_span.count();
 
-    time_span = duration_cast<duration<double>>(la_end - la_start);
+
+    time_span = std::chrono::duration_cast<std::chrono::duration<double>>(la_end - la_start);
     std::cerr << std::endl <<"Layer Assignment taken: " << (time_span.count()-IO_time) << std::endl;
     fout << std::endl <<"Layer Assignment taken: " << (time_span.count()-IO_time) << std::endl;
+
 
     std::cerr << std::endl <<"I/O taken: " << IO_time << std::endl;
     fout << std::endl <<"I/O taken: " << IO_time << std::endl;
 
+
     std::cerr << std::endl <<"Gamer time taken: " << GAMER_TIME << std::endl;
     fout << std::endl <<"Gamer time taken: " << GAMER_TIME << std::endl;
     
+
     std::cerr << std::endl <<"Path search time taken: " << PATH_SEARCH_TIME << std::endl;
     fout << std::endl <<"Path search time taken: " << PATH_SEARCH_TIME << std::endl;
+
 
     std::cerr << std::endl <<"DP time taken: " << DP_TIME << std::endl;
     fout << std::endl <<"DP time taken: " << DP_TIME << std::endl;
 
+
     fout.close();
 
     free(routeAbsolutePath);
-
     return 0;
 }
 
@@ -571,4 +318,3 @@ void dataPreparetionISPD2024(ParameterAnalyzer &ap, Builder *builder)
     GRParser *parser = new Parser24(ap.get_cap_file(), ap.get_net_file());
     parser->parse(builder);
 }
-

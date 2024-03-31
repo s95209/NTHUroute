@@ -404,7 +404,7 @@ int  RoutingParameters::get_box_size_inc_p3()
 
 class ParameterAnalyzer {
 	public:
-                ParameterAnalyzer(int argc, char* argv[]);
+        ParameterAnalyzer(int argc, char* argv[]);
 		//return input file name
 		const char* input();
 		//return output file name
@@ -433,7 +433,6 @@ class ParameterAnalyzer {
         std::string DefFileName;
         std::string outputGuideName;
         std::string ParamFileName;
-		int         paraNO; //parameter group NO.
 		int         type;   //0 for IBM test cases  and 1 for the others
         ParameterSet parameterSet;
         RoutingParameters routingParam;

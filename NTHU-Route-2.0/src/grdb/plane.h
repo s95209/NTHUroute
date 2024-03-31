@@ -13,14 +13,14 @@
 #include <vector>
 #include <utility>
 
-// print memory usage function
-#include <sys/resource.h>
-inline
-void printMemoryUsage() {
-    struct rusage r_usage;
-    getrusage(RUSAGE_SELF, &r_usage);
-    std::cout << "Memory usage: " << r_usage.ru_maxrss << " KB" << std::endl;
-}
+// // print memory usage function
+// #include <sys/resource.h>
+// inline
+// void printMemoryUsage() {
+//     struct rusage r_usage;
+//     getrusage(RUSAGE_SELF, &r_usage);
+//     std::cout << "Memory usage: " << r_usage.ru_maxrss << " KB" << std::endl;
+// }
 
 ///@brief The data structure for presenting the routing bins in global routing area.
 ///@details User can specify the data structure of routing bins by their own, and
@@ -339,18 +339,7 @@ EdgePlane<T>::EdgePlane(int xSize, int ySize, T initialValue, int edgeNumber)
  initialValue_(initialValue),
  edgeNumber_(edgeNumber)
 {
-    std::cout << "||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||" << std::endl;
-    std::cout << "||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||" << std::endl;
-    printMemoryUsage();
-    std::cout << "EdgePlane() || copyPlane(int xSize, int ySize, T initialValue, int edgeNumber) || start" << std::endl;
-    std::cout << "EdgePlane() || copyPlane(int xSize, int ySize, T initialValue, int edgeNumber) || resize() || start" << std::endl;
-    std::cout << "xSize_: " << xSize_ << " ySize_: " << ySize_ << std::endl;
     resize(xSize_, ySize_);
-    printMemoryUsage();
-    std::cout << "EdgePlane() || copyPlane(int xSize, int ySize, T initialValue, int edgeNumber) || resize() || end" << std::endl;
-    std::cout << "EdgePlane() || copyPlane(int xSize, int ySize, T initialValue, int edgeNumber) || end" << std::endl;
-    std::cout << "||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||" << std::endl;
-    std::cout << "||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||" << std::endl;
 }
 
 template<class T>
@@ -362,15 +351,7 @@ EdgePlane<T>::EdgePlane(const EdgePlane& original)
  initialValue_(original.initialValue_),
  edgeNumber_(original.edgeNumber_)
 {
-    std::cout << "====================================" << std::endl;
-    printMemoryUsage();
-    std::cout << "EdgePlane(const EdgePlane& original) || start" << std::endl;
-
-    std::cout << "EdgePlane() || copyPlane() || start" << std::endl;
     copyPlane(original);
-    printMemoryUsage();
-    std::cout << "EdgePlane() || copyPlane() || end" << std::endl;
-    std::cout << "====================================" << std::endl;
 }
 
 template<class T>
@@ -466,40 +447,19 @@ const T& EdgePlane<T>::edge(int x, int y, int JrDir) const
 template<class T>
 void EdgePlane<T>::resize(int xSize, int ySize)
 {
-    std::cout << "EdgePlane() || copyPlane(int xSize, int ySize, T initialValue, int edgeNumber) || resize() || assert() || start" << std::endl;
     assert( xSize >= 0 );
     assert( ySize >= 0 );
-    std::cout << "EdgePlane() || copyPlane(int xSize, int ySize, T initialValue, int edgeNumber) || resize() || assert() || end" << std::endl;
-
-    std::cout << "EdgePlane() || copyPlane(int xSize, int ySize, T initialValue, int edgeNumber) || resize() || releasePlane() || start" << std::endl;
     releasePlane ();
-    std::cout << "EdgePlane() || copyPlane(int xSize, int ySize, T initialValue, int edgeNumber) || resize() || releasePlane() || end" << std::endl;
     //Do not move the following 3 lines before releaseColorMap()
 
 	xSize_ = xSize;
 	ySize_ = ySize;
     //edgeNumber_ = edgeNumber;
 
-    std::cout << "===================================" << std::endl;
-    std::cout << "EdgePlane() || copyPlane(int xSize, int ySize, T initialValue, int edgeNumber) || resize() || if() || start" << std::endl;
     if( (xSize_ != 0) && (ySize_ != 0)) {
-
-        std::cout << "EdgePlane() || copyPlane(int xSize, int ySize, T initialValue, int edgeNumber) || resize() || if() || edgePool_ || start" << std::endl;
-        Vertex* tempv = new  Vertex(initialValue_);
-        std::cout << "EdgePlane() || copyPlane(int xSize, int ySize, T initialValue, int edgeNumber) || resize() || if() || edgePool_ || new  Vertex(initialValue_)" << std::endl;
-        std::cout << "xSize_: " << xSize_ << " ySize_: " << ySize_ << " xSize_ * ySize_: " << xSize_ * ySize_ << std::endl;
-        std::cout << "9999999999999999999999999999999" << std::endl;
-        
-        edgePool_ = new std::vector<Vertex>( (xSize_ * ySize_), *tempv);
-        std::cout << "9999999999999999999999999999999" << std::endl;
-        std::cout << "EdgePlane() || copyPlane(int xSize, int ySize, T initialValue, int edgeNumber) || resize() || if() || edgePool_ || end" << std::endl;
-
-        std::cout << "EdgePlane() || copyPlane(int xSize, int ySize, T initialValue, int edgeNumber) || resize() || if() || assignPoolResource() || start" << std::endl;
+        edgePool_ = new std::vector<Vertex>( (xSize_ * ySize_), Vertex(initialValue_));
         assignPoolResource();
-        std::cout << "EdgePlane() || copyPlane(int xSize, int ySize, T initialValue, int edgeNumber) || resize() || if() || assignPoolResource() || end" << std::endl;
     }
-    std::cout << "EdgePlane() || copyPlane(int xSize, int ySize, T initialValue, int edgeNumber) || resize() || if() || end" << std::endl;
-    std::cout << "===================================" << std::endl;
 }
 
 template<class T>

@@ -42,6 +42,7 @@ struct hash_tuple
 // virtual
 GRParser::~GRParser() {}
 
+
 //====== Parser24 =========
 Parser24::~Parser24() {}
 
@@ -150,37 +151,26 @@ void Parser24::setEdgeCapacity()
 
     bool isVertical = false; //TODO don't hardcode it
     int resource, prev;
-    for (int layer=0; layer<nLayers; ++layer) {
-        if (isVertical) {
-            for (int i=0; i<xSize; ++i) {
-                for (int j=0; j<ySize-1; ++j) {
-                    resource = max(0, static_cast<int>(min(this->GcellCapacity[layer][i][j], this->GcellCapacity[layer][i][j+1])));
+    for (int layer = 0; layer < nLayers; ++layer) {
+        if (layerDirections[layer]) {
+            for (int i = 0; i < xSize; ++i) {
+                for (int j = 0; j < ySize - 1; ++j) {
+                    resource = this->GcellCapacity[layer][i][j];
                     if (layer == 0)
                         resource = 0;
-                    builder_->adjustEdgeCapacity(i, j, layer, i, j+1, layer, resource);
+                    builder_->adjustEdgeCapacity(i, j, layer, i, j + 1, layer, resource);
                 }
             }
-            // for (int i=0; i<xSize-1; ++i) {
-            //     for (int j=0; j<ySize; ++j) {
-            //         builder_->adjustEdgeCapacity(i, j, layer, i+1, j, layer, 0);
-            //     }
-            // }
         } else {
-            for (int j=0; j<ySize; ++j) {
-                for (int i=0; i<xSize-1; ++i) {
-                    resource = max(0, static_cast<int>(min(this->GcellCapacity[layer][i][j], this->GcellCapacity[layer][i+1][j])));
+            for (int j = 0; j < ySize; ++j) {
+                for (int i = 0; i < xSize-1; ++i) {
+                    resource = this->GcellCapacity[layer][i][j];
                     if (layer == 0)
                         resource = 0;
                     builder_->adjustEdgeCapacity(i, j, layer, i+1, j, layer, resource);
                 }
             }
-            // for (int i=0; i<xSize; ++i) {
-            //     for (int j=0; j<ySize-1; ++j) {
-            //         builder_->adjustEdgeCapacity(i, j, layer, i, j+1, layer, 0);
-            //     }
-            // }
         }
-        isVertical = !isVertical;
     }
     for (int l = 0; l < nLayers; ++l) {
         if (l % 2 == 0) {
@@ -290,7 +280,7 @@ void Parser24::parseCapFile()
 
 void Parser24::parse(Builder *builder)
 {
-    assert(builder);
+    assert(builder != NULL);
     builder_ = builder;
 
     this->parseCapFile();
