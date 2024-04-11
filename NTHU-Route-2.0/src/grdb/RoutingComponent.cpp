@@ -89,7 +89,6 @@ int Net::get_bboxSize() const
     if (get_pinNumber() > 0) {
         return (maxPinX - minPinX) + (maxPinY - minPinY);
     }
-
     return 0;
 }
 

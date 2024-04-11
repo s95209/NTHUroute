@@ -78,14 +78,9 @@ class RoutingSpace {
     ///@brief Get the specified tile
     Tile&               tile(int x, int y, int z);
 
-    ///@brief Get the specified tile, and the tile is read-only.
-    const Tile&         tile(int x, int y, int z) const;
-
     ///@brief Get the specified edge
     RoutingEdge&        edge(int x, int y, int z, Jm::DirectionType);
 
-    ///@brief Get the specified edge, and the edge is read-only.
-    const RoutingEdge&  edge(int x, int y, int z, Jm::DirectionType) const;
 
     private:
         struct RoutingEdge {
@@ -133,21 +128,7 @@ RoutingSpace::Tile& RoutingSpace::tile(int x, int y, int z)
 }
 
 inline
-const RoutingSpace::Tile& RoutingSpace::tile(int x, int y, int z) const
-{
-    return (*routingSpace_)[z].vertex(x, y);
-}
-
-inline
-RoutingSpace::RoutingEdge&
-RoutingSpace::edge(int x, int y, int z, Jm::DirectionType dir)
-{
-    return (*routingSpace_)[z].edge(x, y, dir);
-}
-
-inline
-const RoutingSpace::RoutingEdge&
-RoutingSpace::edge(int x, int y, int z, Jm::DirectionType dir) const
+RoutingSpace::RoutingEdge& RoutingSpace::edge(int x, int y, int z, Jm::DirectionType dir)
 {
     return (*routingSpace_)[z].edge(x, y, dir);
 }

@@ -92,11 +92,9 @@ void pre_evaluate_congestion_cost_all(int i, int j, int dir);
 
 class Two_pin_element_2d
 {
-
 public:
     Two_pin_element_2d()
-
-        : net_id(0), done(-1), path_through_zero_edge(false)
+    : net_id(0), done(-1), path_through_zero_edge(false)
     {
     }
 
@@ -111,14 +109,11 @@ public:
 
     int net_id;
 
-    int done;
+    int8_t done;
 
     int boxSize() const
     {
-
-        return abs(pin1.x - pin2.x)
-
-               + abs(pin1.y - pin2.y);
+        return abs(pin1.x - pin2.x) + abs(pin1.y - pin2.y);
     }
 };
 
@@ -155,23 +150,16 @@ public:
 };
 
 class Vertex_flute
-
 {
-
 public:
     int x, y;
-
     int type; // PIN, SETINER, DELETED
-
     int index;
-
     int visit;
-
     vector<Vertex_flute *> neighbor;
 
-    Vertex_flute(int x = 0, int y = 0)
-
-        : x(x), y(y), visit(0) /*, copy_ind(-1)*/
+public:
+    Vertex_flute(int x = 0, int y = 0): x(x), y(y), visit(0) /*, copy_ind(-1)*/
     {
     }
 };
@@ -180,13 +168,10 @@ typedef std::unordered_map<int, int> RoutedNetTable;
 
 class Edge_2d
 {
-
 public:
     Edge_2d();
-
 public:
     double cur_cap;
-
     //2024/04/10 ying revise
     //double max_cap;
     int max_cap;
@@ -240,11 +225,8 @@ public:
     Edge_3d();
 public:
     int max_cap;
-
     int cur_cap;
-
     int cur_dem = 0;
-    
     LRoutedNetTable used_net;
 };
 

@@ -227,119 +227,68 @@ int cal_max_overflow()
 // So if demand vlaue = wire length, this function can be used
 
 int cal_total_wirelength()
-
 {
-
 	int total_wl = 0;
-
 	for (int i = rr_map->get_gridx() - 2; i >= 0; --i)
-
 	{
-
 		for (int j = rr_map->get_gridy() - 1; j >= 0; --j)
-
 		{
-
 			total_wl += (int)congestionMap2d->edge(i, j, RIGHT).cur_cap;
 		}
 	}
-
 	for (int i = rr_map->get_gridx() - 1; i >= 0; --i)
-
 	{
-
 		for (int j = rr_map->get_gridy() - 2; j >= 0; --j)
-
 		{
-
 			total_wl += (int)congestionMap2d->edge(i, j, FRONT).cur_cap;
 		}
 	}
-
 	printf("total wirelengh:%d\n", total_wl);
-
 	return total_wl;
 }
 
 /*sort bbox in ascending order, then pin_num in descending order*/
 
 bool comp_net(const Net *a, const Net *b)
-
 {
-
 	if (a->get_bboxSize() > b->get_bboxSize())
-
 	{
-
 		return true;
 	}
-
 	else if (a->get_bboxSize() < b->get_bboxSize())
-
 	{
-
 		return false;
 	}
-
 	else
-
 	{
-
 		return (a->get_pinNumber() < b->get_pinNumber());
 	}
 }
 
 bool comp_2pin_net(Two_pin_element *a, Two_pin_element *b)
-
 {
-
 	int a_bbox_size = abs(a->pin1.x - a->pin2.x) + abs(a->pin1.y - a->pin2.y);
-
 	int b_bbox_size = abs(b->pin1.x - b->pin2.x) + abs(b->pin1.y - b->pin2.y);
-
 	return (a_bbox_size < b_bbox_size);
 }
 
 bool comp_2pin_net_from_path(Two_pin_element_2d *a, Two_pin_element_2d *b)
-
 {
-
 	int a_bbox_size = abs(a->pin1.x - a->pin2.x) + abs(a->pin1.y - a->pin2.y);
-
 	int b_bbox_size = abs(b->pin1.x - b->pin2.x) + abs(b->pin1.y - b->pin2.y);
-
 	return (a_bbox_size < b_bbox_size);
 }
 
 // sort by x,y,pin,steiner
 
 bool comp_vertex_fl(Vertex_flute_ptr a, Vertex_flute_ptr b)
-
 {
-
-	if (a->x < b->x)
-
-		return true;
-
-	else if (a->x > b->x)
-
-		return false;
-
-	else if (a->y < b->y)
-
-		return true;
-
-	else if (a->y > b->y)
-
-		return false;
-
-	else if (a->type == PIN)
-
-		return true;
-
-	else
-
-		return false;
+	if (a->x < b->x) return true;
+	else if (a->x > b->x) return false;
+	else if (a->y < b->y) return true;
+	else if (a->y > b->y) return false;
+	else if (a->type == PIN) return true;
+	else return false;
 }
 
 void setup_flute_order(int *order)
@@ -357,21 +306,6 @@ void setup_flute_order(int *order)
 
 void init_2d_map()
 {	
-	std::cout << "Edge_3d" << std::endl;
-	printMemoryUsage();
-	std::cout << "-------------------" << endl;
-	Edge_3d* test = new Edge_3d;
-	std::cout << "sizeof Edge_3d ptr: " << sizeof(test) << std::endl;
-	std::cout << "sizeof Edge_3d: " << sizeof(*test) << std::endl;
-	std::cout << "sizeof Edge_3d.max_cap: " << sizeof(test->max_cap) << std::endl;
-	std::cout << "sizeof Edge_3d.cur_cap: " << sizeof(test->cur_cap) << std::endl;
-	std::cout << "sizeof Edge_3d.cur_dem: " << sizeof(test->cur_dem) << std::endl;
-	std::cout << "sizeof Edge_3d.used_net: " << sizeof(test->used_net) << std::endl;
-	std::cout << "Edge_3d end" << std::endl;
-	printMemoryUsage();
-	std::cout << "+++++++++++++++++++" << endl;
-
-
 	std::cout << "new EdgePlane<Edge_2d>" << std::endl;
 	printMemoryUsage();
 	std::cout << "-------------------" << endl;
@@ -443,13 +377,9 @@ void allocate_coor_array()
 }
 
 void init_3d_map()
-
 {
-
 	int i, j, k;
-
 	Vertex_3d **tmp_data, *tmp_data2;
-
 	Edge_3d_ptr newedge;
 
 	/*allocate space for cur_map_3d*/
@@ -501,112 +431,70 @@ void init_3d_map()
 	std::cout << "-------------------" << endl;
 
 	for (i = 0; i < rr_map->get_gridx() - 1; ++i)
-
 		for (j = 0; j < rr_map->get_gridy(); ++j)
-
 			for (k = 0; k < rr_map->get_layerNumber(); ++k)
-
 			{
-
 				newedge = Create_Edge_3d(); /*allocate space for edge_list without initialization*/
-				
-
 				cur_map_3d[i][j][k].edge_list[RIGHT] = newedge;
-
 				cur_map_3d[i + 1][j][k].edge_list[LEFT] = newedge;
 			}
-
-
-
 	for (i = 0; i < rr_map->get_gridx(); ++i)
-
 		for (j = 0; j < rr_map->get_gridy() - 1; ++j)
-
 			for (k = 0; k < rr_map->get_layerNumber(); ++k)
-
 			{
-
 				newedge = Create_Edge_3d(); /*allocate space for edge_list without initialization*/
-
 				cur_map_3d[i][j][k].edge_list[FRONT] = newedge;
-
 				cur_map_3d[i][j + 1][k].edge_list[BACK] = newedge;
 			}
 
 	for (i = 0; i < rr_map->get_gridx(); ++i)
-
 		for (j = 0; j < rr_map->get_gridy(); ++j)
-
 			for (k = 0; k < rr_map->get_layerNumber() - 1; ++k)
-
 			{
-
 				newedge = Create_Edge_3d(); /*allocate space for edge_list without initialization*/
-
 				cur_map_3d[i][j][k].edge_list[UP] = newedge;
-
 				cur_map_3d[i][j][k + 1].edge_list[DOWN] = newedge;
 			}
 
 	for (j = 0; j < rr_map->get_gridy(); ++j)
-
 		for (k = 0; k < rr_map->get_layerNumber(); ++k)
-
 			cur_map_3d[0][j][k].edge_list[LEFT] = cur_map_3d[rr_map->get_gridx() - 1][j][k].edge_list[RIGHT] = NULL;
 
 	for (i = 0; i < rr_map->get_gridx(); ++i)
-
 		for (k = 0; k < rr_map->get_layerNumber(); ++k)
-
 			cur_map_3d[i][0][k].edge_list[BACK] = cur_map_3d[i][rr_map->get_gridy() - 1][k].edge_list[FRONT] = NULL;
 
 	for (i = 0; i < rr_map->get_gridx(); ++i)
-
 		for (j = 0; j < rr_map->get_gridy(); ++j)
-
 			cur_map_3d[i][j][0].edge_list[DOWN] = cur_map_3d[i][j][rr_map->get_layerNumber() - 1].edge_list[UP] = NULL;
 }
 
 void init_2pin_list()
-
 {
-
 	int i, netnum;
-
 	netnum = rr_map->get_netNumber();
-
 	for (i = 0; i < netnum; ++i)
-
 	{
-
 		// Two pin nets group by net id. So for fetching the 2nd net's 2-pin net,
-
 		// you can fetch by net_2pin_list[2][i], where i is the id of 2-pin net.
-
 		net_2pin_list.push_back(new Two_pin_list_2d);
-
 		bbox_2pin_list.push_back(new Two_pin_list_2d);
 	}
 }
 
 void init_flute()
-
 {
-
 	net_flutetree = (Tree *)malloc(rr_map->get_netNumber() * sizeof(Tree));
 }
 
 void free_memory_con2d()
-
 {
-
 	for (vector<Two_pin_list_2d *>::iterator it = bbox_2pin_list.begin(); it != bbox_2pin_list.end(); ++it)
-
 		delete (*it);
-
 	bbox_2pin_list.clear();
 }
-//Two_pin_list_2d* 這是list的結構
+
+//typedef vector<Two_pin_element_2d *> Two_pin_list_2d; 這是list的結構
 void bbox_route(Two_pin_list_2d* list, const float value)
 {
 	int i, x1, y1, x2, y2;
@@ -615,9 +503,7 @@ void bbox_route(Two_pin_list_2d* list, const float value)
 	if (value > 0) u_value = 1;
 	else u_value = -1;
 
-	//typedef vector<Two_pin_element_2d *> Two_pin_list_2d; in .h file
 	//vector<Two_pin_element_2d *>::iterator it
-	
 	for (auto it = list->begin(); it != list->end(); ++it)
 	{
 		// to create the bounding box
@@ -632,11 +518,8 @@ void bbox_route(Two_pin_list_2d* list, const float value)
 		}
 
 		x1 = (*it)->pin1.x;
-
 		y1 = (*it)->pin1.y;
-
 		x2 = (*it)->pin2.x;
-
 		y2 = (*it)->pin2.y;
 
 		// to connect the net
@@ -673,103 +556,59 @@ void bbox_route(Two_pin_list_2d* list, const float value)
 	// check the flag of edges, if it is set to 1, then add demand on it.
 	// to add the demand of the wire
 
-	for (vector<Two_pin_element_2d *>::iterator it = list->begin();
-
-		 it != list->end();
-
-		 ++it)
-
+	for (auto it = list->begin(); it != list->end(); ++it)
 	{
-
 		// x1, y1 is the smaller set
-
 		// NOTE: they have been sorted in the last for loop
-
 		x1 = (*it)->pin1.x;
-
 		y1 = (*it)->pin1.y;
-
 		x2 = (*it)->pin2.x;
-
 		y2 = (*it)->pin2.y;
 
 		if (x1 == x2) // vertical edge
-
 		{
-
 			for (i = y1; i < y2; ++i)
-
 				if (bboxRouteStateMap->color(x1, i, DIR_NORTH) == 1)
-
 				{
-
 					congestionMap2d->edge(x1, i, DIR_NORTH).cur_cap += u_value;
-
 					bboxRouteStateMap->color(x1, i, DIR_NORTH) = 0;
 				}
 		}
-
 		else if (y1 == y2) // horizontal edge
-
 		{
-
 			for (i = x1; i < x2; ++i)
-
 				if (bboxRouteStateMap->color(i, y1, DIR_EAST) == 1)
-
 				{
 					congestionMap2d->edge(i, y1, DIR_EAST).cur_cap += u_value;
-
 					bboxRouteStateMap->color(i, y1, DIR_EAST) = 0;
 				}
 		}
-
 		else // box (with bending)
-
 		{
-
 			for (i = y1; i < y2; ++i)
-
 			{
-
 				if (bboxRouteStateMap->color(x1, i, DIR_NORTH) == 1)
-
 				{
-
 					congestionMap2d->edge(x1, i, DIR_NORTH).cur_cap += value;
-
 					bboxRouteStateMap->color(x1, i, DIR_NORTH) = 0;
 				}
-
 				if (bboxRouteStateMap->color(x2, i, DIR_NORTH) == 1)
-
 				{
-
 					congestionMap2d->edge(x2, i, DIR_NORTH).cur_cap += value;
-
 					bboxRouteStateMap->color(x2, i, DIR_NORTH) = 0;
 				}
 			}
 
 			for (i = x1; i < x2; ++i)
-
 			{
-
 				if (bboxRouteStateMap->color(i, y1, DIR_EAST) == 1)
-
 				{
-
 					congestionMap2d->edge(i, y1, DIR_EAST).cur_cap += value;
-
 					bboxRouteStateMap->color(i, y1, DIR_EAST) = 0;
 				}
-
 				if (bboxRouteStateMap->color(i, y2, DIR_EAST) == 1)
-
 				{
-
 					congestionMap2d->edge(i, y2, DIR_EAST).cur_cap += value;
-
 					bboxRouteStateMap->color(i, y2, DIR_EAST) = 0;
 				}
 			}
@@ -1977,6 +1816,9 @@ void gen_FR_congestion_map()
 	printf("L-shaped pattern routing start...\n");
 
 #endif
+	std::cout << "L-shaped pattern routing" << std::endl;
+	printMemoryUsage();
+	std::cout << "-------------------" << endl;
 
 	// sort net by their bounding box size, then by their pin number
     pattern_start = std::chrono::high_resolution_clock::now();
@@ -1984,38 +1826,35 @@ void gen_FR_congestion_map()
 	vector<const Net *> sort_net;
 
 	for (int i = 0; i < rr_map->get_netNumber(); ++i)
-
 	{
-
 		sort_net.push_back(&rr_map->get_netList()[i]);
 	}
 
-	sort(sort_net.begin(), sort_net.end(), comp_net);
+	sort(sort_net.begin(), sort_net.end(), [](const Net* a, const Net* b){
+			if (a->get_bboxSize() > b->get_bboxSize()) {
+				return true;
+			} else if (a->get_bboxSize() < b->get_bboxSize()) {
+				return false;
+			} else {
+				return (a->get_pinNumber() < b->get_pinNumber());
+			}
+		}
+	);
 
 	// Now begins the initial routing by pattern routing
-
 	// Edge shifting will also be applyed to the routing.
-
-	// bool do_edge_shifting = (TESTCASE_NAME != "ispd18_test5_metal5" && TESTCASE_NAME != "ispd19_test9_metal5"); // This is for Best Score Settings;
-	// bool do_edge_shifting = (TESTCASE_NAME != "ispd18_test5_metal5" && TESTCASE_NAME != "ispd19_test9_metal5" && TESTCASE_NAME != "ispd19_test7_metal5" && TESTCASE_NAME != "ispd19_test8_metal5"); // This is for DRC-clean settings
 	bool do_edge_shifting = false;
 	
-	for (vector<const Net *>::iterator it = sort_net.begin();
-
-		 it != sort_net.end();
-
-		 ++it)
-
+	// sort_net 的datatype vector<const Net *> sort_net;
+	for (auto it = sort_net.begin(); it != sort_net.end(); ++it)
 	{
-
 		int netId = (*it)->id;
+		flute_order = (int *)malloc(sizeof(int) * flutetree[netId].number);
 
-		flute_order = (int *)malloc(sizeof(int) * (2 * flutetree[netId].deg - 2));
-
-		if (do_edge_shifting) 
+		if (do_edge_shifting){
 			edge_shifting(&flutetree[netId]);												  
-			
-
+		}
+		
 		global_flutetree = flutetree[netId];
 
 		setup_flute_order(flute_order);
@@ -2070,7 +1909,9 @@ void gen_FR_congestion_map()
 #endif
 	}
     pattern_end = std::chrono::high_resolution_clock::now();
-
+	std::cout << "L-shaped pattern routing end" << std::endl;
+	printMemoryUsage();
+	std::cout << "+++++++++++++++++++" << endl;
 
 #ifdef MESSAGE
 
@@ -3288,57 +3129,36 @@ void dfs_output_tree(Vertex_flute_ptr node, Tree *t)
 }
 
 void edge_shifting(Tree *t)
-
 {
-
 	Vertex_flute_ptr new_v;
-
 	double ori_cost; // the original cost without edge shifting
-
 	ori_cost = 0;
 
 	// creat vertex
-
 	for (int i = 0; i < t->deg; ++i)
-
 	{
-
 		new_v = new Vertex_flute((int)t->branch[i].x, (int)t->branch[i].y);
-
 		new_v->type = PIN;
-
 		vertex_fl.push_back(new_v);
 	}
 
 	for (int i = t->deg; i < 2 * t->deg - 2; ++i)
-
 	{
-
 		new_v = new Vertex_flute((int)t->branch[i].x, (int)t->branch[i].y);
-
 		new_v->type = STEINER;
-
 		vertex_fl.push_back(new_v);
 	}
 
 	// creat edge
-
 	for (int i = 0; i < 2 * (t->deg) - 2; ++i)
-
 	{
-
 		// skip the vertex if it is the same vertex with its neighbor
-
-		if ((vertex_fl[i]->x == vertex_fl[t->branch[i].n]->x) && (vertex_fl[i]->y == vertex_fl[t->branch[i].n]->y))
-
+		if ((vertex_fl[i]->x == vertex_fl[t->branch[i].n]->x) && (vertex_fl[i]->y == vertex_fl[t->branch[i].n]->y)){
 			continue;
-
+		}
 		vertex_fl[i]->neighbor.push_back(vertex_fl[t->branch[i].n]);
-
 		vertex_fl[t->branch[i].n]->neighbor.push_back(vertex_fl[i]);
-
 		// compute original tree cost
-
 		ori_cost += compute_L_pattern_cost(vertex_fl[i]->x, vertex_fl[i]->y, vertex_fl[t->branch[i].n]->x, vertex_fl[t->branch[i].n]->y, -1);
 	}
 
@@ -3349,9 +3169,7 @@ void edge_shifting(Tree *t)
 		if ((vertex_fl[i]->x == vertex_fl[j]->x) && (vertex_fl[i]->y == vertex_fl[j]->y)) // j is redundant
 		{
 			vertex_fl[j]->type = DELETED;
-			for (vector<Vertex_flute_ptr>::iterator it = vertex_fl[j]->neighbor.begin();
-				 it != vertex_fl[j]->neighbor.end();
-				 ++it)
+			for (vector<Vertex_flute_ptr>::iterator it = vertex_fl[j]->neighbor.begin(); it != vertex_fl[j]->neighbor.end(); ++it)
 			{
 				if (((*it)->x != vertex_fl[i]->x) || ((*it)->y != vertex_fl[i]->y)) // not i,add 0430
 				{
@@ -3468,7 +3286,15 @@ double construct_2d_tree(RoutingRegion *rr)
 
     main_start = std::chrono::high_resolution_clock::now();
 
+
+	std::cout << "allocate_gridcell" << std::endl;
+	printMemoryUsage();
+	std::cout << "-------------------" << endl;
 	allocate_gridcell(); // question: I don't know what this for. (jalamorm, 07/10/31)
+	std::cout << "allocate_gridcell end" << std::endl;
+	printMemoryUsage();
+	std::cout << "+++++++++++++++++++" << endl;
+
 
 	// Make a 2-pin net list without group by net
 	for (int i = 0; i < rr_map->get_netNumber(); ++i)
@@ -3479,19 +3305,41 @@ double construct_2d_tree(RoutingRegion *rr)
 		}
 	}
 
+	std::cout << "reallocate_two_pin_list" << std::endl;
+	printMemoryUsage();
+	std::cout << "-------------------" << endl;
 	reallocate_two_pin_list(true);
+	std::cout << "reallocate_two_pin_list end" << std::endl;
+	printMemoryUsage();
+	std::cout << "+++++++++++++++++++" << endl;
 
+	std::cout << "new EdgePlane<CacheEdge>" << std::endl;
+	printMemoryUsage();
+	std::cout << "-------------------" << endl;
 	cache = new EdgePlane<CacheEdge>(rr_map->get_gridx(), rr_map->get_gridy(), CacheEdge());
+	std::cout << "new EdgePlane<CacheEdge> end" << std::endl;
+	printMemoryUsage();
+	std::cout << "+++++++++++++++++++" << endl;
+
+
+	std::cout << "new Multisource_multisink_mazeroute" << std::endl;
+	printMemoryUsage();
+	std::cout << "-------------------" << endl;
 	mazeroute_in_range = new Multisource_multisink_mazeroute();
+	std::cout << "new Multisource_multisink_mazerout end" << std::endl;
+	printMemoryUsage();
+	std::cout << "+++++++++++++++++++" << endl;
+
 
 	// int pre_overflow = -1;
 	int cur_overflow = -1;
 	used_cost_flag = HISTORY_COST;
 	BOXSIZE_INC = routing_parameter->get_init_box_size_p2();
 
-	for (cur_iter = 1, done_iter = cur_iter;
-		 cur_iter <= routing_parameter->get_iteration_p2();
-		 ++cur_iter, done_iter = cur_iter) // do n-1 times
+	std::cout << "Iteration:" << std::endl;
+	printMemoryUsage();
+	std::cout << "-------------------" << endl;
+	for(cur_iter = 1, done_iter = cur_iter; cur_iter <= routing_parameter->get_iteration_p2(); ++cur_iter, done_iter = cur_iter) // do n-1 times
 	{
 		cout << "\033[31mIteration:\033[m " << cur_iter << endl;
 
@@ -3500,12 +3348,6 @@ double construct_2d_tree(RoutingRegion *rr)
 		WL_Cost = factor;
 		via_cost = static_cast<int>(4 * factor);
 		adjust_value = cur_iter * (1.25 + 3 * factor); // tuned for experimant
-
-#ifdef MESSAGE
-		cout << "Parameters - Factor: " << factor
-			 << ", Via_Cost: " << via_cost
-			 << ", Box Size: " << BOXSIZE_INC + cur_iter - 1 << endl;
-#endif
 
 		pre_evaluate_congestion_cost();
 
@@ -3521,9 +3363,6 @@ double construct_2d_tree(RoutingRegion *rr)
 
 		reallocate_two_pin_list(true);
 
-#ifdef MESSAGE
-		printMemoryUsage("Memory Usage:");
-#endif
 
 		if (cur_overflow <= routing_parameter->get_overflow_threshold())
 		{
@@ -3531,6 +3370,10 @@ double construct_2d_tree(RoutingRegion *rr)
 		}
 		BOXSIZE_INC += routing_parameter->get_box_size_inc_p2();
 	}
+	std::cout << "Iteration end" << std::endl;
+	printMemoryUsage();
+	std::cout << "+++++++++++++++++++" << endl;
+
 
 	output_2_pin_list(); // order:bbox�p
 	

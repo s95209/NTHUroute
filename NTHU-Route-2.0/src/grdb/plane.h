@@ -47,20 +47,12 @@ class VertexPlane {
     ///@brief Get the map size in y-axis
     int         getYSize () const;
 
-    ///@brief Reset every vertex to initial value.
-    void        reset();
-
     ///@brief Get the initial value, and it can be changed.
     T&          initialValue();
-
-    ///@brief Get the initial value, and it is read-only.
-    const T&    initialValue() const;
 
     ///@brief Get the specified vertex
     T&          vertex(int x, int y);//, int z);
 
-    ///@brief Get the specified vertex, and the vertex is read-only.
-    const T&    vertex(int x, int y) const;//, int z) const;
 
 	private:
     ///The real data structure of plane
@@ -141,12 +133,6 @@ T& VertexPlane<T>::initialValue()
     return initialValue_;
 }
 
-template<class T>
-inline
-const T& VertexPlane<T>::initialValue() const
-{
-    return initialValue_;
-}
 
 template<class T>
 inline
@@ -158,15 +144,6 @@ T& VertexPlane<T>::vertex(int x, int y)
     return vertexPlane_[x][y];
 }
 
-template<class T>
-inline
-const T& VertexPlane<T>::vertex(int x, int y) const
-{
-    assert( x >= 0 );   assert( x < xSize_ );
-    assert( y >= 0 );   assert( y < ySize_ );
-
-    return vertexPlane_[x][y];
-}
 
 template<class T>
 void VertexPlane<T>::resize(int xSize, int ySize)
@@ -184,12 +161,6 @@ void VertexPlane<T>::resize(int xSize, int ySize)
         vertexPool_ = new std::vector<T>(xSize_ * ySize_ , initialValue_);
         assignPoolResource();
     }
-}
-
-template<class T>
-inline
-void VertexPlane<T>::reset(){
-    resize(xSize_, ySize_);
 }
 
 template<class T>
@@ -261,9 +232,6 @@ class EdgePlane {
         ///@brief Get the map size in y-axis
         int         getYSize () const;
 
-        ///@brief Reset every vertex to initial value.
-        void        reset();
-
         ///@brief Get the initial value, and it can be changed.
         T&          initialValue();
 
@@ -273,20 +241,12 @@ class EdgePlane {
         ///@brief Get the specified edge
         T&          edge(int x, int y, Jm::DirectionType);
 
-        ///@brief Get the specified edge, and the edge is read-only.
-        const T&    edge(int x, int y, Jm::DirectionType) const;
 
         ///@brief Get the specified edge. 
         ///The direction id is using JR Direction 
         /// (North, South, West, East) which is different from JR Driection
         /// (North, South, East, West)
         T&          edge(int x, int y, int dir);
-
-        ///@brief Get the specified edge, and the edge is read-only.
-        ///The direction id is using JR Direction 
-        /// (North, South, West, East) which is different from JR Driection
-        /// (North, South, East, West)
-        const T&    edge(int x, int y, int dir) const;
 
     public:
     ///The routing bins used to connect the routing edges.
@@ -402,9 +362,6 @@ template<class T>
 inline
 T& EdgePlane<T>::edge(int x, int y, Jm::DirectionType dir)
 {
-    assert( x >= 0 );   assert( x < xSize_ );
-    assert( y >= 0 );   assert( y < ySize_ );
-
     //If the direction is South, West, Down edges, we will need to change it
     //to available direction (North, East, Up) and coordinate
     if( (static_cast<int>(dir) & 0x01) != 0) {
@@ -416,26 +373,12 @@ T& EdgePlane<T>::edge(int x, int y, Jm::DirectionType dir)
 
 template<class T>
 inline
-const T& EdgePlane<T>::edge(int x, int y, Jm::DirectionType dir) const
-{
-    return edge(x, y, dir);
-}
-
-template<class T>
-inline
 T& EdgePlane<T>::edge(int x, int y, int JrDir)
 {
     assert( JrDir >= 0 && JrDir < 4); 
 
     Jm::DirectionType dir = static_cast<Jm::DirectionType>( Jr2JmTransferTable[JrDir] );
     return edge(x, y, dir);
-}
-
-template<class T>
-inline
-const T& EdgePlane<T>::edge(int x, int y, int JrDir) const
-{
-    return edge(x, y, JrDir);
 }
 
 template<class T>
@@ -453,12 +396,6 @@ void EdgePlane<T>::resize(int xSize, int ySize)
         edgePool_ = new std::vector<Vertex>( (xSize_ * ySize_), Vertex(initialValue_));
         assignPoolResource();
     }
-}
-
-template<class T>
-inline
-void EdgePlane<T>::reset(){
-    resize(xSize_, ySize_);
 }
 
 template<class T>
@@ -549,9 +486,6 @@ class Plane {
     ///@brief Get the map size in y-axis
     int         getYSize () const;
 
-    ///@brief Reset every vertex to initial value.
-    void        reset();
-
     ///@brief Get the initial value, and it can be changed.
     std::pair<VertexT&, EdgeT&>
                 initialValue();
@@ -635,14 +569,6 @@ inline
 int Plane<VertexT, EdgeT>::getYSize() const
 {
     return vertexPlane_.getYSize();
-}
-
-template<class VertexT, class EdgeT>
-inline
-void Plane<VertexT, EdgeT>::reset()
-{
-    vertexPlane_.reset();
-    edgePlane_.reset();
 }
 
 template<class VertexT, class EdgeT>

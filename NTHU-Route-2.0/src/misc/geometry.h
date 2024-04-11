@@ -247,8 +247,6 @@ namespace Jm
     public:
         int x;
         int y;
-        int pinLayer = -1;
-
     public:
         Coordinate_2d(int x = 0, int y = 0)
             : x(x), y(y) {}
@@ -256,7 +254,6 @@ namespace Jm
         {
             x = p.x;
             y = p.y;
-            pinLayer = p.pinLayer;
         }
         bool operator==(const Coordinate_2d &other) const
         {

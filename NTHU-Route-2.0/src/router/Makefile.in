@@ -10,9 +10,6 @@ router_library_objects =	            \
 	$(objdir)/router/Range_router.o     \
 	$(objdir)/router/Route_2pinnets.o	\
 	$(objdir)/router/Layerassignment.o	\
-	$(objdir)/router/CoalaDB.o  		\
-	$(objdir)/router/Coala.o  			\
-	$(objdir)/router/CoalaReroute.o 	\
 	$(objdir)/router/sum.o 				\
 	$(objdir)/cugr/db/*.o				\
 	$(objdir)/cugr/gr_db/*.o 			\
