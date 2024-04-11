@@ -33,7 +33,8 @@ int Pin::get_layerId() const
 
 
 Net::Net(const char* name, int id)
-:name(name),
+:id(id),
+ name(name),
  minPinX(INT_MAX),
  maxPinX(0),
  minPinY(INT_MAX),
