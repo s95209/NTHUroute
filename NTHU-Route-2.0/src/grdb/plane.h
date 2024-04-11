@@ -244,8 +244,7 @@ class EdgePlane {
     public:
         EdgePlane(int xSize,
                     int ySize,
-                    T initialValue,
-                    int edgeNumber = 2);
+                    T initialValue);
 
         EdgePlane(const EdgePlane&);
 
@@ -289,7 +288,7 @@ class EdgePlane {
         /// (North, South, East, West)
         const T&    edge(int x, int y, int dir) const;
 
-    private:
+    public:
     ///The routing bins used to connect the routing edges.
         class Vertex {
             public:
@@ -297,7 +296,7 @@ class EdgePlane {
                     T edge[2];
         };
 
-	private:
+	public:
         ///The real data structure of plane
         Vertex**   edgePlane_;
         std::vector<Vertex>* edgePool_;
@@ -308,7 +307,6 @@ class EdgePlane {
 
         ///The initial value
         T           initialValue_;
-        int         edgeNumber_;
 
         static const int  transferTable[2][2];
         static const int  Jr2JmTransferTable[4];
@@ -331,13 +329,12 @@ class EdgePlane {
 };
 
 template<class T>
-EdgePlane<T>::EdgePlane(int xSize, int ySize, T initialValue, int edgeNumber)
+EdgePlane<T>::EdgePlane(int xSize, int ySize, T initialValue)
 :edgePlane_(NULL),
  edgePool_(NULL),
  xSize_(xSize),
  ySize_(ySize),
- initialValue_(initialValue),
- edgeNumber_(edgeNumber)
+ initialValue_(initialValue)
 {
     resize(xSize_, ySize_);
 }
@@ -348,8 +345,7 @@ EdgePlane<T>::EdgePlane(const EdgePlane& original)
  edgePool_(NULL),
  xSize_(original.xSize_),
  ySize_(original.ySize_),
- initialValue_(original.initialValue_),
- edgeNumber_(original.edgeNumber_)
+ initialValue_(original.initialValue_)
 {
     copyPlane(original);
 }
@@ -363,7 +359,6 @@ template<class T>
 void EdgePlane<T>::operator=(const EdgePlane& original)
 {
     initialValue_ = original.initialValue_;
-    edgeNumber_ = original.edgeNumber_;
     copyPlane(original);
 }
 
@@ -409,7 +404,6 @@ T& EdgePlane<T>::edge(int x, int y, Jm::DirectionType dir)
 {
     assert( x >= 0 );   assert( x < xSize_ );
     assert( y >= 0 );   assert( y < ySize_ );
-    assert( dir >= 0 ); assert( (static_cast<int>(dir) >> 1) < edgeNumber_ );
 
     //If the direction is South, West, Down edges, we will need to change it
     //to available direction (North, East, Up) and coordinate
@@ -454,7 +448,6 @@ void EdgePlane<T>::resize(int xSize, int ySize)
 
 	xSize_ = xSize;
 	ySize_ = ySize;
-    //edgeNumber_ = edgeNumber;
 
     if( (xSize_ != 0) && (ySize_ != 0)) {
         edgePool_ = new std::vector<Vertex>( (xSize_ * ySize_), Vertex(initialValue_));
@@ -539,8 +532,7 @@ class Plane {
                 Plane(int xSize,
                       int ySize,
                       VertexT vertexInitialValue,
-                      EdgeT edgeInitialValue,
-                      int edgeNumber = 2);
+                      EdgeT edgeInitialValue);
 
                 Plane(const Plane&);
 
@@ -600,10 +592,9 @@ class Plane {
 template<class VertexT, class EdgeT>
 Plane<VertexT, EdgeT>::Plane(int xSize, int ySize,
                              VertexT vertexInitialValue,
-                             EdgeT edgeInitialValue,
-                             int edgeNumber)
+                             EdgeT edgeInitialValue)
 :vertexPlane_(xSize, ySize, vertexInitialValue),
- edgePlane_(xSize, ySize, edgeInitialValue, edgeNumber)
+ edgePlane_(xSize, ySize, edgeInitialValue)
 {}
 
 template<class VertexT, class EdgeT>

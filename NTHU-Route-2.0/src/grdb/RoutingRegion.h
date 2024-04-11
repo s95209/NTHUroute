@@ -33,13 +33,11 @@ class RoutingRegion : public Builder {
     const char* get_netName(int netPos);	//get net name
     std::string& get_net_name(int netPos);
     int get_netSerialNumber(int netId);
-    int get_netId(int netSerial);
     //int get_netPos(int net_id);	//get net's list position by net id
     int get_netPinNumber(int netPos);		//get pin number of the specified net
     int get_netMinWidth(int netPos);		//get minimum wire width of the specified net
     NetList& get_netList();
     NetList& get_deleted_netList();
-    std::unordered_map<std::string,int>& get_name2ID_map();
     // Pin list
     const PinptrList& get_nPin(int net_id);	//get Pins by net
 
@@ -88,11 +86,9 @@ class RoutingRegion : public Builder {
     NetList* netList_;
     RoutingSpace* routingSpace_;
     NetList* deletedNetList_ = new std::vector<Net>();
-    std::unordered_map<std::string,int>* name2Index = new std::unordered_map<std::string,int>();
-    //First int is the net id given from input file,
+
     //the second id is the net position in NetList
     typedef std::unordered_map<int, int> NetIdLookupTable;
-    NetIdLookupTable* netSerial2NetId_;
 
     typedef std::set< std::tuple<int, int, int> > PinTable;
     PinTable*   pinTable_;
@@ -173,20 +169,12 @@ int RoutingRegion::get_netSerialNumber(int netId){
 	return (*netList_)[netId].id;
 }
 
-inline
-int RoutingRegion::get_netId(int net_id){
-	return (*netSerial2NetId_)[net_id];
-}
 
 inline
 int RoutingRegion::get_netPinNumber(int netId){
 	return (*netList_)[netId].get_pinNumber();
 }
 
-inline
-int RoutingRegion::get_netMinWidth(int netId){
-	return (*netList_)[netId].minWireWidth;
-}
 
 inline
 NetList& RoutingRegion::get_netList ()
@@ -200,10 +188,6 @@ NetList& RoutingRegion::get_deleted_netList ()
     return (*deletedNetList_);
 }
 
-inline std::unordered_map<std::string,int>&
-RoutingRegion::get_name2ID_map(){
-    return (*name2Index);
-}
 
 inline
 const PinptrList& RoutingRegion::get_nPin(int netId){	//get Pins by net

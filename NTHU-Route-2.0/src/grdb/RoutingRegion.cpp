@@ -12,7 +12,6 @@ using namespace Jm;
 RoutingRegion::RoutingRegion()
 :netList_(NULL),
  routingSpace_(new RoutingSpace),
- netSerial2NetId_(NULL),
  pinTable_(NULL)
 {}
 
@@ -20,7 +19,6 @@ RoutingRegion::~RoutingRegion()
 {
     if (netList_ != NULL) delete netList_;
     if (routingSpace_ != NULL) delete routingSpace_;
-    if (netSerial2NetId_ != NULL) delete netSerial2NetId_;
     if (pinTable_ != NULL) delete pinTable_;
 }
 
@@ -86,9 +84,6 @@ void RoutingRegion::setNetNumber (unsigned int netNumber)
         netList_ = new NetList();
         netList_->reserve(netNumber);
     }
-    if(netSerial2NetId_ == NULL) {
-        netSerial2NetId_ = new NetIdLookupTable(netNumber);
-    }
 }
 
 void RoutingRegion::adjustEdgeCapacity (unsigned int x1,
@@ -130,12 +125,7 @@ void RoutingRegion::beginAddANet (const char* netName,
                                   unsigned int minWidth)
 {
     int netId = netList_->size();
-    (*netSerial2NetId_)[netSerial] = netId;
-	netList_->push_back( Net(netName, netSerial, netId, minWidth) );
-    (*name2Index)[std::string(netName)] = netSerial;
-    // if (std::string(netName) == "pin1") {
-    //     std::cout << "Net pin1's id = " << netId << '\n';
-    // }
+	netList_->push_back( Net(netName, netId) );
 }
 
 void RoutingRegion::addPin (unsigned int x,

@@ -21,13 +21,10 @@ typedef std::vector<const Pin*> PinptrList;
 
 class Net{
     public:
-        int serialNumber;   //net id_# in test case
 		int id;             //the net ordered in test case
-		int minWireWidth;	//minimum wire width of this net
-
 	public:
 		//Constructor
-		Net(const char* name ="", int id = 0, int pos = 0, int minWidth = 0);
+		Net(const char* name ="", int id = 0);
 
 		void set_name(const char*);	//set net name
 		void add_pin(const Pin* pin_ptr); //add pin pointer that point to pin

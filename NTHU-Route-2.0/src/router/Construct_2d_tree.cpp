@@ -24,7 +24,6 @@ using namespace std;
 
 using namespace Jm;
 
-// #define GARY
 
 /***********************
 
@@ -113,7 +112,7 @@ static vector<Two_pin_list_2d *> bbox_2pin_list; // store bbox 2pin list of each
 
 static vector<Vertex_flute_ptr> vertex_fl;
 
-static EdgeColorMap<int>* bboxRouteStateMap;
+static EdgeColorMap<int8_t>* bboxRouteStateMap;
 
 static double factor = 1.0;
 
@@ -127,13 +126,15 @@ extern int maxTurns;
 
 Edge_2d::Edge_2d()
 
-	: cur_cap(0.),
+	: cur_cap(0),
 
-	  max_cap(0.),
+	  max_cap(0),
 
 	  history(1),
-
-	  used_net(128)
+	  
+	  //2024/04/10 ying revise
+	  //used_net(128),
+	  used_net()
 
 {
 }
@@ -144,15 +145,13 @@ Edge_3d::Edge_3d()
 
 	  cur_cap(0),
 
-	  used_net(5)
+	  used_net()
 
 {
 }
 
 Edge_3d_ptr Create_Edge_3d()
-
 {
-
 	return new Edge_3d;
 }
 
@@ -357,48 +356,42 @@ void setup_flute_order(int *order)
 /*assign the estimated track# to each edge*/
 
 void init_2d_map()
-
-{
-	std::cout << "====================================" << "\n";
-	std::cout << "Before new EdgePlane in init_2d_map()" << "\n";
+{	
+	std::cout << "Edge_3d" << std::endl;
 	printMemoryUsage();
-	std::cout << std::endl;
-	std::cout << rr_map->get_gridx() << " " << rr_map->get_gridy() << " " << rr_map->get_gridx()*rr_map->get_gridy() << std::endl;
+	std::cout << "-------------------" << endl;
+	Edge_3d* test = new Edge_3d;
+	std::cout << "sizeof Edge_3d ptr: " << sizeof(test) << std::endl;
+	std::cout << "sizeof Edge_3d: " << sizeof(*test) << std::endl;
+	std::cout << "sizeof Edge_3d.max_cap: " << sizeof(test->max_cap) << std::endl;
+	std::cout << "sizeof Edge_3d.cur_cap: " << sizeof(test->cur_cap) << std::endl;
+	std::cout << "sizeof Edge_3d.cur_dem: " << sizeof(test->cur_dem) << std::endl;
+	std::cout << "sizeof Edge_3d.used_net: " << sizeof(test->used_net) << std::endl;
+	std::cout << "Edge_3d end" << std::endl;
+	printMemoryUsage();
+	std::cout << "+++++++++++++++++++" << endl;
+
+
+	std::cout << "new EdgePlane<Edge_2d>" << std::endl;
+	printMemoryUsage();
+	std::cout << "-------------------" << endl;
 	congestionMap2d = new EdgePlane<Edge_2d>(rr_map->get_gridx(), rr_map->get_gridy(), Edge_2d());
-	std::cout << "After new EdgePlane in init_2d_map()" << "\n";
+	std::cout << "new EdgePlane<Edge_2d> end" << std::endl;
 	printMemoryUsage();
-	std::cout << std::endl;
-	std::cout << "====================================" << std::endl;
-
+	std::cout << "+++++++++++++++++++" << endl;
 	for (int x = rr_map->get_gridx() - 2; x >= 0; --x)
-
 	{
 
 		for (int y = rr_map->get_gridy() - 1; y >= 0; --y)
-
 		{
 
 			for (int layer = rr_map->get_layerNumber() - 1; layer >= 0; --layer)
-
 			{
-
-#ifdef IBM_CASE
-
-				// There is no wire spacing, so
-
-				// the edge capacity on congestion map = edge capacity on every layer
-
-				congestionMap2d->edge(x, y, DIR_EAST).max_cap += rr_map->capacity(layer, x, y, x + 1, y);
-
-#else
-
 				// Because the wire width = 1 and wire spaceing = 1,
 
 				// the edge capacity on congestion map = edge capacity on every layer /2.
 
 				congestionMap2d->edge(x, y, DIR_EAST).max_cap += (rr_map->capacity(layer, x, y, x + 1, y));
-
-#endif
 			}
 		}
 	}
@@ -414,24 +407,11 @@ void init_2d_map()
 			for (int layer = rr_map->get_layerNumber() - 1; layer >= 0; --layer)
 
 			{
-
-#ifdef IBM_CASE
-
-				// There is no wire spacing, so
-
-				// the edge capacity on congestion map = edge capacity on every layer
-
-				congestionMap2d->edge(x, y, DIR_NORTH).max_cap += rr_map->capacity(layer, x, y, x, y + 1);
-
-#else
-
 				// Because the wire width = 1 and wire spaceing = 1,
 
 				// the edge capacity on congestion map = edge capacity on every layer /2.
 
 				congestionMap2d->edge(x, y, DIR_NORTH).max_cap += (rr_map->capacity(layer, x, y, x, y + 1));
-
-#endif
 			}
 		}
 	}
@@ -440,9 +420,7 @@ void init_2d_map()
 // Make an coordinate array which contains the (x, y) information
 
 void allocate_coor_array()
-
 {
-
 	int i, j;
 
 	Coordinate_2d *tmp_data;
@@ -452,19 +430,13 @@ void allocate_coor_array()
 	tmp_data = (Coordinate_2d *)malloc(rr_map->get_gridx() * rr_map->get_gridy() * sizeof(Coordinate_2d));
 
 	for (i = 0; i < rr_map->get_gridx(); ++i, tmp_data += rr_map->get_gridy())
-
 		coor_array[i] = tmp_data;
 
 	for (i = 0; i < rr_map->get_gridx(); ++i)
-
 	{
-
 		for (j = 0; j < rr_map->get_gridy(); ++j)
-
 		{
-
 			coor_array[i][j].x = i;
-
 			coor_array[i][j].y = j;
 		}
 	}
@@ -481,16 +453,41 @@ void init_3d_map()
 	Edge_3d_ptr newedge;
 
 	/*allocate space for cur_map_3d*/
-
+	std::cout << "cur_map_3d = (Vertex_3d ***)malloc(rr_map->get_gridx() * sizeof(Vertex_3d **));" << endl;
+	printMemoryUsage();
+	std::cout << "-------------------" << endl;
 	cur_map_3d = (Vertex_3d ***)malloc(rr_map->get_gridx() * sizeof(Vertex_3d **));
+	std::cout << "sizeof Vertex_3d ***: " << sizeof(cur_map_3d) << endl;
+	std::cout << "sizeof Vertex_3d **: " << sizeof(cur_map_3d[0]) << endl;
+	std::cout << "sizeof Vertex_3d *: " << sizeof(cur_map_3d[0][0]) << endl;
+	std::cout << "cur_map_3d = (Vertex_3d ***)malloc(rr_map->get_gridx() * sizeof(Vertex_3d **)); end" << endl;
+	printMemoryUsage();
+	std::cout << "-------------------" << endl;
 
+	std::cout << "tmp_data = (Vertex_3d **)malloc(rr_map->get_gridx() * rr_map->get_gridy() * sizeof(Vertex_3d *));" << endl;
+	printMemoryUsage();
+	std::cout << "-------------------" << endl;
 	tmp_data = (Vertex_3d **)malloc(rr_map->get_gridx() * rr_map->get_gridy() * sizeof(Vertex_3d *));
+	std::cout << "tmp_data = (Vertex_3d **)malloc(rr_map->get_gridx() * rr_map->get_gridy() * sizeof(Vertex_3d *)); end" << endl;
+	printMemoryUsage();
+	std::cout << "-------------------" << endl;
 
 	for (i = 0; i < rr_map->get_gridx(); ++i, tmp_data += rr_map->get_gridy())
 
 		cur_map_3d[i] = tmp_data;
 
+	std::cout << "tmp_data2 = (Vertex_3d *)malloc(rr_map->get_gridx() * rr_map->get_gridy() * rr_map->get_layerNumber() * sizeof(Vertex_3d));" << endl;
+	printMemoryUsage();
+	std::cout << "-------------------" << endl;
 	tmp_data2 = (Vertex_3d *)malloc(rr_map->get_gridx() * rr_map->get_gridy() * rr_map->get_layerNumber() * sizeof(Vertex_3d));
+	std::cout << "tmp_data2 = (Vertex_3d *)malloc(rr_map->get_gridx() * rr_map->get_gridy() * rr_map->get_layerNumber() * sizeof(Vertex_3d)); end" << endl;
+	printMemoryUsage();
+	std::cout << "-------------------" << endl;
+
+	std::cout << "+++++++++++++++++++" << endl;
+	newedge = Create_Edge_3d();
+	std::cout << "sizeof Edge_3d: " << sizeof(*newedge) << endl;
+	std::cout << "+++++++++++++++++++" << endl;
 
 	for (i = 0; i < rr_map->get_gridx(); ++i)
 
@@ -499,6 +496,9 @@ void init_3d_map()
 			cur_map_3d[i][j] = tmp_data2;
 
 	// initialize capacity
+	std::cout << "allocate space for edge_list" << endl;
+	printMemoryUsage();
+	std::cout << "-------------------" << endl;
 
 	for (i = 0; i < rr_map->get_gridx() - 1; ++i)
 
@@ -509,32 +509,14 @@ void init_3d_map()
 			{
 
 				newedge = Create_Edge_3d(); /*allocate space for edge_list without initialization*/
-#ifdef GARY				
-				if (k == 0)
+				
 
-					cur_map_3d[i][j][k].discountRatio = discountRatio[i][j];
-
-				else if (database.getLayerDir(k) == X && k <= 2) // k = 2
-				{
-					cur_map_3d[i][j][k].discountRatio = discountRatioV[i][j];
-				}
-				else if (database.getLayerDir(k) == Y && k <= 2) // k = 1
-				{
-					cur_map_3d[i][j][k].discountRatio = discountRatioH[i][j];
-				}
-				else if (database.getLayerDir(k) == X) // k = 4
-				{
-					cur_map_3d[i][j][k].discountRatio = discountRatioNonZeroV[i][j];
-				}
-				else if (database.getLayerDir(k) == Y) // k = 3
-				{
-					cur_map_3d[i][j][k].discountRatio = discountRatioNonZeroH[i][j];
-				} 
-#endif
 				cur_map_3d[i][j][k].edge_list[RIGHT] = newedge;
 
 				cur_map_3d[i + 1][j][k].edge_list[LEFT] = newedge;
 			}
+
+
 
 	for (i = 0; i < rr_map->get_gridx(); ++i)
 
@@ -624,39 +606,27 @@ void free_memory_con2d()
 
 	bbox_2pin_list.clear();
 }
-
-void bbox_route(Two_pin_list_2d *list, const double value)
-
+//Two_pin_list_2d* 這是list的結構
+void bbox_route(Two_pin_list_2d* list, const float value)
 {
-
 	int i, x1, y1, x2, y2;
-	double u_value;
+	float u_value;
 
-	if (value > 0)
+	if (value > 0) u_value = 1;
+	else u_value = -1;
 
-		u_value = 1;
-
-	else
-
-		u_value = -1;
-
-	for (vector<Two_pin_element_2d *>::iterator it = list->begin();
-
-		 it != list->end();
-
-		 ++it)
-
+	//typedef vector<Two_pin_element_2d *> Two_pin_list_2d; in .h file
+	//vector<Two_pin_element_2d *>::iterator it
+	
+	for (auto it = list->begin(); it != list->end(); ++it)
 	{
-
 		// to create the bounding box
 		if ((*it)->pin1.x > (*it)->pin2.x)
-
 		{
-			swap((*it)->pin1.x, (*it)->pin2.x);
+			swap((*it)->pin1.x, (*it)->pin2.x); //std::swap
 		}
-
+		
 		if ((*it)->pin1.y > (*it)->pin2.y)
-
 		{
 			swap((*it)->pin1.y, (*it)->pin2.y);
 		}
@@ -669,56 +639,32 @@ void bbox_route(Two_pin_list_2d *list, const double value)
 
 		y2 = (*it)->pin2.y;
 
-#ifdef DEBUG_BBOX
-
-		printf("(%d %d) (%d %d)\n", x1, y1, x2, y2);
-
-#endif
-
 		// to connect the net
 		if (x1 == x2) // vertical edge
-
 		{
-
 			for (i = y1; i < y2; ++i)
-
 			{
-
 				bboxRouteStateMap->color(x1, i, DIR_NORTH) = 1;
 			}
 		}
-
 		else if (y1 == y2) // horizontal edge
-
 		{
-
 			for (i = x1; i < x2; ++i)
-
 			{
-
 				bboxRouteStateMap->color(i, y1, DIR_EAST) = 1;
 			}
 		}
-
 		else // box (L-shape routing need
-
 		{
-
 			for (i = y1; i < y2; ++i)
-
 			{
-
 				bboxRouteStateMap->color(x1, i, DIR_NORTH) = 1;
-
 				bboxRouteStateMap->color(x2, i, DIR_NORTH) = 1;
 			}
 
 			for (i = x1; i < x2; ++i)
-
 			{
-
 				bboxRouteStateMap->color(i, y1, DIR_EAST) = 1;
-
 				bboxRouteStateMap->color(i, y2, DIR_EAST) = 1;
 			}
 		}
@@ -830,11 +776,6 @@ void bbox_route(Two_pin_list_2d *list, const double value)
 		}
 	}
 
-#ifdef DEBUG_BBOX
-
-	print_cap("cur");
-
-#endif
 }
 
 void insert_all_two_pin_list(Two_pin_element_2d *mn_path_2d)
@@ -911,7 +852,6 @@ inline bool smaller_than_lower_bound(
 void (*pre_evaluate_congestion_cost_fp)(int i, int j, int dir);
 
 void pre_evaluate_congestion_cost_all(int i, int j, int dir)
-
 {
 
 	static const int inc = 1;
@@ -1928,34 +1868,40 @@ void gen_FR_congestion_map()
 
 	Tree *flutetree; // a struct, defined by Flute library
 
-	Two_pin_element_2d *L_path, *two_pin;
+	Two_pin_element_2d *L_path, *two_pin; //
 
 	int *flute_order;
 
-	bboxRouteStateMap = new EdgeColorMap<int>(
+	bboxRouteStateMap = new EdgeColorMap<int8_t>(rr_map->get_gridx(), rr_map->get_gridy(), -1);
 
-		rr_map->get_gridx(),
+	std::cout << "init_2d_map" << std::endl;
+	printMemoryUsage();
+	std::cout << "-------------------" << endl;
+	init_2d_map(); 
+	// initial congestion map: calculating every edge's capacity
+	// 建立congestionMap2d = new EdgePlane<Edge_2d>(rr_map->get_gridx(), rr_map->get_gridy(), Edge_2d());
+	// 裡面存每條edge的 max capacity
+	std::cout << "init_2d_map end" << std::endl;
+	printMemoryUsage();
+	std::cout << "+++++++++++++++++++" << endl;
 
-		rr_map->get_gridy(),
-
-		-1);
-
-	init_2d_map(); // initial congestion map: calculating every edge's capacity
-
-
+	std::cout << "init_2pin_list" << std::endl;
+	printMemoryUsage();
+	std::cout << "-------------------" << endl;
 	init_2pin_list(); // initial 2-pin net container
+	std::cout << "init_2pin_list end" << std::endl;
+	printMemoryUsage();
+	std::cout << "+++++++++++++++++++" << endl;
 
+
+	std::cout << "flutet" << std::endl;
+	printMemoryUsage();
+	std::cout << "-------------------" << endl;
 	init_flute(); // initial the information of pin's coordinte and group by net for flute
 
 	flute_mode = NORMAL; // wirelength driven	mode
 
 	/*assign 0.7 demand to each net*/
-
-#ifdef MESSAGE
-
-	printf("bbox routing start...\n");
-
-#endif
 
 	// for storing the RSMT which retruned by flute
 
@@ -1963,45 +1909,36 @@ void gen_FR_congestion_map()
 
 	flutetree = (Tree *)calloc(rr_map->get_netNumber(), sizeof(Tree));
 
+	std::cout << "flutet end" << std::endl;
+	printMemoryUsage();
+	std::cout << "+++++++++++++++++++" << endl;
 	// Get every net's possible RSMT by flute, then use it to calculate the possible congestion
 
+	#ifdef MESSAGE
+
+	printf("bbox routing start...\n");
+
+	#endif
+
+	std::cout << "bbox routing" << std::endl;
+	printMemoryUsage();
+	std::cout << "-------------------" << endl;
 	// In this section, we won't get a real routing result, but a possible congestion information.
-	// std::set<tuple<int, int, int>> pinCheck;
-	// std::set<tuple<int, int>> pinCheck2D, pinCheck2D_flute;
 	for (int i = 0; i < rr_map->get_netNumber(); ++i) // i:net id
-
 	{
-
-#ifdef DEBUG_BBOX
-
-		printf("bbox route net %d start...pin_num=%d\n", i, rr_map->get_netPinNumber(i));
-
-#endif
-
 		// call flute to gen steiner tree and put the result in flutetree[]
 
 		netRoutingTreeRouter.routeNet(rr_map->get_nPin(i), flutetree[i]);
-		
-		// if (i == 892) {
-		// 	for (auto &pin : rr_map->get_nPin(i)) {
-		// 		pinCheck.insert({pin->get_tileX(), pin->get_tileY(), pin->get_layerId()});
-		// 		pinCheck2D.insert({pin->get_tileX(), pin->get_tileY()});
-		// 	}
-		// 	std::cout << "Net " << rr_map->get_net_name(i) <<  " has " << pinCheck.size() << " pins" << std::endl;
-		// }
-
+		// flutetree[i].number 是每個net有的node數
 		// The total node # in a tree, thoes nodes include pin and steinor point
-
 		// And it is defined as ((2 * degree of a tree) - 2) by the authors of flute
+		flutetree[i].number = 2 * flutetree[i].deg - 2; 
 
-		flutetree[i].number = 2 * flutetree[i].deg - 2; // add 0403
 
 		/*2-pin bounding box assign demand 0.7, remember not to repeat the same net*/
 
 		for (int j = 0; j < flutetree[i].number; ++j) // for all pins and steiner points
-
 		{
-
 			int x1 = (int)flutetree[i].branch[j].x;
 
 			int y1 = (int)flutetree[i].branch[j].y;
@@ -2027,250 +1964,13 @@ void gen_FR_congestion_map()
 				two_pin->net_id = i;
 
 				bbox_2pin_list[i]->push_back(two_pin);
-
-				// if (i == 892) {
-				// 	if (pinCheck2D.count({x1, y1})) {
-				// 		pinCheck2D_flute.insert({x1, y1});
-				// 	}
-				// 	if (pinCheck2D.count({x2, y2})) {
-				// 		pinCheck2D_flute.insert({x2, y2});
-
-				// 	}
-				// }
 			}
 		}
-		// if (i == 892) {
-		// 	std::cout << pinCheck2D_flute.size() << ' ' << pinCheck2D.size() << '\n';
-		// }
-#ifndef GARY
-		bbox_route(bbox_2pin_list[i], 0.7);
-#endif
-	}
-#ifdef GARY
-	std::vector<std::vector<double>> rudyMap(rr_map->get_gridx(), std::vector<double>(rr_map->get_gridy(), 0.0));
-	std::vector<std::vector<double>> rudyMapV(rr_map->get_gridx(), std::vector<double>(rr_map->get_gridy(), 0.0));
-	std::vector<std::vector<double>> rudyMapH(rr_map->get_gridx(), std::vector<double>(rr_map->get_gridy(), 0.0));
-	std::vector<std::vector<double>> rudyMapNonZeroPinV(rr_map->get_gridx(), std::vector<double>(rr_map->get_gridy(), 0.0));
-	std::vector<std::vector<double>> rudyMapNonZeroPinH(rr_map->get_gridx(), std::vector<double>(rr_map->get_gridy(), 0.0));
-	std::vector<std::vector<double>> pinDensity(rr_map->get_gridx(), std::vector<double>(rr_map->get_gridy(), 0.0));
-	std::vector<std::vector<double>> pinDensityNonZeroPin(rr_map->get_gridx(), std::vector<double>(rr_map->get_gridy(), 0.0));
-
-	int netNum = 0;
-
-	double congSum = 0.0;
-	double congSumV = 0.0;
-	double congSumH = 0.0;
-	double congSumNonZeroV = 0.0;
-	double congSumNonZeroH = 0.0;
-	std::unordered_map<int, int> pinMap;
-	for (int i = 0; i < rr_map->get_netNumber(); ++i)
-
-	{
-
-		auto pinList = rr_map->get_nPin(i);
-
-		for (auto &pin : pinList)
-		{
-
-			pinDensity[pin->get_tileX()][pin->get_tileY()]++;
-			if (pin->get_layerId() > 0)
-			{
-				pinMap[coord2Dto1D(pin->get_tileX(), pin->get_tileY())] = pin->get_layerId();
-				pinDensityNonZeroPin[pin->get_tileX()][pin->get_tileY()]++;
-			}
-		}
-	}
-
-	for (int x = 0; x < rr_map->get_gridx(); x++)
-
-	{
-
-		for (int y = 0; y < rr_map->get_gridy(); y++)
-
-		{
-
-			int cap = 0;
-
-			if (y < rr_map->get_gridy() - 1)
-
-				cap += congestionMap2d->edge(x, y, Jm::DIR_NORTH).max_cap;
-
-			if (x < rr_map->get_gridx() - 1)
-
-				cap += congestionMap2d->edge(x, y, Jm::DIR_EAST).max_cap;
-
-			if (cap == 0)
-
-				continue;
-
-			pinDensity[x][y] /= cap;
-			congSum += pinDensity[x][y];
-			congSumV += pinDensity[x][y];
-			congSumH += pinDensity[x][y];
-			congSumNonZeroV += pinDensityNonZeroPin[x][y];
-			congSumNonZeroH += pinDensityNonZeroPin[x][y];
-		}
-	}
-	std::cout << "non zero = " << congSumNonZeroV << " , " << congSumNonZeroH << " ---------------------------------\n";
-	for (int i = 0; i < rr_map->get_netNumber(); ++i)
-
-	{
-
-		for (auto &twoPin : (*bbox_2pin_list[i]))
-
-		{
-
-			int x1 = std::min(twoPin->pin1.x, twoPin->pin2.x);
-
-			int x2 = std::max(twoPin->pin1.x, twoPin->pin2.x);
-
-			int y1 = std::min(twoPin->pin1.y, twoPin->pin2.y);
-
-			int y2 = std::max(twoPin->pin1.y, twoPin->pin2.y);
-
-			double xedge = x2 - x1 + 1;
-
-			double yedge = y2 - y1 + 1;
-
-			double rudy = (xedge + yedge) / (xedge * yedge);
-
-			double rudyV = yedge / (xedge * yedge);
-			double rudyH = xedge / (xedge * yedge);
-			double rudyNonZeroV = 0.0;
-			double rudyNonZeroH = 0.0;
-			if (pinMap[coord2Dto1D(twoPin->pin1.x, twoPin->pin1.y)] || pinMap[coord2Dto1D(twoPin->pin2.x, twoPin->pin2.y)])
-			{
-				rudyNonZeroV = yedge / (xedge * yedge);
-				rudyNonZeroH = xedge / (xedge * yedge);
-			}
-			for (int x = x1; x <= x2; x++)
-			{
-				for (int y = y1; y <= y2; y++)
-				{
-					rudyMapV[x][y] += rudyV;
-					rudyMapH[x][y] += rudyH;
-					rudyMap[x][y] += rudy;
-					congSum += rudy;
-					congSumV += rudyV;
-					congSumH += rudyH;
-					if (pinMap[coord2Dto1D(twoPin->pin1.x, twoPin->pin1.y)] || pinMap[coord2Dto1D(twoPin->pin2.x, twoPin->pin2.y)])
-					{
-						rudyMapNonZeroPinV[x][y] += rudyNonZeroV;
-						rudyMapNonZeroPinH[x][y] += rudyNonZeroH;
-						congSumNonZeroV += rudyNonZeroV;
-						congSumNonZeroH += rudyNonZeroH;
-					}
-				}
-			}
-		}
-	}
-
-	double congArea = congSum / (rr_map->get_gridx() * rr_map->get_gridy());
-	double congAreaV = congSumV / (rr_map->get_gridx() * rr_map->get_gridy());
-	double congAreaH = congSumH / (rr_map->get_gridx() * rr_map->get_gridy());
-	double congAreaNonZeroV = congSumNonZeroV / (rr_map->get_gridx() * rr_map->get_gridy());
-	double congAreaNonZeroH = congSumNonZeroH / (rr_map->get_gridx() * rr_map->get_gridy());
-
-	std::cout << "non zero = " << congAreaNonZeroV << " , " << congAreaNonZeroH << " ---------------------------------\n";
-	std::vector<std::vector<double>> congestedmap;
-
-	congestedmap.resize(rr_map->get_gridx(), std::vector<double>(rr_map->get_gridy(), 0.0));
-
-	// ofstream outPutFile;
-
-	// outPutFile.open("congested.output");
-
-	discountRatio.resize(rr_map->get_gridx(), std::vector<double>(rr_map->get_gridy(), 0.0));
-	discountRatioV.resize(rr_map->get_gridx(), std::vector<double>(rr_map->get_gridy(), 0.0));
-	discountRatioH.resize(rr_map->get_gridx(), std::vector<double>(rr_map->get_gridy(), 0.0));
-	discountRatioNonZeroV.resize(rr_map->get_gridx(), std::vector<double>(rr_map->get_gridy(), 0.0));
-	discountRatioNonZeroH.resize(rr_map->get_gridx(), std::vector<double>(rr_map->get_gridy(), 0.0));
-
-	bool is_ispd18_test5_metal5 = (TESTCASE_NAME == "ispd18_test5_metal5");
-	double slope = is_ispd18_test5_metal5 ?  0.2 : 0.3; // 0.2 produces DRC-clean result(1573...), 0.25 produces best score but has DRC(1572...)
-	// std::cout << "is_ispd18_test5_metal5: " << is_ispd18_test5_metal5 << '\n';
-	for (int x = 0; x < rr_map->get_gridx(); x++)
-	{
-		for (int y = 0; y < rr_map->get_gridy(); y++)
-		{
-			double cong = pinDensity[x][y] + rudyMap[x][y];
-			double congV = pinDensity[x][y] + rudyMapV[x][y];
-			double congH = pinDensity[x][y] + rudyMapH[x][y];
-			double congNonZeroV = pinDensityNonZeroPin[x][y] + rudyMapNonZeroPinV[x][y];
-			double congNonZeroH = pinDensityNonZeroPin[x][y] + rudyMapNonZeroPinH[x][y];
-
-			double rcong = routing_parameter->get_rcong_min() + routing_parameter->get_rcong_diff() / (1 + std::exp((cong - congArea) * slope));
-			double rcongV = routing_parameter->get_rcongV_min() + routing_parameter->get_rcongV_diff() / (1 + std::exp((congV - congAreaV) * slope));
-			double rcongH = routing_parameter->get_rcongH_min() + routing_parameter->get_rcongH_diff() / (1 + std::exp((congH - congAreaH) * slope));
-			double rcongNonZeroV = routing_parameter->get_NonZeroV_min() + routing_parameter->get_NonZeroV_diff() / (1 + std::exp((congNonZeroV - congAreaNonZeroV) * 0.5));
-			double rcongNonZeroH = routing_parameter->get_NonZeroH_min() + routing_parameter->get_NonZeroH_diff() / (1 + std::exp((congNonZeroH - congAreaNonZeroH) * 0.5));
-			discountRatio[x][y] = rcong;
-			discountRatioV[x][y] = rcongV;
-			discountRatioH[x][y] = rcongH;
-			discountRatioNonZeroV[x][y] = rcongNonZeroV;
-			discountRatioNonZeroH[x][y] = rcongNonZeroH;
-
-			// if (y < rr_map->get_gridy() - 1)
-
-			// 	congestionMap2d->edge(x, y, Jm::DIR_NORTH).max_cap -= (congestionMap2d->edge(x, y, Jm::DIR_NORTH).max_cap * (1 - rcong) * 0.5);
-
-			// if (x < rr_map->get_gridx() - 1)
-
-			// 	congestionMap2d->edge(x, y, Jm::DIR_EAST).max_cap -= (congestionMap2d->edge(x, y, Jm::DIR_EAST).max_cap * (1 - rcong) * 0.5);
-
-			// if (y > 0)
-
-			// 	congestionMap2d->edge(x, y - 1, Jm::DIR_NORTH).max_cap -= (congestionMap2d->edge(x, y - 1, Jm::DIR_NORTH).max_cap * (1 - rcong) * 0.5);
-
-			// if (x > 0)
-
-			// 	congestionMap2d->edge(x - 1, y, Jm::DIR_EAST).max_cap -= (congestionMap2d->edge(x - 1, y, Jm::DIR_EAST).max_cap * (1 - rcong) * 0.5);
-
-			// outPutFile << rcong << " ";
-		}
-
-		// outPutFile << "\n";
-	}
-
-	for (int x=0; x<rr_map->get_gridx()-1; ++x) {
-		for (int y=0; y<rr_map->get_gridy(); ++y) {
-			double cong = (pinDensity[x][y] + rudyMap[x][y] + pinDensity[x+1][y] + rudyMap[x+1][y])/2;
-			double ratio = routing_parameter->get_rcong_min() + routing_parameter->get_rcong_diff() / (1 + std::exp((cong - congArea) * slope));
-			congestionMap2d->edge(x, y, Jm::DIR_EAST).max_cap = std::round(congestionMap2d->edge(x, y, Jm::DIR_EAST).max_cap * ratio);
-			// congestionMap2d->edge(x, y, Jm::DIR_EAST).max_cap = std::round(congestionMap2d->edge(x, y, Jm::DIR_EAST).max_cap 
-			// 															* ((discountRatio[x][y] + discountRatio[x+1][y])/2));
-			// congestionMap2d->edge(x, y, Jm::DIR_EAST).max_cap = std::round(congestionMap2d->edge(x, y, Jm::DIR_EAST).max_cap);
-			
-		}
-	}
-	for (int x=0; x<rr_map->get_gridx(); ++x) {
-		for (int y=0; y<rr_map->get_gridy()-1; ++y) {
-			double cong = (pinDensity[x][y] + rudyMap[x][y] + pinDensity[x][y+1] + rudyMap[x][y+1])/2;
-			double ratio = routing_parameter->get_rcong_min() + routing_parameter->get_rcong_diff() / (1 + std::exp((cong - congArea) * slope));
-			congestionMap2d->edge(x, y, Jm::DIR_NORTH).max_cap = std::round(congestionMap2d->edge(x, y, Jm::DIR_NORTH).max_cap * ratio);
-			// congestionMap2d->edge(x, y, Jm::DIR_NORTH).max_cap = std::round(congestionMap2d->edge(x, y, Jm::DIR_NORTH).max_cap 
-			// 															* ((discountRatio[x][y] + discountRatio[x][y+1])/2));
-			// congestionMap2d->edge(x, y, Jm::DIR_NORTH).max_cap = std::round(congestionMap2d->edge(x, y, Jm::DIR_NORTH).max_cap);
-		}
-	}
-
-	for (int i = 0; i < rr_map->get_netNumber(); ++i)
-
-	{
-
 		bbox_route(bbox_2pin_list[i], 0.7);
 	}
-#endif
-
-#ifdef DEBUG1
-
-	printf("bbox routing complete\n");
-
-	print_cap("max");
-
-	print_cap("cur");
-
-#endif
+	std::cout << "bbox_route end" << std::endl;
+	printMemoryUsage();
+	std::cout << "+++++++++++++++++++" << endl;
 
 #ifdef MESSAGE
 
@@ -2295,11 +1995,10 @@ void gen_FR_congestion_map()
 	// Now begins the initial routing by pattern routing
 
 	// Edge shifting will also be applyed to the routing.
-		// std::set<tuple<int, int>> pinCheckL;
 
 	// bool do_edge_shifting = (TESTCASE_NAME != "ispd18_test5_metal5" && TESTCASE_NAME != "ispd19_test9_metal5"); // This is for Best Score Settings;
-	bool do_edge_shifting = (TESTCASE_NAME != "ispd18_test5_metal5" && TESTCASE_NAME != "ispd19_test9_metal5" && TESTCASE_NAME != "ispd19_test7_metal5" && TESTCASE_NAME != "ispd19_test8_metal5"); // This is for DRC-clean settings
-	
+	// bool do_edge_shifting = (TESTCASE_NAME != "ispd18_test5_metal5" && TESTCASE_NAME != "ispd19_test9_metal5" && TESTCASE_NAME != "ispd19_test7_metal5" && TESTCASE_NAME != "ispd19_test8_metal5"); // This is for DRC-clean settings
+	bool do_edge_shifting = false;
 	
 	for (vector<const Net *>::iterator it = sort_net.begin();
 
@@ -2343,12 +2042,6 @@ void gen_FR_congestion_map()
 			if (!(x1 == x2 && y1 == y2))
 
 			{
-				// if (netId == 892) {
-				// 	if (pinCheck2D.count({x1, y1}))
-				// 		pinCheckL.insert({x1, y1});
-				// 	if (pinCheck2D.count({x2, y2}))
-				// 		pinCheckL.insert({x2, y2});
-				// }
 
 				/*choose the L-shpae with lower congestion to assing new demand 1*/
 
@@ -2377,8 +2070,6 @@ void gen_FR_congestion_map()
 #endif
 	}
     pattern_end = std::chrono::high_resolution_clock::now();
-
-		// std::cout << "After L-route " <<  pinCheckL.size() << ' ' << pinCheck2D.size() << '\n';
 
 
 #ifdef MESSAGE
@@ -3731,290 +3422,6 @@ void output_3d_map()
 			{
 				cur_map_3d[i][j][k].edge_list[FRONT]->max_cap = rr_map->capacity(k, i, j, i, j + 1);
 			}
-#ifdef GARY
-	int x_size = rr_map->get_gridx();
-    int y_size = rr_map->get_gridy();
-    int layer_size = rr_map->get_layerNumber();
-
-	std::vector<std::vector<int>> tile_cap_map_x;
-    std::vector<std::vector<int>> tile_cap_map_y;
-    tile_cap_map_x.resize(x_size, std::vector<int>(y_size, 0));
-    tile_cap_map_y.resize(x_size, std::vector<int>(y_size, 0));
-    // calculate 2d tile capacity
-    for (int i = x_size - 2; i >= 0; --i)
-    {
-        for (int j = y_size - 1; j >= 0; --j)
-        {
-
-            int i_j_2d_cap_x = std::round(congestionMap2d->edge(i, j, Jm::DIR_EAST).cur_cap);
-            tile_cap_map_x[i][j] += i_j_2d_cap_x;
-            tile_cap_map_x[i + 1][j] += i_j_2d_cap_x;
-        }
-    }
-
-    for (int i = x_size - 1; i >= 0; --i)
-    {
-        for (int j = y_size - 2; j >= 0; --j)
-        {
-
-            int i_j_2d_cap_y = std::round(congestionMap2d->edge(i, j, Jm::DIR_NORTH).cur_cap);
-            tile_cap_map_y[i][j] += i_j_2d_cap_y;
-            tile_cap_map_y[i][j + 1] += i_j_2d_cap_y;
-        }
-    }
-
-    // caculate 3d tile capacity and demand prediction maps
-    for (int i = 0; i < x_size; ++i)
-    {
-        for (int j = 0; j < y_size; ++j)
-        {
-            int demand_x = tile_cap_map_x[i][j];
-            int demand_y = tile_cap_map_y[i][j];
-            for (int k = layer_size - 1; k > 0; --k)
-            {
-                if (database.getLayerDir(k) == Y)
-                {
-                    int targetLayer = (database.getLayerDir(1) == Y) ? 1 : 2;
-                    int targetLayerM = (database.getLayerDir(3) == Y) ? 3 : 4;
-                    if (i > 0 && i < x_size - 1)
-                    {
-                        cur_map_3d[i][j][k].cap = (cur_map_3d[i][j][k].edge_list[RIGHT]->max_cap + cur_map_3d[i][j][k].edge_list[LEFT]->max_cap);
-                    }
-                    else if (i == 0)
-                    {
-                        cur_map_3d[i][j][k].cap = cur_map_3d[i][j][k].edge_list[RIGHT]->max_cap;
-                    }
-                    else
-                    {
-                        cur_map_3d[i][j][k].cap = cur_map_3d[i][j][k].edge_list[LEFT]->max_cap;
-                    }
-
-                    if (k < 3) // 3 for metal5 testcase 5 for normal
-                    {
-                        if (cur_map_3d[i][j][targetLayer].discountRatio <= 0.6)
-                        {
-                            cur_map_3d[i][j][k].cap *= 0.7; // 0.85
-                        }
-                    }
-                    else if (k >= 3)
-                    {
-                        if (cur_map_3d[i][j][targetLayerM].discountRatio <= 0.65)
-                        {
-                            cur_map_3d[i][j][k].cap *= 0.8;
-                        }
-                    }
-					assert(sign(cur_map_3d[i][j][k].cap) >= 0);
-                    cur_map_3d[i][j][k].max_cap = cur_map_3d[i][j][k].cap;
-                    if (cur_map_3d[i][j][k].cap <= demand_x)
-                    {
-                        cur_map_3d[i][j][k].dem_pred = cur_map_3d[i][j][k].cap;
-                        demand_x -= cur_map_3d[i][j][k].cap;
-                    }
-                    else if (k != 1)
-                    {
-                        cur_map_3d[i][j][k].dem_pred = demand_x;
-                        demand_x = 0;
-                    }
-                }
-                else
-                {
-                    int targetLayer = (database.getLayerDir(1) == X) ? 1 : 2;
-                    int targetLayerM = (database.getLayerDir(3) == X) ? 3 : 4;
-                    if (j > 0 && j < y_size - 1)
-                    {
-                        cur_map_3d[i][j][k].cap = (cur_map_3d[i][j][k].edge_list[FRONT]->max_cap + cur_map_3d[i][j][k].edge_list[BACK]->max_cap);
-                    }
-                    else if (j == 0)
-                    {
-                        cur_map_3d[i][j][k].cap = cur_map_3d[i][j][k].edge_list[FRONT]->max_cap;
-                    }
-                    else
-                    {
-                        cur_map_3d[i][j][k].cap = cur_map_3d[i][j][k].edge_list[BACK]->max_cap;
-                    }
-
-                    if (k < 3)  // 3 for metal5 testcase 5 for normal
-                    {
-                        if (cur_map_3d[i][j][targetLayer].discountRatio <= 0.6)
-                        {
-                            cur_map_3d[i][j][k].cap *= 0.7; //0.85
-                        }
-                    }
-                    else if (k >= 3)
-                    {
-                        if (cur_map_3d[i][j][targetLayerM].discountRatio <= 0.65)
-                        {
-                            cur_map_3d[i][j][k].cap *= 0.8;
-                        }
-                    }
-					assert(sign(cur_map_3d[i][j][k].cap) >= 0);
-                    cur_map_3d[i][j][k].max_cap = cur_map_3d[i][j][k].cap;
-                    if (cur_map_3d[i][j][k].cap <= demand_y)
-                    {
-                        cur_map_3d[i][j][k].dem_pred = cur_map_3d[i][j][k].cap;
-                        demand_y -= cur_map_3d[i][j][k].cap;
-                    }
-                    else
-                    {
-                        cur_map_3d[i][j][k].dem_pred = demand_y;
-                        demand_y = 0;
-                    }
-                }
-            }
-        }
-    }
-
-    auto &deletedNet = rr_map->get_deleted_netList();
-    for (auto &net : deletedNet)
-    {
-        auto &pinList = net.get_pinList();
-        auto maxLayer = rr_map->get_layerNumber();
-        for (auto &pin : pinList)
-        {
-            int x = pin->get_tileX();
-            int y = pin->get_tileY();
-            int layer = pin->get_layerId();
-            if (layer != 0) {
-                cur_map_3d[x][y][layer].cap -= 2;
-				cur_map_3d[x][y][layer].cap = max(0.0, cur_map_3d[x][y][layer].cap);
-			}
-			if (layer+1 < layer_size) {
-            	cur_map_3d[x][y][layer + 1].cap -= 2;
-				cur_map_3d[x][y][layer+1].cap = max(0.0, cur_map_3d[x][y][layer+1].cap);
-			}
-			if (layer+2 < layer_size) {
-            	cur_map_3d[x][y][layer + 2].cap -= 2;
-				cur_map_3d[x][y][layer+2].cap = max(0.0, cur_map_3d[x][y][layer+2].cap);
-			}
-        }
-    }
-
-	for (int j=0; j<y_size; ++j) {
-		for (int k=0; k<layer_size; ++k) {
-			if (database.getLayerDir(k) == Y) {
-				cur_map_3d[0][j][k].edge_list[RIGHT]->max_cap = std::round(cur_map_3d[0][j][k].cap);
-				cur_map_3d[x_size-2][j][k].edge_list[RIGHT]->max_cap = std::round(cur_map_3d[x_size-1][j][k].cap);
-				assert(cur_map_3d[0][j][k].edge_list[RIGHT]->max_cap >= 0);
-				assert(cur_map_3d[x_size-2][j][k].edge_list[RIGHT]->max_cap >= 0);
-			} else {
-				cur_map_3d[0][j][k].edge_list[RIGHT]->max_cap = cur_map_3d[x_size-2][j][k].edge_list[RIGHT]->max_cap = 0;
-			}
-		}
-	}
-	for (int i=0; i<x_size; ++i) {
-		for (int k=0; k<layer_size; ++k) {
-			if (database.getLayerDir(k) == X) {
-				cur_map_3d[i][0][k].edge_list[FRONT]->max_cap = std::round(cur_map_3d[i][0][k].cap);
-				cur_map_3d[i][y_size-2][k].edge_list[FRONT]->max_cap = std::round(cur_map_3d[i][y_size-1][k].cap);
-				assert(cur_map_3d[i][0][k].edge_list[FRONT]->max_cap >= 0);
-				assert(cur_map_3d[i][y_size-2][k].edge_list[FRONT]->max_cap >= 0);
-			} else {
-				cur_map_3d[i][0][k].edge_list[FRONT]->max_cap = cur_map_3d[i][y_size-2][k].edge_list[FRONT]->max_cap = 0;
-			}
-		}
-	}
-
-	for (int i=1; i<x_size-2; ++i) {
-		for (int j=0; j<y_size; ++j) {
-			for (int k=0; k<layer_size; ++k) {
-				if (database.getLayerDir(k) == Y) {
-					cur_map_3d[i][j][k].edge_list[RIGHT]->max_cap = max(0, (int)std::round(cur_map_3d[i][j][k].cap) - cur_map_3d[i-1][j][k].edge_list[RIGHT]->max_cap);
-				} else {
-					cur_map_3d[i][j][k].edge_list[RIGHT]->max_cap = 0;
-				}
-			}
-		}
-	}
-	for (int i=0; i<x_size; ++i) {
-		for (int j=1; j<y_size-2; ++j) {
-			for (int k=0; k<layer_size; ++k) {
-				if (database.getLayerDir(k) == X) {
-					cur_map_3d[i][j][k].edge_list[FRONT]->max_cap = max(0, (int)std::round(cur_map_3d[i][j][k].cap) - cur_map_3d[i][j-1][k].edge_list[FRONT]->max_cap);
-				} else {
-					cur_map_3d[i][j][k].edge_list[FRONT]->max_cap = 0;
-				}
-			}
-		}
-	}
-
-	for (int i=0; i<x_size-1; ++i) {
-		for (int j=0; j<y_size; ++j) {
-			double cap = 0;
-			for (int k=0; k<layer_size; ++k) {
-				cap += cur_map_3d[i][j][k].edge_list[RIGHT]->max_cap;
-				if (database.getLayerDir(k) == X) {
-					assert(cur_map_3d[i][j][k].edge_list[RIGHT]->max_cap == 0);
-				}
-			}
-			if (sign(cap - std::round(congestionMap2d->edge(i, j, DIR_EAST).max_cap)) < 0) {
-				int diff = (int)std::round(std::round(congestionMap2d->edge(i, j, DIR_EAST).max_cap) - cap);
-				pair<int, int> quota[layer_size];
-				for (int k=0; k<layer_size; ++k) {
-					quota[k] = {max(0,
-					rr_map->capacity(k, i, j, i + 1, j) - cur_map_3d[i][j][k].edge_list[RIGHT]->max_cap), k};
-				}
-				std::sort(quota, quota+layer_size, std::greater<pair<int,int>>());
-
-				int id = 0;
-				while (diff > 0) {
-					if (quota[id].first > 0) {
-						int k = quota[id].second;
-						cur_map_3d[i][j][k].edge_list[RIGHT]->max_cap++;
-						cap++;
-						diff--;
-						quota[id].first--;
-					} else {
-						// bool run_out = true;
-						// for (int k=0; k<layer_size; ++k)
-						// 	run_out &= (quota[k].first == 0);
-						// assert(run_out == false);
-						// if (run_out) break;
-					}
-					id = (id + 1) % layer_size;
-				}
-			}
-			assert(sign(cap - std::round(congestionMap2d->edge(i, j, DIR_EAST).max_cap)) >= 0);
-		}
-	}
-	for (int i=0; i<x_size; ++i) {
-		for (int j=0; j<y_size-1; ++j) {
-			double cap = 0;
-			for (int k=0; k<layer_size; ++k) {
-				cap += cur_map_3d[i][j][k].edge_list[FRONT]->max_cap;
-				if (database.getLayerDir(k) == Y)
-					assert(cur_map_3d[i][j][k].edge_list[FRONT]->max_cap == 0);
-			}
-			if (sign(cap - std::round(congestionMap2d->edge(i, j, DIR_NORTH).max_cap)) < 0) {
-				int diff = (int)std::round(std::round(congestionMap2d->edge(i, j, DIR_NORTH).max_cap) - cap);
-				pair<int, int> quota[layer_size];
-				for (int k=0; k<layer_size; ++k) {
-					quota[k] = {max(0, 
-					rr_map->capacity(k, i, j, i, j+1) - cur_map_3d[i][j][k].edge_list[FRONT]->max_cap), k};
-				}
-				std::sort(quota, quota+layer_size, std::greater<pair<int,int>>());
-
-				int id = 0;
-				while (diff > 0) {
-					if (quota[id].first > 0) {
-						int k = quota[id].second;
-						cur_map_3d[i][j][k].edge_list[FRONT]->max_cap++;
-						cap++;
-						diff--;
-						quota[id].first--;
-					} else {
-						// bool run_out = true;
-						// for (int k=0; k<layer_size; ++k)
-						// 	run_out &= (quota[k].first == 0);
-						// assert(run_out == false);
-						// if (run_out) break;
-					}
-					id = (id + 1) % layer_size;
-				}
-			}
-			assert(sign(cap - std::round(congestionMap2d->edge(i, j, DIR_NORTH).max_cap)) >= 0);
-		}
-	}
-#endif
 
 #ifdef DEBUG1
 	print_cap_3d("max");

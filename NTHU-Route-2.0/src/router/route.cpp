@@ -225,24 +225,47 @@ int main(int argc, char *argv[])
 
     ParameterAnalyzer ap(argc, argv);
 
-    cout << "000000000000000000000000000000000000000000000000" << endl;
-
+    pre_evaluate_congestion_cost_fp = pre_evaluate_congestion_cost_all; 
     RoutingRegion* routingData = new RoutingRegion();
-    cout << "111111111111111111111111111111111111111111111111" << endl;
+
     parameter_set = ap.parameter(); // Global variable: routing parameters //還沒assign值
-    cout << "222222222222222222222222222222222222222222222222" << endl;
+
     routing_parameter = ap.routing_param();
     
-    pre_evaluate_congestion_cost_fp = pre_evaluate_congestion_cost_all; //指向這個function
-    
+ 
+
+
+
+    std::cout << "dataPreparetionISPD2024" << endl;
+    printMemoryUsage();
+    std::cout << "-------------------" << endl;
     dataPreparetionISPD2024(ap, routingData);
+    std::cout << "dataPreparetionISPD2024 end" << endl;
+    printMemoryUsage();
+    std::cout << "+++++++++++++++++++" << endl;
+
 
     prog_start = std::chrono::high_resolution_clock::now();
 
+    std::cout << "construct_2d_tree" << endl;
+    printMemoryUsage();
+    std::cout << "-------------------" << endl;
     construct_2d_tree(routingData);
+    std::cout << "construct_2d_tree end" << endl;
+    printMemoryUsage();
+    std::cout << "+++++++++++++++++++" << endl;
+
 
     post_start = std::chrono::high_resolution_clock::now();
+
+    std::cout << "Post_processing" << endl;
+    printMemoryUsage();
+    std::cout << "-------------------" << endl;
     Post_processing();
+    std::cout << "Post_processing end" << endl;
+    printMemoryUsage();
+    std::cout << "+++++++++++++++++++" << endl;
+
     post_end = std::chrono::high_resolution_clock::now();
 
     if (ap.caseType() == 0)
@@ -251,7 +274,14 @@ int main(int argc, char *argv[])
     else
     {
 	    la_start = std::chrono::high_resolution_clock::now();
+        std::cout << "Layer_assignment" << endl;
+        printMemoryUsage();
+        std::cout << "-------------------" << endl;
         Layer_assignment(ap.get_outPR_file());
+        std::cout << "Layer_assignment end" << endl;
+        printMemoryUsage();
+        std::cout << "+++++++++++++++++++" << endl;
+
 	    la_end = std::chrono::high_resolution_clock::now();
     }
 

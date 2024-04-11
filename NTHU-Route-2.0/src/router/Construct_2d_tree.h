@@ -87,6 +87,7 @@ extern void (*pre_evaluate_congestion_cost_fp)(int i, int j, int dir);
 
 void pre_evaluate_congestion_cost_all(int i, int j, int dir);
 
+
 // store the information of a 2-pin net
 
 class Two_pin_element_2d
@@ -186,7 +187,9 @@ public:
 public:
     double cur_cap;
 
-    double max_cap;
+    //2024/04/10 ying revise
+    //double max_cap;
+    int max_cap;
 
     int history;
 
@@ -233,19 +236,15 @@ typedef std::unordered_map<int, int> LRoutedNetTable;
 
 class Edge_3d
 {
-
 public:
     Edge_3d();
-
 public:
     int max_cap;
 
     int cur_cap;
 
     int cur_dem = 0;
-
-    set<Two_pin_element *> used_two_pin;
-
+    
     LRoutedNetTable used_net;
 };
 

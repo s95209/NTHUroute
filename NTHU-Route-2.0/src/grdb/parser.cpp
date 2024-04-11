@@ -78,12 +78,9 @@ void Parser24::parseNetFile()
     std::string line;
     std::string name;
     int numPins = 0;
-    // std::vector<Net> nets;
-    // std::unordered_map<std::string, Net> nets;
-    // int netId = -1;
     std::vector<std::vector<std::vector<int>>> accessPoints;
     while (std::getline(netFile, line)) {
-        // if (line.find("net") != std::string::npos || line.find("pin") != std::string::npos) {
+        // 每個net的第一行
         if (line.find("(") == std::string::npos && line.find(")") == std::string::npos && line.length()>1) {
             // name = line.substr(0, line.size() - 1);
             name = line;
@@ -94,6 +91,7 @@ void Parser24::parseNetFile()
             // netId = std::stoi(line.substr(3));
             numPins = 0;
             // std::cout << name << " " << netId << std::endl;
+        //每個net的每個pin
         } else if (line.find('[') != std::string::npos) {
             std::vector<std::vector<int>> access;
             std::string text = line.substr(1, line.size() - 2); // Remove brackets and trailing comma
@@ -104,6 +102,7 @@ void Parser24::parseNetFile()
             // std::cout << "current line is: " << text << std::endl;
             std::istringstream ss(text);
             int x, y, z;
+        //pin中的 access point
             while (ss >> x >> y >> z) {
                 std::vector<int> point;
                 point.push_back(x);
@@ -114,18 +113,13 @@ void Parser24::parseNetFile()
             }
             accessPoints.push_back(access);
             numPins++;
+        //每個net的結尾            
         } else if (line.find(')') != std::string::npos) {
-            // if (netId == 3153 || netId == 3151) {
-            //     std::cout << name << " " << netId << " " << numPins << std::endl;
-            // }
-            // nets.push_back(Net(name, numPins, accessPoints));
             NetISPD24 net(name, numPins, accessPoints);
             this->nets[name] = net;
             accessPoints.clear();
         }
     }
-    // std::cout << "Got net info" << std::endl;
-
     netFile.close();
 }
 

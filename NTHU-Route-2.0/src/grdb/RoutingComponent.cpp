@@ -31,17 +31,9 @@ int Pin::get_layerId() const
 	return z();
 }
 
-/******
-  Net
- *****/
-Net::Net(const char* name,
-         int serialNumber,
-         int id,
-         int minWireWidth)
-:serialNumber(serialNumber),
- id(id),
- minWireWidth(minWireWidth),
- name(name),
+
+Net::Net(const char* name, int id)
+:name(name),
  minPinX(INT_MAX),
  maxPinX(0),
  minPinY(INT_MAX),

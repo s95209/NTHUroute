@@ -297,7 +297,13 @@ void Post_processing(void)
     if(cur_overflow > 0) {
         //In post processing, we only need to pre-evaluate all cost once.
         //The other update will be done by update_add(remove)_edge
+		std::cout << "pre_evaluate_congestion_cost" << endl;
+        printMemoryUsage();
+        std::cout << "-------------------" << endl;
         pre_evaluate_congestion_cost();
+		std::cout << "pre_evaluate_congestion_cost end" << endl;
+        printMemoryUsage();
+        std::cout << "-------------------" << endl;
         for (int i = 0; i < Post_processing_iteration; ++i,++done_iter)
         {
             printf("\033[31mIteration: \033[m%d\n",i+1);
@@ -309,74 +315,64 @@ void Post_processing(void)
 #endif
             total_no_overflow = true; 
 
+			std::cout << "initial_for_post_processing" << endl;
+			printMemoryUsage();
+			std::cout << "-------------------" << endl;
             initial_for_post_processing();
+			std::cout << "initial_for_post_processing end" << endl;
+			printMemoryUsage();
+			std::cout << "-------------------" << endl;
 
             pre_overflow = cur_overflow;
+
+			std::cout << "cal_max_overflow" << endl;
+			printMemoryUsage();
+			std::cout << "-------------------" << endl;
             cur_overflow = cal_max_overflow();
+			std::cout << "cal_max_overflow end" << endl;
+			printMemoryUsage();
+			std::cout << "-------------------" << endl;
             // cal_total_wirelength();
 
             if (total_no_overflow || cur_overflow == 0) break;
             BOXSIZE_INC += inc_num;
+			std::cout << "reallocate_two_pin_list" << endl;
+			printMemoryUsage();
+			std::cout << "-------------------" << endl;
             reallocate_two_pin_list(true);
+			std::cout << "reallocate_two_pin_list end" << endl;
+			printMemoryUsage();
+			std::cout << "-------------------" << endl;
         }
     }
 
-
+	std::cout << "insert_all_two_pin_list" << endl;
+	printMemoryUsage();
+	std::cout << "-------------------" << endl;
 	for (int i=0; i < (int)two_pin_list.size(); ++i) {
 		insert_all_two_pin_list(two_pin_list[i]);
 	}
-
+	std::cout << "insert_all_two_pin_list end" << endl;
+	printMemoryUsage();
+	std::cout << "-------------------" << endl;
     delete cache;
 
 #ifdef MESSAGE
 	puts("maze routing complete successfully");
 #endif
+	std::cout << "init_3d_map" << endl;
+	printMemoryUsage();
+	std::cout << "-------------------" << endl;
 	init_3d_map();	        //allocate space
+	std::cout << "init_3d_map end" << endl;
+	printMemoryUsage();
+	std::cout << "-------------------" << endl;
+
+	std::cout << "output_3d_map" << endl;
+	printMemoryUsage();
+	std::cout << "-------------------" << endl;
 	output_3d_map();	    //assign max_cap
-/*
-	unordered_map<int, bool> through_of_edge_nets_and_through_zero;
-	// ofstream fout("grid.txt");
-	int fuck_edge_cnt = 0;
-	for (int i=0; i<two_pin_list.size(); ++i) {
-		for(int j=two_pin_list[i]->path.size()-2; j >= 0; --j)
-		{
-			int dir = get_direction_2d(two_pin_list[i]->path[j], two_pin_list[i]->path[j+1]);
-			DirectionType dirType = static_cast<DirectionType>(Jr2JmDirArray[dir]);
-			int x = two_pin_list[i]->path[j]->x;
-			int y = two_pin_list[i]->path[j]->y;
-			// if (two_pin_list[i]->net_id == 892) {
-			// 	// std::cout << "(" << x << ", " << y << "), dir: " << dir << " dem: " << congestionMap2d->edge(x, y, dirType).cur_cap << ", cap: " << congestionMap2d->edge(x, y, dirType).max_cap << '\n'; 
-			// 	fout << x << " " << y << "\n"; 
-			// }
-			if (congestionMap2d->edge(x, y, dirType).isOverflow()) {
-				if (sign(congestionMap2d->edge(x, y, dirType).max_cap) == 0) {
-					// std::cout << "Fucking edge: " << x << ' ' << y << ' ' << dir << ' ' << congestionMap2d->edge(x, y, dirType).cur_cap << ' ' << congestionMap2d->edge(x, y, dirType).max_cap << '\n';
-					fuck_edge_cnt++;
-					through_of_edge_nets_and_through_zero[two_pin_list[i]->net_id] = true;
-					for (int k=0; k<rr_map->get_layerNumber(); ++k) {
-						if (dir == LEFT)
-							assert(rr_map->capacity(k, x, y, x-1, y) == 0);
-						if (dir == RIGHT)
-							assert(rr_map->capacity(k, x, y, x+1, y) == 0);
-						if (dir == FRONT)
-							assert(rr_map->capacity(k, x, y, x, y+1) == 0);
-						if (dir == BACK)
-							assert(rr_map->capacity(k, x, y, x, y-1) == 0);
-					}
-					// break;
-				} else {
-					if (!through_of_edge_nets_and_through_zero[two_pin_list[i]->net_id])
-						through_of_edge_nets_and_through_zero[two_pin_list[i]->net_id] = false;
-				}
-			}
-		}
-		
-	}
-	// fout.close();
-	std::cout << "Fuck edge cnt = " << fuck_edge_cnt << '\n';
-	std::cout << "#OF nets:" << through_of_edge_nets_and_through_zero.size() << '\n';
-	// for (auto &[net_id, through_zero] : through_of_edge_nets_and_through_zero) {
-	// 	std::cout << "net id: " << net_id << ' ' << "through_zero: " << through_zero << '\n';
-	// }
-*/
+	std::cout << "output_3d_map end" << endl;
+	printMemoryUsage();
+	std::cout << "-------------------" << endl;
 }

@@ -1942,8 +1942,6 @@ void DP(int x, int y, int z) {
 
     void klat(int net_id) {
 #ifdef PRINT_DP_PIN
-        // get_netSerialNumber(int netId)
-        // get_netId(int netSerial)
         if (net_id == 172) {
             check_net = true;
         }
