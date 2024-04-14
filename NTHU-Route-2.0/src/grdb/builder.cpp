@@ -56,7 +56,6 @@ void Builder::setTileTransformInformation (unsigned int,    //llx
 {}
 
 void Builder::beginAddANet (const char*,            //netName
-                            unsigned int,           //netSerial
                             unsigned int,           //pinNumber
                             unsigned int)           //minWidth
 {}

@@ -32,7 +32,6 @@ class RoutingRegion : public Builder {
     int get_netNumber();			//get net number
     const char* get_netName(int netPos);	//get net name
     std::string& get_net_name(int netPos);
-    int get_netSerialNumber(int netId);
     //int get_netPos(int net_id);	//get net's list position by net id
     int get_netPinNumber(int netPos);		//get pin number of the specified net
     int get_netMinWidth(int netPos);		//get minimum wire width of the specified net
@@ -73,7 +72,6 @@ class RoutingRegion : public Builder {
                                                  unsigned int tWidth, 
                                                  unsigned int tHeight);
     virtual void 	beginAddANet (const char* netName,
-                                  unsigned int netSerial,
                                   unsigned int pinNumber,
                                   unsigned int minWidth);
     virtual void    addPin (unsigned int x,
@@ -162,11 +160,6 @@ const char* RoutingRegion::get_netName(int netId){
 inline
 std::string& RoutingRegion::get_net_name(int netId){
 	return (*netList_)[netId].getName();
-}
-
-inline
-int RoutingRegion::get_netSerialNumber(int netId){
-	return (*netList_)[netId].id;
 }
 
 

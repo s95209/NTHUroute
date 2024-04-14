@@ -208,37 +208,37 @@ void ParameterAnalyzer::analyze2() {
 
     struct option long_option[] = {
 
-        {"p2-max-iteration", 1, 0, 1},
+        // {"p2-max-iteration", 1, 0, 1},
 
-        {"p3-max-iteration", 1, 0, 2},
+        // {"p3-max-iteration", 1, 0, 2},
 
-        {"overflow-threshold", 1, 0, 3},
+        // {"overflow-threshold", 1, 0, 3},
 
-        {"p3-init-box-size", 1, 0, 4},
+        // {"p3-init-box-size", 1, 0, 4},
 
-        {"p3-box-expand-size", 1, 0, 5},
+        // {"p3-box-expand-size", 1, 0, 5},
 
-        {"p2-boxsize-inc", 1, 0, 6},
+        // {"p2-boxsize-inc", 1, 0, 6},
 
-        {"p2-box-expand-size", 1, 0, 7},
+        // {"p2-box-expand-size", 1, 0, 7},
 
-        {"monotonic-routing", 1, 0, 8},
+        // {"monotonic-routing", 1, 0, 8},
 
-        {"simple", 0, 0, 9},
+        // {"simple", 0, 0, 9},
 
-        {"inputs", 1, 0, 'i'},
+        // {"inputs", 1, 0, 'i'},
 
-        {"outputs", 1, 0, 'o'},
+        // {"outputs", 1, 0, 'o'},
 
-        {"p2-init-box-size", 1, 0, 6},
+        // {"p2-init-box-size", 1, 0, 6},
 
-        {"def", 1, 0, 'D'},
+        // {"def", 1, 0, 'D'},
 
-        {"lef", 1, 0, 'L'},
+        // {"lef", 1, 0, 'L'},
 
-        {"guide", 1, 0, 'G'},
+        // {"guide", 1, 0, 'G'},
 
-        {"param", 1, 0, 'P'},
+        // {"param", 1, 0, 'P'},
 
 		// --- (2024/01/21) ISPD2024 MF edit --- //
         {"cap", 1, 0, 'C'},
@@ -266,101 +266,101 @@ void ParameterAnalyzer::analyze2() {
 
         switch (cmd) {
             
-        case 0:
-            std::cout << "Wrong parameter entered!" << endl;
-            break;
+        // case 0:
+        //     std::cout << "Wrong parameter entered!" << endl;
+        //     break;
 
-        case 1:
-            std::cout << "Part 2 Max Iteration set to " << parameter << endl;
-            parameterSet.iter_2d = atoi(parameter.c_str());
-            routingParam.set_iteration_p2(atoi(parameter.c_str()));
-            break;
+        // case 1:
+        //     std::cout << "Part 2 Max Iteration set to " << parameter << endl;
+        //     parameterSet.iter_2d = atoi(parameter.c_str());
+        //     routingParam.set_iteration_p2(atoi(parameter.c_str()));
+        //     break;
 
-        case 2:
-            std::cout << "Part 3 Max Iteration set to " << parameter << endl;
-            parameterSet.iter_p3 = atoi(parameter.c_str());
-            routingParam.set_iteration_p3(atoi(parameter.c_str()));
-            break;
+        // case 2:
+        //     std::cout << "Part 3 Max Iteration set to " << parameter << endl;
+        //     parameterSet.iter_p3 = atoi(parameter.c_str());
+        //     routingParam.set_iteration_p3(atoi(parameter.c_str()));
+        //     break;
 
-        case 3:
-            std::cout << "P2 to P3 overflow threashold set to " << parameter << endl;
-            parameterSet.overflow_threshold = atoi(parameter.c_str());
-            routingParam.set_overflow_threshold(atoi(parameter.c_str()));
-            break;
+        // case 3:
+        //     std::cout << "P2 to P3 overflow threashold set to " << parameter << endl;
+        //     parameterSet.overflow_threshold = atoi(parameter.c_str());
+        //     routingParam.set_overflow_threshold(atoi(parameter.c_str()));
+        //     break;
 
-        case 4:
-            std::cout << "P3 Initial Box Size set to " << parameter << endl;
-            routingParam.set_init_box_size_p3(atoi(parameter.c_str()));
-            break;
+        // case 4:
+        //     std::cout << "P3 Initial Box Size set to " << parameter << endl;
+        //     routingParam.set_init_box_size_p3(atoi(parameter.c_str()));
+        //     break;
 
-        case 5:
-            std::cout << "P3 Box Expand Size set to " << parameter << endl;
-            routingParam.set_box_size_inc_p3(atoi(parameter.c_str()));
-            break;
+        // case 5:
+        //     std::cout << "P3 Box Expand Size set to " << parameter << endl;
+        //     routingParam.set_box_size_inc_p3(atoi(parameter.c_str()));
+        //     break;
 
-        case 6:
-            std::cout << "P2 BOXSIZE_INC set to " << parameter << endl;
-            BOXSIZE_INC = atoi(parameter.c_str());
-            routingParam.set_init_box_size_p2(atoi(parameter.c_str()));
-            break;
+        // case 6:
+        //     std::cout << "P2 BOXSIZE_INC set to " << parameter << endl;
+        //     BOXSIZE_INC = atoi(parameter.c_str());
+        //     routingParam.set_init_box_size_p2(atoi(parameter.c_str()));
+        //     break;
 
-        case 7:
-            std::cout << "P2 Box Expand Size set to " << parameter << endl;
-            routingParam.set_box_size_inc_p2(atoi(parameter.c_str()));
-            break;
+        // case 7:
+        //     std::cout << "P2 Box Expand Size set to " << parameter << endl;
+        //     routingParam.set_box_size_inc_p2(atoi(parameter.c_str()));
+        //     break;
 
-        case 8:
-            std::cout << "Monotonic Routing ";
-            enable = atoi(parameter.c_str()) == 1;
-            routingParam.set_monotonic_en(enable);
+        // case 8:
+        //     std::cout << "Monotonic Routing ";
+        //     enable = atoi(parameter.c_str()) == 1;
+        //     routingParam.set_monotonic_en(enable);
 
-            if (enable)
-                std::cout << "Enabled!" << endl;
-            else
-                std::cout << "Disabled!" << endl;
-            break;
+        //     if (enable)
+        //         std::cout << "Enabled!" << endl;
+        //     else
+        //         std::cout << "Disabled!" << endl;
+        //     break;
 
-        case 9:
-            std::cout << "Simple Mode enable - Routing Parameter Auto Fitting!" << endl;
-            routingParam.set_simple_mode_en(true);
-            break;
+        // case 9:
+        //     std::cout << "Simple Mode enable - Routing Parameter Auto Fitting!" << endl;
+        //     routingParam.set_simple_mode_en(true);
+        //     break;
 
-        case 'i':
-            std::cout << "Input file " << parameter << endl;
-            this->inputFileName.append(parameter);
-            this->analyzeInput();
-            parameterSet.setInputfile(parameter);
-            break;
+        // case 'i':
+        //     std::cout << "Input file " << parameter << endl;
+        //     this->inputFileName.append(parameter);
+        //     this->analyzeInput();
+        //     parameterSet.setInputfile(parameter);
+        //     break;
 
-        case 'I':
-            std::cout << "Input file " << parameter << endl;
-            this->inputFileName.append(parameter);
-            parameterSet.setInputfile(parameter);
-            break;
+        // case 'I':
+        //     std::cout << "Input file " << parameter << endl;
+        //     this->inputFileName.append(parameter);
+        //     parameterSet.setInputfile(parameter);
+        //     break;
 
-        case 'L':
-            this->LefFileName.append(parameter);
-            break;
+        // case 'L':
+        //     this->LefFileName.append(parameter);
+        //     break;
 
-        case 'D':
-            this->DefFileName.append(parameter);
-            break;
+        // case 'D':
+        //     this->DefFileName.append(parameter);
+        //     break;
 
-        case 'P':
-            this->ParamFileName.append(parameter);
-            break;
+        // case 'P':
+        //     this->ParamFileName.append(parameter);
+        //     break;
 
-        case 'o':
-            std::cout << "Output file " << parameter << endl;
-            this->outputFileName.append(parameter);
-            this->analyzeOutput();
-            parameterSet.setOutputfile(parameter);
-            defineOutput = true;
-            break;
+        // case 'o':
+        //     std::cout << "Output file " << parameter << endl;
+        //     this->outputFileName.append(parameter);
+        //     this->analyzeOutput();
+        //     parameterSet.setOutputfile(parameter);
+        //     defineOutput = true;
+        //     break;
 
-        case 'G':
-            this->outputGuideName.append(parameter);
-            break;
+        // case 'G':
+        //     this->outputGuideName.append(parameter);
+        //     break;
 
         case 'C':
             this->inputCapName = parameter; // For ISPD 2024

@@ -85,7 +85,6 @@ class RoutingSpace {
     private:
         struct RoutingEdge {
             RoutingEdge (int capacity = 0): capacity(capacity) {}
-            
             int capacity;
         };
 
@@ -103,6 +102,8 @@ class RoutingSpace {
     private:
         void  assignTileCoordinate ();
 };
+
+
 
 typedef std::vector<Net> NetList;
 

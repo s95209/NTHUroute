@@ -120,7 +120,6 @@ void RoutingRegion::setTileTransformInformation (unsigned int llx,
 }
 
 void RoutingRegion::beginAddANet (const char* netName,
-                                  unsigned int netSerial,
                                   unsigned int, //pinNumber,
                                   unsigned int minWidth)
 {

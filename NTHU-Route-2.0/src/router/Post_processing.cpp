@@ -148,11 +148,6 @@ void initial_for_post_processing()
 		// call maze routing
 		if (counter[i].total_overflow > 0)
 		{
-            //Coordinate_2d pin1 = two_pin_list[id]->pin1;
-            //Coordinate_2d pin2 = two_pin_list[id]->pin2;
-
-			// std::cout << "Post processing net " << two_pin_list[id]->net_id << " with bbox size " << two_pin_list[id]->boxSize()
-			//  	  << " path_through_zero: " << two_pin_list[id]->path_through_zero_edge << " tof: " << counter[i].total_overflow << '\n';
 
 			no_overflow = check_path_no_overflow(&two_pin_list[id]->path,two_pin_list[id]->net_id,false);
 			if (no_overflow)
@@ -170,24 +165,6 @@ void initial_for_post_processing()
 			bound_via_num = mn.via_num;
 			two_pin_list[id]->path.clear();
 			
-			// if (two_pin_list[id]->net_id == 892) {
-			// 	std::cout << "Before mn, bound_cost = " << bound_cost << ' ';
-			// 	// std::cout << "path size: " << two_pin_list[id]->path.size() << '\n';
-			// 	if (bound_cost > 1000)
-			// 	{
-			// 		for(int j=(*bound_path).size()-2; j >= 0; --j)
-			// 		{
-			// 			int dir = get_direction_2d((*bound_path)[j], (*bound_path)[j+1]);
-			// 			DirectionType dirType = static_cast<DirectionType>(Jr2JmDirArray[dir]);
-			// 			int x = (*bound_path)[j]->x;
-			// 			int y = (*bound_path)[j]->y;
-			// 			std::cout << "Net 892 original path: " << x << ' ' << y << ' ' << dir << " dem: " << congestionMap2d->edge(x, y, dirType).cur_cap << " cap: " << congestionMap2d->edge(x, y, dirType).max_cap << '\n';
-			// 			assert(sign(congestionMap2d->edge(x, y, dirType).max_cap) > 0);
-			// 		}
-			// 	}
-				
-			// }
-			// std::cout << "MN enable: " << routing_parameter->get_monotonic_en() << std::endl;
             if( routing_parameter->get_monotonic_en() ) {
                 find_path_flag = monotonic_pattern_route(two_pin_list[id]->pin1.x,two_pin_list[id]->pin1.y,two_pin_list[id]->pin2.x,two_pin_list[id]->pin2.y,two_pin_list[id],two_pin_list[id]->net_id,bound_cost,bound_distance,bound_via_num,true);
                 if (find_path_flag)

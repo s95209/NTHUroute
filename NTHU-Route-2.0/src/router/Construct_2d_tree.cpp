@@ -59,14 +59,6 @@ Vertex_3d ***cur_map_3d;
 
 vector<Two_pin_element *> all_two_pin_list;
 
-std::vector<std::vector<double>> discountRatio;
-
-std::vector<std::vector<double>> discountRatioV;
-
-std::vector<std::vector<double>> discountRatioH;
-
-std::vector<std::vector<double>> discountRatioNonZeroV;
-std::vector<std::vector<double>> discountRatioNonZeroH;
 
 RoutingRegion *rr_map;
 
@@ -165,7 +157,6 @@ int sign(double x) {
 }
 
 /*==================DEBUG FUNCTION================================*/
-
 // Obtain the max. overflow and total overflowed value of edges of every gCell
 
 int cal_max_overflow()
@@ -292,13 +283,9 @@ bool comp_vertex_fl(Vertex_flute_ptr a, Vertex_flute_ptr b)
 }
 
 void setup_flute_order(int *order)
-
 {
-
 	for (int i = global_flutetree.number - 1; i >= 0; --i)
-
 	{
-
 		order[i] = i;
 	}
 }
@@ -315,10 +302,8 @@ void init_2d_map()
 	std::cout << "+++++++++++++++++++" << endl;
 	for (int x = rr_map->get_gridx() - 2; x >= 0; --x)
 	{
-
 		for (int y = rr_map->get_gridy() - 1; y >= 0; --y)
 		{
-
 			for (int layer = rr_map->get_layerNumber() - 1; layer >= 0; --layer)
 			{
 				// Because the wire width = 1 and wire spaceing = 1,
@@ -331,20 +316,13 @@ void init_2d_map()
 	}
 
 	for (int x = rr_map->get_gridx() - 1; x >= 0; --x)
-
 	{
-
 		for (int y = rr_map->get_gridy() - 2; y >= 0; --y)
-
 		{
-
 			for (int layer = rr_map->get_layerNumber() - 1; layer >= 0; --layer)
-
 			{
 				// Because the wire width = 1 and wire spaceing = 1,
-
 				// the edge capacity on congestion map = edge capacity on every layer /2.
-
 				congestionMap2d->edge(x, y, DIR_NORTH).max_cap += (rr_map->capacity(layer, x, y, x, y + 1));
 			}
 		}
@@ -438,6 +416,7 @@ void init_3d_map()
 				cur_map_3d[i][j][k].edge_list[RIGHT] = newedge;
 				cur_map_3d[i + 1][j][k].edge_list[LEFT] = newedge;
 			}
+	std::cout << "11111111111111111111111" << endl;
 	for (i = 0; i < rr_map->get_gridx(); ++i)
 		for (j = 0; j < rr_map->get_gridy() - 1; ++j)
 			for (k = 0; k < rr_map->get_layerNumber(); ++k)
@@ -446,7 +425,7 @@ void init_3d_map()
 				cur_map_3d[i][j][k].edge_list[FRONT] = newedge;
 				cur_map_3d[i][j + 1][k].edge_list[BACK] = newedge;
 			}
-
+	std::cout << "22222222222222222222222" << endl;
 	for (i = 0; i < rr_map->get_gridx(); ++i)
 		for (j = 0; j < rr_map->get_gridy(); ++j)
 			for (k = 0; k < rr_map->get_layerNumber() - 1; ++k)
@@ -455,18 +434,19 @@ void init_3d_map()
 				cur_map_3d[i][j][k].edge_list[UP] = newedge;
 				cur_map_3d[i][j][k + 1].edge_list[DOWN] = newedge;
 			}
-
+	std::cout << "3333333333333333333333333" << endl;
 	for (j = 0; j < rr_map->get_gridy(); ++j)
 		for (k = 0; k < rr_map->get_layerNumber(); ++k)
 			cur_map_3d[0][j][k].edge_list[LEFT] = cur_map_3d[rr_map->get_gridx() - 1][j][k].edge_list[RIGHT] = NULL;
-
+	std::cout << "4444444444444444444444444" << endl;
 	for (i = 0; i < rr_map->get_gridx(); ++i)
 		for (k = 0; k < rr_map->get_layerNumber(); ++k)
 			cur_map_3d[i][0][k].edge_list[BACK] = cur_map_3d[i][rr_map->get_gridy() - 1][k].edge_list[FRONT] = NULL;
-
+	std::cout << "55555555555555555555555555555" << endl;
 	for (i = 0; i < rr_map->get_gridx(); ++i)
 		for (j = 0; j < rr_map->get_gridy(); ++j)
 			cur_map_3d[i][j][0].edge_list[DOWN] = cur_map_3d[i][j][rr_map->get_layerNumber() - 1].edge_list[UP] = NULL;
+	std::cout << "666666666666666666666666666666666" << endl;
 }
 
 void init_2pin_list()
@@ -692,7 +672,6 @@ void (*pre_evaluate_congestion_cost_fp)(int i, int j, int dir);
 
 void pre_evaluate_congestion_cost_all(int i, int j, int dir)
 {
-
 	static const int inc = 1;
 
 	double cong;
@@ -785,68 +764,47 @@ void pre_evaluate_congestion_cost()
 // get edge cost on a 2D layer
 
 double get_cost_2d(int i, int j, int dir, int net_id, int *distance)
-
 {
-
+	//	將方向從 FRONT BACK LEFT RIGHT 轉換成 NORTH SORTH EAST WEST
 	DirectionType dirType = static_cast<DirectionType>(Jr2JmDirArray[dir]);
 
 	// Check if the specified net pass the edge.
+	
 
-	// If it have passed the edge before, then the cost is 0.
-
-	if (sign(congestionMap2d->edge(i, j, dirType).max_cap) == 0) {
+	// sign 是在處理浮點數跟整數比較的問題
+	// 2024/04/14 ying 應該是為了 congestion 要為 0
+	if (sign(congestionMap2d->edge(i, j, dirType).max_cap) == 0) //沒有capacity 不能經過，所以給很大的 distance 和 cost
+	{
 		(*distance) = 1e5;
 		return 1e9;
 	}
 
+	// If it have passed the edge before, then the cost is 0.
 	if (congestionMap2d->edge(i, j, dirType).lookupNet(net_id) == false)
-
 	{
-
 		(*distance) = 1;
-
 		// Used in part II : main stage
-
 		if (used_cost_flag == HISTORY_COST)
-
 		{
-
 			return cache->edge(i, j, dirType).cost;
 		}
-
 		// Used in part III: Post processing
-
 		else if (used_cost_flag == MADEOF_COST)
-
 		{
 			// return (congestionMap2d->edge(i, j, dirType).overUsage());
 			return (congestionMap2d->edge(i, j, dirType).isFull());
 		}
-
 		// Used in part I: Initial routing
-
 		else if (used_cost_flag == FASTROUTE_COST)
-
 		{
-
-			return 1 + parameter_h /
-
-						   (1 + exp((-1) * parameter_k *
-
-									(congestionMap2d->edge(i, j, dirType).cur_cap + 1 -
-
-									 congestionMap2d->edge(i, j, dirType).max_cap)));
+			return 1 + parameter_h / 
+			(1 + exp((-1) * parameter_k * (congestionMap2d->edge(i, j, dirType).cur_cap + 1 - congestionMap2d->edge(i, j, dirType).max_cap)));
 		}
-
 		return 0;
 	}
-
-	else
-
+	else 
 	{
-
 		(*distance) = 0;
-
 		return 0;
 	}
 }
@@ -857,53 +815,48 @@ Compare two cost and return a pointer to the Monotonici_element which has smalle
 
 */
 
-Monotonic_element *compare_cost(Monotonic_element *m1, Monotonic_element *m2)
+Monotonic_element* compare_cost(Monotonic_element *m1, Monotonic_element *m2)
 
 {
 
 	if ((m1->total_cost - m2->total_cost) < (neg_error_bound))
-
-		return m1;
-
-	else if ((m1->total_cost - m2->total_cost) > (neg_error_bound))
-
-		return m2;
-
-	else
-
 	{
-
+		return m1;
+	}
+	else if ((m1->total_cost - m2->total_cost) > (neg_error_bound))
+	{
+		return m2;
+	}
+	else
+	{
 		if ((m1->max_cost - m2->max_cost) < (neg_error_bound))
-
-			return m1;
-
-		else if ((m1->max_cost - m2->max_cost) > (neg_error_bound))
-
-			return m2;
-
-		else
-
 		{
-
+			return m1;
+		}
+		else if ((m1->max_cost - m2->max_cost) > (neg_error_bound))
+		{
+			return m2;
+		}
+		else
+		{
 			if (m1->distance < m2->distance)
-
-				return m1;
-
-			else if (m1->distance > m2->distance)
-
-				return m2;
-
-			else
-
 			{
-
+				return m1;
+			}
+			else if (m1->distance > m2->distance)
+			{
+				return m2;
+			}
+			else
+			{
 				if (m1->via_num <= m2->via_num)
-
+				{
 					return m1;
-
+				}
 				else
-
+				{
 					return m2;
+				}
 			}
 		}
 	}
@@ -918,94 +871,60 @@ output: record the best L pattern into two_pin_L_path_global, and return the min
 */
 
 Monotonic_element L_pattern_max_cong(int x1, int y1, int x2, int y2, int dir1, int dir2, Two_pin_element_2d *two_pin_L_path, int net_id)
-
 {
-
 	int i, j;
-
 	double temp;
-
 	int dir[2], dir_index;
-
 	Monotonic_element max_path;
-
 	int distance;
 
 	dir[0] = dir1;
-
 	dir[1] = dir2;
-
+	
 	i = x1;
-
 	j = y1;
 
 	max_path.max_cost = -1000000;
-
 	max_path.total_cost = 0;
-
-	max_path.net_cost = 0;
-
 	max_path.distance = 0;
-
 	max_path.via_num = 1;
 
 	for (dir_index = 0; dir_index < 2; dir_index++)
-
 	{
-
 		if (dir[dir_index] == RIGHT) // search in horizontal direction: RIGHT
-
 		{
-
 			// for loop from the left boundary to the right boundary
-
 			for (i = x1; i < x2; ++i)
-
 			{
-
 				temp = get_cost_2d(i, j, dir[dir_index], net_id, &distance);
-
 				max_path.total_cost += max(static_cast<double>(0), temp);
-
 				max_path.distance += distance;
-
 				(*two_pin_L_path).path.push_back(&coor_array[i][j]);
-
-				if (temp > max_path.max_cost)
-
-					max_path.max_cost = temp;
+				if (temp > max_path.max_cost)	max_path.max_cost = temp;
 			}
-
 			i = x2;
 		}
-
 		else // search in vertical direction
-
 		{
-
 			for (j = y1; (j < y2 && dir[dir_index] == FRONT) || (j > y2 && dir[dir_index] == BACK);)
-
 			{
-
 				temp = get_cost_2d(i, j, dir[dir_index], net_id, &distance);
-
 				max_path.total_cost += max(static_cast<double>(0), temp);
-
 				max_path.distance += distance;
-
 				(*two_pin_L_path).path.push_back(&coor_array[i][j]);
 
 				if (temp > max_path.max_cost)
-
+				{
 					max_path.max_cost = temp;
-
+				}
 				if (dir[dir_index] == FRONT)
-
+				{
 					++j;
-
+				}
 				else if (dir[dir_index] == BACK)
-
+				{
 					--j;
+				}
 			}
 
 			j = y2;
@@ -1034,37 +953,29 @@ void L_pattern_route(int x1, int y1, int x2, int y2, Two_pin_element_2d *two_pin
 	Monotonic_element max_cong_path1, max_cong_path2;
 
 	if (x1 > x2)
-
 	{
-
 		swap(x1, x2);
-
 		swap(y1, y2);
 	}
 
 	if (x1 < x2 && y1 < y2) // two points are left_back and right_front
-
 	{
-
 		// FRONT and RIGHT L pattern from (x1 y1)
-
 		max_cong_path1 = L_pattern_max_cong(x1, y1, x2, y2, FRONT, RIGHT, &path1, net_id);
 
 		// RIGTH and FRONT L pattern from (x1,y1)
-
 		max_cong_path2 = L_pattern_max_cong(x1, y1, x2, y2, RIGHT, FRONT, &path2, net_id);
 
 		if ((&max_cong_path1) == (compare_cost(&max_cong_path1, &max_cong_path2)))
-
+		{
 			(*two_pin_L_path) = path1;
-
+		}
 		else
-
+		{
 			(*two_pin_L_path) = path2;
+		}
 	}
-
 	else if (x1 < x2 && y1 > y2) // two points are left_front and right_back
-
 	{
 
 		// BACK and RIGHT L pattern from (x1,y1)
@@ -1076,32 +987,25 @@ void L_pattern_route(int x1, int y1, int x2, int y2, Two_pin_element_2d *two_pin
 		max_cong_path2 = L_pattern_max_cong(x1, y1, x2, y2, RIGHT, BACK, &path2, net_id);
 
 		if ((&max_cong_path1) == (compare_cost(&max_cong_path1, &max_cong_path2)))
-
-			(*two_pin_L_path) = path1;
-
-		else
-
-			(*two_pin_L_path) = path2;
-	}
-
-	else // vertical or horizontal line
-
-	{
-
-		if (y1 > y2)
-
 		{
-
+			(*two_pin_L_path) = path1;
+		}
+		else
+		{
+			(*two_pin_L_path) = path2;
+		}
+	}
+	else // vertical or horizontal line
+	{
+		if (y1 > y2)
+		{
 			swap(y1, y2);
 		}
-
 		max_cong_path1 = L_pattern_max_cong(x1, y1, x2, y2, FRONT, RIGHT, two_pin_L_path, net_id);
 	}
 
 	(*two_pin_L_path).pin1 = *((*two_pin_L_path).path[0]);
-
 	(*two_pin_L_path).pin2 = *((*two_pin_L_path).path.back());
-
 	(*two_pin_L_path).net_id = net_id;
 }
 
@@ -1284,8 +1188,6 @@ void compare_two_direction_congestion(int i, int j, int dir1, int pre_i, int dir
 
 	cong_monotonic[i][j].total_cost = choose_element->total_cost;
 
-	cong_monotonic[i][j].net_cost = choose_element->net_cost;
-
 	cong_monotonic[i][j].distance = choose_element->distance;
 
 	cong_monotonic[i][j].via_num = choose_element->via_num;
@@ -1325,8 +1227,6 @@ void monotonic_routing_algorithm(int x1, int y1, int x2, int y2, int dir, int ne
 	cong_monotonic[x1][y1].total_cost = 0;
 
 	cong_monotonic[x1][y1].distance = 0;
-
-	cong_monotonic[x1][y1].net_cost = 0;
 
 	cong_monotonic[x1][y1].via_num = 0;
 
@@ -1586,45 +1486,30 @@ bool monotonic_pattern_route(int x1, int y1,
 }
 
 // Add the path of two pin element on to congestion map
-
 // The congestion map record not only which net pass which edge,
-
 // but also the number of a net pass through
-
 void update_congestion_map_insert_two_pin_net(Two_pin_element_2d *element)
-
 {
-
 	int dir;
-
 	NetDirtyBit[element->net_id] = true;
-
 	for (int i = element->path.size() - 2; i >= 0; --i)
-
 	{
-
 		// get an edge from congestion map - c_map_2d
-
 		dir = get_direction_2d(element->path[i], element->path[i + 1]);
-
 		pair<RoutedNetTable::iterator, bool> insert_result =
-
 			congestionMap2d->edge(element->path[i]->x, element->path[i]->y, dir).used_net.insert(pair<int, int>(element->net_id, 1));
 
 		if (!insert_result.second)
-
-			++((insert_result.first)->second);	// insert the routing edge
-
-		else
-
 		{
-
+			// 同一條net的2pin net用到同個edge不用有額外的capacity
+			++((insert_result.first)->second);	// insert the routing edge
+		}
+		else
+		{
+			// 成功插入增加demand
 			++(congestionMap2d->edge(element->path[i]->x, element->path[i]->y, dir).cur_cap);
-
 			if (used_cost_flag != FASTROUTE_COST)
-
 			{
-
 				pre_evaluate_congestion_cost_fp(element->path[i]->x, element->path[i]->y, dir);
 			}
 		}
@@ -1802,6 +1687,8 @@ void gen_FR_congestion_map()
 
 				two_pin->net_id = i;
 
+				//它的結構是vector<Two_pin_list_2d *> bbox_2pin_list; 
+				//又typedef vector<Two_pin_element_2d *> Two_pin_list_2d;
 				bbox_2pin_list[i]->push_back(two_pin);
 			}
 		}
@@ -1811,11 +1698,11 @@ void gen_FR_congestion_map()
 	printMemoryUsage();
 	std::cout << "+++++++++++++++++++" << endl;
 
-#ifdef MESSAGE
 
-	printf("L-shaped pattern routing start...\n");
 
-#endif
+	// L-shaped pattern routing start...
+
+
 	std::cout << "L-shaped pattern routing" << std::endl;
 	printMemoryUsage();
 	std::cout << "-------------------" << endl;
@@ -1830,6 +1717,7 @@ void gen_FR_congestion_map()
 		sort_net.push_back(&rr_map->get_netList()[i]);
 	}
 
+	//bbox愈大愈前面，一樣大的時候，pin愈小愈前面
 	sort(sort_net.begin(), sort_net.end(), [](const Net* a, const Net* b){
 			if (a->get_bboxSize() > b->get_bboxSize()) {
 				return true;
@@ -1844,11 +1732,16 @@ void gen_FR_congestion_map()
 	// Now begins the initial routing by pattern routing
 	// Edge shifting will also be applyed to the routing.
 	bool do_edge_shifting = false;
-	
+	double cccc = 0;
+	std::cout << "L-shaped pattern routing middle" << std::endl;
+	printMemoryUsage();
+	std::cout << "mmmmmmmmmmmmmmmmmmmm" << endl;
 	// sort_net 的datatype vector<const Net *> sort_net;
+	//每條net拿來做L-shape pattern route
 	for (auto it = sort_net.begin(); it != sort_net.end(); ++it)
 	{
 		int netId = (*it)->id;
+		// flutetree[i].number 是該net有的node數
 		flute_order = (int *)malloc(sizeof(int) * flutetree[netId].number);
 
 		if (do_edge_shifting){
@@ -1859,15 +1752,14 @@ void gen_FR_congestion_map()
 
 		setup_flute_order(flute_order);
 
+		//這行是要把net對應的tree資訊傳給global的指標來給後續使用
 		net_flutetree[netId] = flutetree[netId];
 
 		/*remove demand*/
 
 		bbox_route(bbox_2pin_list[netId], -0.7);
 		for (int k = 0; k < flutetree[netId].number; ++k)
-
 		{
-
 			int j = flute_order[k];
 
 			int x1 = (int)flutetree[netId].branch[j].x;
@@ -1879,53 +1771,45 @@ void gen_FR_congestion_map()
 			int y2 = (int)flutetree[netId].branch[flutetree[netId].branch[j].n].y;
 
 			if (!(x1 == x2 && y1 == y2))
-
 			{
-
 				/*choose the L-shpae with lower congestion to assing new demand 1*/
 
 				L_path = new Two_pin_element_2d();
-
 				L_pattern_route(x1, y1, x2, y2, L_path, netId);
 
 				/*insert 2pin_path into this net*/
 
+				//它的結構是vector<Two_pin_list_2d *> net_2pin_list; 
+				//又typedef vector<Two_pin_element_2d *> Two_pin_list_2d;
+				cccc += sizeof(L_path);
 				net_2pin_list[netId]->push_back(L_path);
-
 				update_congestion_map_insert_two_pin_net(L_path);
-
-#ifdef DEBUG_LROUTE
-
-				print_path(*L_path);
-
-#endif
 			}
 		}
-
-#ifdef FREE
-
+		cout << "net: " << netId << " path size: " << cccc << endl;
 		free(flute_order);
-
-#endif
 	}
     pattern_end = std::chrono::high_resolution_clock::now();
+	
 	std::cout << "L-shaped pattern routing end" << std::endl;
 	printMemoryUsage();
 	std::cout << "+++++++++++++++++++" << endl;
 
-#ifdef MESSAGE
-
 	printf("generate L-shape congestion map in stage1 successfully\n");
 
-#endif
-
 #ifdef DEBUG1
-
 	print_cap("cur");
-
 #endif
 
+	std::cout << "cal_max_overflow();" << std::endl;
+	printMemoryUsage();
+	std::cout << "-------------------" << endl;
 	cal_max_overflow();
+	std::cout << "cal_max_overflow() end;" << std::endl;
+	printMemoryUsage();
+	std::cout << "+++++++++++++++++++" << endl;
+
+
 
 	delete bboxRouteStateMap;
 }
@@ -1935,67 +1819,46 @@ void gen_FR_congestion_map()
 // Return the smaller cost of L-shape path or the only one cost of flap path
 
 double compute_L_pattern_cost(int x1, int y1, int x2, int y2, int net_id)
-
 {
-
 	Two_pin_element_2d path1, path2;
-
 	Monotonic_element max_cong_path1, max_cong_path2;
 
 	if (x1 > x2)
-
 	{
-
 		swap(x1, x2);
-
 		swap(y1, y2);
 	}
 
 	if (x1 < x2 && y1 < y2)
-
 	{
-
 		max_cong_path1 = L_pattern_max_cong(x1, y1, x2, y2, FRONT, RIGHT, &path1, net_id);
-
 		max_cong_path2 = L_pattern_max_cong(x1, y1, x2, y2, RIGHT, FRONT, &path2, net_id);
 
-		if ((&max_cong_path1) == (compare_cost(&max_cong_path1, &max_cong_path2)))
-
+		if ((&max_cong_path1) == (compare_cost(&max_cong_path1, &max_cong_path2))){
 			return max_cong_path1.total_cost;
-
-		else
-
+		}
+		else{
 			return max_cong_path2.total_cost;
+		}
 	}
-
 	else if (x1 < x2 && y1 > y2)
-
 	{
-
 		max_cong_path1 = L_pattern_max_cong(x1, y1, x2, y2, BACK, RIGHT, &path1, net_id);
-
 		max_cong_path2 = L_pattern_max_cong(x1, y1, x2, y2, RIGHT, BACK, &path2, net_id);
-
-		if ((&max_cong_path1) == (compare_cost(&max_cong_path1, &max_cong_path2)))
-
+		
+		if ((&max_cong_path1) == (compare_cost(&max_cong_path1, &max_cong_path2))){
 			return max_cong_path1.total_cost;
-
-		else
-
+		}
+		else{ 
 			return max_cong_path2.total_cost;
+		}
 	}
-
 	else // vertical or horizontal line
-
 	{
-
 		if (y1 > y2)
-
 		{
-
 			swap(y1, y2);
 		}
-
 		max_cong_path1 = L_pattern_max_cong(x1, y1, x2, y2, FRONT, RIGHT, &path1, net_id);
 
 		return max_cong_path1.total_cost;
@@ -2003,297 +1866,191 @@ double compute_L_pattern_cost(int x1, int y1, int x2, int y2, int net_id)
 }
 
 void find_saferange(Vertex_flute_ptr a, Vertex_flute_ptr b, int *low, int *high, int dir)
-
 {
-
 	Vertex_flute_ptr cur, find;
 
 	// Horizontal edge doing vertical shifting
-
-	if (dir == HOR)
-
+	if(dir == HOR)
 	{
-
 		cur = a;
-
-		while (cur->type != PIN)
-
+		while(cur->type != PIN)
 		{
-
 			find = *(cur->neighbor.begin());
 
-			for (vector<Vertex_flute_ptr>::iterator nei = cur->neighbor.begin() + 1;
-
-				 nei != cur->neighbor.end();
-
-				 ++nei)
-
+			// vector<Vertex_flute_ptr>::iterator
+			for(auto nei = cur->neighbor.begin() + 1; nei != cur->neighbor.end(); ++nei)
 			{
-
-				if ((*nei)->y > find->y)
-
-				{
-
+				if((*nei)->y > find->y){
 					find = *nei;
 				}
 			}
-
 			cur = find;
-
-			if ((cur->y == a->y) || (cur->x != a->x))
-
+			if((cur->y == a->y) || (cur->x != a->x)){
 				break;
+			}
 		}
 
 		*high = min(*high, cur->y);
-
 		cur = b;
-
-		while (cur->type != PIN)
-
-		{
-
+		while(cur->type != PIN){
 			find = *(cur->neighbor.begin());
 
-			for (vector<Vertex_flute_ptr>::iterator nei = cur->neighbor.begin() + 1; nei != cur->neighbor.end(); ++nei)
-
-				if ((*nei)->y > find->y)
-
+			//vector<Vertex_flute_ptr>::iterator
+			for(auto nei = cur->neighbor.begin() + 1; nei != cur->neighbor.end(); ++nei){
+				if ((*nei)->y > find->y){
 					find = *nei;
-
+				}
+			}
 			cur = find;
-
-			if ((cur->y == b->y) || (cur->x != b->x))
-
+			if((cur->y == b->y) || (cur->x != b->x)){
 				break;
+			}
 		}
 
 		*high = min(*high, cur->y);
-
 		cur = a;
-
-		while (cur->type != PIN)
-
+		while(cur->type != PIN)
 		{
-
 			find = *(cur->neighbor.begin());
 
-			for (vector<Vertex_flute_ptr>::iterator nei = cur->neighbor.begin() + 1; nei != cur->neighbor.end(); ++nei)
-
-				if ((*nei)->y < find->y)
-
+			//vector<Vertex_flute_ptr>::iterator
+			for(auto nei = cur->neighbor.begin() + 1; nei != cur->neighbor.end(); ++nei){
+				if ((*nei)->y < find->y){
 					find = *nei;
-
+				}
+			}
 			cur = find;
-
-			if (cur->y == a->y || cur->x != a->x)
-
+			if(cur->y == a->y || cur->x != a->x){
 				break;
+			}
 		}
 
 		*low = max(*low, cur->y);
-
 		cur = b;
-
-		while (cur->type != PIN)
-
-		{
-
+		while(cur->type != PIN){
 			find = *(cur->neighbor.begin());
 
-			for (vector<Vertex_flute_ptr>::iterator nei = cur->neighbor.begin() + 1; nei != cur->neighbor.end(); ++nei)
-
-				if ((*nei)->y < find->y)
-
+			//vector<Vertex_flute_ptr>::iterator
+			for(auto nei = cur->neighbor.begin() + 1; nei != cur->neighbor.end(); ++nei){
+				if ((*nei)->y < find->y){
 					find = *nei;
-
+				}
+			}
 			cur = find;
-
-			if ((cur->y == b->y) || (cur->x != b->x))
-
+			if ((cur->y == b->y) || (cur->x != b->x)){
 				break;
+			}
 		}
-
 		*low = max(*low, cur->y);
 	}
-
-	else
-
-	{
-
+	else{
 		cur = a;
-
-		while (cur->type != PIN)
-
-		{
-
+		while(cur->type != PIN){
 			find = *(cur->neighbor.begin());
 
-			for (vector<Vertex_flute_ptr>::iterator nei = cur->neighbor.begin() + 1; nei != cur->neighbor.end(); ++nei)
-
-				if ((*nei)->x > find->x)
-
+			//vector<Vertex_flute_ptr>::iterator
+			for(auto nei = cur->neighbor.begin() + 1; nei != cur->neighbor.end(); ++nei){
+				if ((*nei)->x > find->x){
 					find = *nei;
-
+				}	
+			}
 			cur = find;
-
-			if (cur->x == a->x || cur->y != a->y) // no neighboring vertex in the right of a
-
+			if (cur->x == a->x || cur->y != a->y){ // no neighboring vertex in the right of a
 				break;
+			}
 		}
 
 		*high = min(*high, cur->x);
-
 		cur = b;
-
-		while (cur->type != PIN)
-
-		{
-
+		while(cur->type != PIN){
 			find = *(cur->neighbor.begin());
 
-			for (vector<Vertex_flute_ptr>::iterator nei = cur->neighbor.begin() + 1; nei != cur->neighbor.end(); ++nei)
-
-				if ((*nei)->x > find->x)
-
+			//vector<Vertex_flute_ptr>::iterator
+			for(auto nei = cur->neighbor.begin() + 1; nei != cur->neighbor.end(); ++nei){
+				if ((*nei)->x > find->x){
 					find = *nei;
-
+				}
+			}
 			cur = find;
-
-			if (cur->x == b->x || cur->y != b->y) // no neighboring vertex in the right of b
-
+			if (cur->x == b->x || cur->y != b->y){ // no neighboring vertex in the right of b
 				break;
+			}
 		}
 
 		*high = min(*high, cur->x);
-
 		cur = a;
-
-		while (cur->type != PIN)
-
-		{
-
+		while(cur->type != PIN){
 			find = *(cur->neighbor.begin());
 
-			for (vector<Vertex_flute_ptr>::iterator nei = cur->neighbor.begin() + 1; nei != cur->neighbor.end(); ++nei)
-
-				if ((*nei)->x < find->x)
-
+			//vector<Vertex_flute_ptr>::iterator
+			for (auto nei = cur->neighbor.begin() + 1; nei != cur->neighbor.end(); ++nei){
+				if ((*nei)->x < find->x){
 					find = *nei;
-
+				}
+			}
 			cur = find;
-
-			if (cur->x == a->x || cur->y != a->y) // no neighboring vertex in the left of a
-
+			if (cur->x == a->x || cur->y != a->y){ // no neighboring vertex in the left of a
 				break;
+			}
 		}
 
 		*low = max(*low, cur->x);
-
 		cur = b;
-
-		while (cur->type != PIN)
-
-		{
-
+		while(cur->type != PIN){
 			find = *(cur->neighbor.begin());
 
-			for (vector<Vertex_flute_ptr>::iterator nei = cur->neighbor.begin() + 1; nei != cur->neighbor.end(); ++nei)
-
-				if ((*nei)->x < find->x)
-
+			//vector<Vertex_flute_ptr>::iterator
+			for(auto nei = cur->neighbor.begin() + 1; nei != cur->neighbor.end(); ++nei){
+				if ((*nei)->x < find->x){
 					find = *nei;
-
+				}
+			}
 			cur = find;
-
-			if (cur->x == b->x || cur->y != b->y) // no neighboring vertex in the left of b
-
+			if(cur->x == b->x || cur->y != b->y){ // no neighboring vertex in the left of b
 				break;
+			}
 		}
-
 		*low = max(*low, cur->x);
 	}
 }
 
-void merge_vertex(Vertex_flute_ptr keep, Vertex_flute_ptr deleted)
+void merge_vertex(Vertex_flute_ptr keep, Vertex_flute_ptr deleted){
 
-{
-
-	for (vector<Vertex_flute_ptr>::iterator nei = deleted->neighbor.begin(); nei != deleted->neighbor.end(); ++nei)
-
+	//vector<Vertex_flute_ptr>::iterator
+	for(auto nei = deleted->neighbor.begin(); nei != deleted->neighbor.end(); ++nei)
 	{
-
-		if ((*nei) != keep) // nei is not keep itself
-
-		{
-
+		if ((*nei) != keep){ // nei is not keep itself
 			keep->neighbor.push_back(*nei); // add deleted's neighbor to keep
-
-			for (int find = 0;; ++find)
-
-			{
-
-				//#ifdef DEBUG_EDGESHIFT
-
-				if (find == (int)(*nei)->neighbor.size())
-
-				{
-
+			for (int find = 0;; ++find){
+				if (find == (int)(*nei)->neighbor.size()){
 					printf("wrong in merge_vertex\n");
-
 					exit(0);
 				}
-
-				//#endif
-
-				if ((*nei)->neighbor[find]->x == deleted->x && (*nei)->neighbor[find]->y == deleted->y) // neighbor[find] equals to deleted
-
-				{
-
+				if ((*nei)->neighbor[find]->x == deleted->x && (*nei)->neighbor[find]->y == deleted->y){ // neighbor[find] equals to deleted
 					(*nei)->neighbor[find] = keep; // replace its neighbor as keep
-
 					break;
 				}
 			}
 		}
 	}
-
 	deleted->type = DELETED;
 }
 
-bool move_edge(Vertex_flute_ptr a, Vertex_flute_ptr b, int best_pos, int dir)
-
-{
-
+bool move_edge(Vertex_flute_ptr a, Vertex_flute_ptr b, int best_pos, int dir){
 	vector<Vertex_flute_ptr> st_pt;
-
 	Vertex_flute_ptr cur, find;
-
 	Vertex_flute_ptr overlap_a, overlap_b;
-
 	int ind1, ind2;
-
 	overlap_a = overlap_b = NULL;
 
-	if (dir == HOR)
-
-	{
-
-		if (best_pos > a->y) // move up
-
-		{
-
+	if(dir == HOR){
+		if (best_pos > a->y){ // move up
 			// find all steiner points between a and best_pos
-
 			cur = a;
 
-			while (cur->y < best_pos)
-
-			{
-
+			while(cur->y < best_pos){
 				find = *(cur->neighbor.begin());
-
-				for (vector<Vertex_flute_ptr>::iterator nei = cur->neighbor.begin() + 1; nei != cur->neighbor.end(); ++nei)
+				for(vector<Vertex_flute_ptr>::iterator nei = cur->neighbor.begin() + 1; nei != cur->neighbor.end(); ++nei)
 
 					if ((*nei)->y > find->y)
 
@@ -3273,9 +3030,17 @@ double construct_2d_tree(RoutingRegion *rr)
 
 	if (routing_parameter->get_monotonic_en())
 	{
+		std::cout << "//////////////////////" << std::endl;
+		std::cout << "is enable..." << std::endl;
+		std::cout << "//////////////////////" << std::endl;
 		allocate_monotonic(); // Allocate the memory for storing the data while searching monotonic path
 							  // 1. A 2D array that stores max congestion
 							  // 2. A 2D array that stores parent (x,y) during finding monotonic path
+	}
+	else{
+		std::cout << "//////////////////////" << std::endl;
+		std::cout << "is not enable..." << std::endl;
+		std::cout << "//////////////////////" << std::endl;
 	}
 
 	gen_FR_congestion_map(); // Generate congestion map by flute, then route all nets by L-shap pattern routing with
@@ -3380,63 +3145,12 @@ double construct_2d_tree(RoutingRegion *rr)
     main_end = std::chrono::high_resolution_clock::now();
 	// std::cout << "Max turns = " << maxTurns << "\n";
     
-
-
-
-#ifdef FREE
 	free_memory_con2d();
-#endif
 #ifdef MESSAGE
 	cout << "================================================================" << endl;
 	cout << "===                   Enter Post Processing                  ===" << endl;
 	cout << "================================================================" << endl;
 #endif
-/*
-	unordered_map<int, bool> through_of_edge_nets_and_through_zero;
-	// ofstream fout("grid.txt");
-	int fuck_edge_cnt = 0;
-	for (int i=0; i<two_pin_list.size(); ++i) {
-		for(int j=two_pin_list[i]->path.size()-2; j >= 0; --j)
-		{
-			int dir = get_direction_2d(two_pin_list[i]->path[j], two_pin_list[i]->path[j+1]);
-			DirectionType dirType = static_cast<DirectionType>(Jr2JmDirArray[dir]);
-			int x = two_pin_list[i]->path[j]->x;
-			int y = two_pin_list[i]->path[j]->y;
-			// if (two_pin_list[i]->net_id == 892) {
-			// 	// std::cout << "(" << x << ", " << y << "), dir: " << dir << " dem: " << congestionMap2d->edge(x, y, dirType).cur_cap << ", cap: " << congestionMap2d->edge(x, y, dirType).max_cap << '\n'; 
-			// 	fout << x << " " << y << "\n"; 
-			// }
-			if (congestionMap2d->edge(x, y, dirType).isOverflow()) {
-				if (sign(congestionMap2d->edge(x, y, dirType).max_cap) == 0) {
-					// std::cout << "Fucking edge: " << x << ' ' << y << ' ' << dir << ' ' << congestionMap2d->edge(x, y, dirType).cur_cap << ' ' << congestionMap2d->edge(x, y, dirType).max_cap << '\n';
-					fuck_edge_cnt++;
-					through_of_edge_nets_and_through_zero[two_pin_list[i]->net_id] = true;
-					for (int k=0; k<rr_map->get_layerNumber(); ++k) {
-						if (dir == LEFT)
-							assert(rr_map->capacity(k, x, y, x-1, y) == 0);
-						if (dir == RIGHT)
-							assert(rr_map->capacity(k, x, y, x+1, y) == 0);
-						if (dir == FRONT)
-							assert(rr_map->capacity(k, x, y, x, y+1) == 0);
-						if (dir == BACK)
-							assert(rr_map->capacity(k, x, y, x, y-1) == 0);
-					}
-					// break;
-				} else {
-					if (!through_of_edge_nets_and_through_zero[two_pin_list[i]->net_id])
-						through_of_edge_nets_and_through_zero[two_pin_list[i]->net_id] = false;
-				}
-			}
-		}
-		
-	}
-	// fout.close();
-	std::cout << "Fuck edge cnt = " << fuck_edge_cnt << '\n';
-	std::cout << "#OF nets:" << through_of_edge_nets_and_through_zero.size() << '\n';
-	// for (auto &[net_id, through_zero] : through_of_edge_nets_and_through_zero) {
-	// 	std::cout << "net id: " << net_id << ' ' << "through_zero: " << through_zero << '\n';
-	// }
-*/
 	return 0;
 }
 

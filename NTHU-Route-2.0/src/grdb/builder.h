@@ -75,11 +75,9 @@ class Builder {
     /// information of a net, i.e., net serial number, minimun net
     /// width.
     ///@param[in] netName The net name
-    ///@param[in] netSerial The serial number of the net
     ///@param[in] pinNumber Total pin number of the net
     ///@param[in] minWidth Minimun net width of the net
     virtual void beginAddANet (const char* netName,
-                               unsigned int netSerial,
                                unsigned int pinNumber,
                                unsigned int minWidth) = 0;
 	

@@ -125,8 +125,6 @@ public:
 
     double total_cost; // record the acculmated congestion of the monotonic path
 
-    int net_cost;
-
     int distance;
 
     int via_num;
@@ -230,9 +228,9 @@ public:
     LRoutedNetTable used_net;
 };
 
-typedef Edge_2d *Edge_2d_ptr;
+typedef Edge_2d* Edge_2d_ptr;
 
-typedef Edge_3d *Edge_3d_ptr;
+typedef Edge_3d* Edge_3d_ptr;
 
 typedef vector<Two_pin_element_2d *> Two_pin_list_2d;
 
@@ -240,17 +238,14 @@ typedef Vertex_flute *Vertex_flute_ptr;
 
 class Vertex_3d
 {
-
 public:
     Edge_3d_ptr edge_list[6]; // FRONT,BACK,LEFT,RIGHT,UP,DOWN
 
     int dem_pred = 0;
 
-    double cap = 0.0;
+    int cap = 0.0;
 
-    double max_cap = 0.0;
-
-    double discountRatio = 0.0;
+    int max_cap = 0.0;
 };
 
 struct CacheEdge

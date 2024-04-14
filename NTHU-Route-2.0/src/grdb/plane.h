@@ -85,6 +85,7 @@ VertexPlane<T>::VertexPlane(int xSize, int ySize, T initialValue)
  ySize_(ySize),
  initialValue_(initialValue)
 {
+    // std::cout << "VertexPlane<T>::VertexPlane(int xSize, int ySize, T initialValue)" << std::endl;
     resize(xSize_, ySize_);
 }
 
@@ -96,6 +97,7 @@ VertexPlane<T>::VertexPlane(const VertexPlane& original)
  ySize_(original.ySize_),
  initialValue_(original.initialValue_)
 {
+    // std::cout << "VertexPlane<T>::VertexPlane(const VertexPlane& original)" << std::endl;
     copyPlane(original);
 }
 
@@ -108,6 +110,7 @@ VertexPlane<T>::~VertexPlane(){
 template<class T>
 void VertexPlane<T>::operator=(const VertexPlane& original)
 {
+    // std::cout << "void VertexPlane<T>::operator=(const VertexPlane& original)" << std::endl;
     initialValue_ = original.initialValue_;
     copyPlane(original);
 }
@@ -148,6 +151,7 @@ T& VertexPlane<T>::vertex(int x, int y)
 template<class T>
 void VertexPlane<T>::resize(int xSize, int ySize)
 {
+    // std::cout << "void VertexPlane<T>::resize(int xSize, int ySize)" << std::endl;
     assert( xSize >= 0 );
     assert( ySize >= 0 );
 
@@ -166,6 +170,7 @@ void VertexPlane<T>::resize(int xSize, int ySize)
 template<class T>
 void VertexPlane<T>::copyPlane(const VertexPlane& original)
 {
+    // std::cout << "void VertexPlane<T>::copyPlane(const VertexPlane& original)" << std::endl;
     releasePlane();
 
 	xSize_ = original.xSize_;
@@ -288,6 +293,7 @@ class EdgePlane {
         void        assignPoolResource ();
 };
 
+
 template<class T>
 EdgePlane<T>::EdgePlane(int xSize, int ySize, T initialValue)
 :edgePlane_(NULL),
@@ -296,6 +302,7 @@ EdgePlane<T>::EdgePlane(int xSize, int ySize, T initialValue)
  ySize_(ySize),
  initialValue_(initialValue)
 {
+    // std::cout << "EdgePlane<T>::EdgePlane(int xSize, int ySize, T initialValue)" << std::endl;
     resize(xSize_, ySize_);
 }
 
@@ -307,6 +314,7 @@ EdgePlane<T>::EdgePlane(const EdgePlane& original)
  ySize_(original.ySize_),
  initialValue_(original.initialValue_)
 {
+    // std::cout << "EdgePlane<T>::EdgePlane(const EdgePlane& original)" << std::endl;
     copyPlane(original);
 }
 
@@ -318,6 +326,7 @@ EdgePlane<T>::~EdgePlane(){
 template<class T>
 void EdgePlane<T>::operator=(const EdgePlane& original)
 {
+    // std::cout << "void EdgePlane<T>::operator=(const EdgePlane& original)" << std::endl;
     initialValue_ = original.initialValue_;
     copyPlane(original);
 }
@@ -384,8 +393,7 @@ T& EdgePlane<T>::edge(int x, int y, int JrDir)
 template<class T>
 void EdgePlane<T>::resize(int xSize, int ySize)
 {
-    assert( xSize >= 0 );
-    assert( ySize >= 0 );
+    // std::cout << "void EdgePlane<T>::resize(int xSize, int ySize)" << std::endl;
     releasePlane ();
     //Do not move the following 3 lines before releaseColorMap()
 
@@ -401,6 +409,9 @@ void EdgePlane<T>::resize(int xSize, int ySize)
 template<class T>
 void EdgePlane<T>::copyPlane(const EdgePlane& original)
 {
+    // std::cout << "******************************" << std::endl;
+    // std::cout << "copy Plane" << std::endl;
+    // std::cout << "******************************" << std::endl;
     releasePlane();
 
 	xSize_ = original.xSize_;
@@ -426,7 +437,7 @@ void EdgePlane<T>::assignPoolResource()
 }
 
 template<class T>
-void EdgePlane<T>::releasePlane ()
+void EdgePlane<T>::releasePlane()
 {
     if(edgePool_ != NULL) {
         delete edgePool_;
@@ -462,6 +473,223 @@ EdgePlane<T>::Vertex::Vertex(T& value)
         edge[i] = value;
     }
 }
+///////////////////////////////////////////////////////////////////////////////
+template<class T>
+class EdgePlane_single {
+    public:
+        EdgePlane_single(int xSize,
+                    int ySize,
+                    T initialValue);
+
+        ~EdgePlane_single();
+
+
+        ///@brief Change the size of plane. Every vertex will reset to initial value.
+        void        resize(int xSize, int ySize);
+
+        ///@brief Get the map size in x-axis
+        int         getXSize () const;
+
+        ///@brief Get the map size in y-axis
+        int         getYSize () const;
+
+        ///@brief Get the initial value, and it can be changed.
+        T&          initialValue();
+
+        ///@brief Get the initial value, and it is read-only.
+        const T&    initialValue() const;
+
+        ///@brief Get the specified edge
+        T&          edge(int x, int y, Jm::DirectionType);
+
+
+        ///@brief Get the specified edge. 
+        ///The direction id is using JR Direction 
+        /// (North, South, West, East) which is different from JR Driection
+        /// (North, South, East, West)
+        T&          edge(int x, int y, int dir);
+
+    public:
+    ///The routing bins used to connect the routing edges.
+        class Vertex {
+            public:
+                    Vertex(T& initialValue);
+                    T edge[2];
+        };
+
+	public:
+        ///The real data structure of plane
+        Vertex**   edgePlane_;
+        std::vector<Vertex>* edgePool_;
+
+        ///Plane size
+        int         xSize_;
+        int         ySize_;
+
+        ///The initial value
+        T           initialValue_;
+
+        static const int  transferTable[2][2];
+        static const int  Jr2JmTransferTable[4];
+
+    private:
+
+        ///Release the memory used by plane
+        void        releasePlane();
+
+        ///Because the Vertex only contain the North, East edges, if the user
+        ///want to access the South, West edges, we will need to transfer
+        ///the coordinate and direction to the available value.
+        void        transferLocation(int* x, int* y,
+                                    int index) const;
+
+        ///This function will assign xxxPool_'s memeory resource to xxxPlane_ pointers
+        void        assignPoolResource ();
+};
+
+template<class T>
+EdgePlane_single<T>::EdgePlane_single(int xSize, int ySize, T initialValue)
+:edgePlane_(NULL),
+ edgePool_(NULL),
+ xSize_(xSize),
+ ySize_(ySize),
+ initialValue_(initialValue)
+{
+    resize(xSize_, ySize_);
+}
+
+
+template<class T>
+EdgePlane_single<T>::~EdgePlane_single(){
+    releasePlane ();
+}
+
+template<class T>
+const int EdgePlane_single<T>::transferTable[2][2] = 
+{{0, -1}, {-1, 0}};
+
+template<class T>
+const int EdgePlane_single<T>::Jr2JmTransferTable[4] = 
+{0, 1, 3, 2};
+
+template<class T>
+inline
+int EdgePlane_single<T>::getXSize () const
+{
+    return xSize_;
+}
+
+template<class T>
+inline
+int EdgePlane_single<T>::getYSize () const
+{
+    return ySize_;
+}
+
+template<class T>
+inline
+T& EdgePlane_single<T>::initialValue ()
+{
+    return initialValue_;
+}
+
+template<class T>
+inline
+const T& EdgePlane_single<T>::initialValue () const
+{
+    return initialValue_;
+}
+
+template<class T>
+inline
+T& EdgePlane_single<T>::edge(int x, int y, Jm::DirectionType dir)
+{
+    //If the direction is South, West, Down edges, we will need to change it
+    //to available direction (North, East, Up) and coordinate
+    if( (static_cast<int>(dir) & 0x01) != 0) {
+        transferLocation(&x, &y, (static_cast<int>(dir) >> 1));
+    }
+
+	return edgePlane_[x][y].edge[ (static_cast<int>(dir) >> 1) ];
+}
+
+template<class T>
+inline
+T& EdgePlane_single<T>::edge(int x, int y, int JrDir)
+{
+    assert( JrDir >= 0 && JrDir < 4); 
+
+    Jm::DirectionType dir = static_cast<Jm::DirectionType>( Jr2JmTransferTable[JrDir] );
+    return edge(x, y, dir);
+}
+
+template<class T>
+void EdgePlane_single<T>::resize(int xSize, int ySize)
+{
+    releasePlane ();
+    //Do not move the following 3 lines before releaseColorMap()
+
+	xSize_ = xSize;
+	ySize_ = ySize;
+
+    if( (xSize_ != 0) && (ySize_ != 0)) {
+        edgePool_ = new std::vector<Vertex>( (xSize_ * ySize_), Vertex(initialValue_));
+        assignPoolResource();
+    }
+}
+
+
+template<class T>
+void EdgePlane_single<T>::assignPoolResource()
+{
+    assert(edgePool_ != NULL);
+    assert(edgePlane_ == NULL);
+
+    edgePlane_ = new Vertex*[xSize_];
+
+    int index = 0;
+    for(int x = 0; x < xSize_; ++x) {
+        edgePlane_[x] = &((*edgePool_)[index]);
+        index += ySize_;
+    }
+}
+
+template<class T>
+void EdgePlane_single<T>::releasePlane ()
+{
+    if(edgePool_ != NULL) {
+        delete edgePool_;
+        edgePool_ = NULL;
+    }
+	if(edgePlane_ != NULL) {
+        delete[]   edgePlane_;
+        edgePlane_ = NULL;
+	}
+
+	xSize_ = 0;
+	ySize_ = 0;
+}
+
+template<class T>
+inline
+void EdgePlane_single<T>::transferLocation(int* x, int* y, int index) const
+{
+    *x += transferTable[index][0];
+    *y += transferTable[index][1];
+
+}
+
+template<class T>
+EdgePlane_single<T>::Vertex::Vertex(T& value)
+{
+    for(int i = 0; i < 2; ++i) {
+        edge[i] = value;
+    }
+}
+////////////////////////////////////////////////////////////////////////////
+
+
+
 
 template<class VertexT, class EdgeT>
 class Plane {
@@ -471,11 +699,11 @@ class Plane {
                       VertexT vertexInitialValue,
                       EdgeT edgeInitialValue);
 
-                Plane(const Plane&);
+                // Plane(const Plane&);
 
                 ~Plane();
 
-                void operator=(const Plane&);
+                // void operator=(const Plane&);
 
     ///@brief Change the size of plane. Every vertex will reset to initial value.
     void        resize(int xSize, int ySize);
@@ -524,29 +752,31 @@ class Plane {
 };
 
 template<class VertexT, class EdgeT>
-Plane<VertexT, EdgeT>::Plane(int xSize, int ySize,
-                             VertexT vertexInitialValue,
-                             EdgeT edgeInitialValue)
+Plane<VertexT, EdgeT>::Plane(int xSize, int ySize, VertexT vertexInitialValue, EdgeT edgeInitialValue)
 :vertexPlane_(xSize, ySize, vertexInitialValue),
  edgePlane_(xSize, ySize, edgeInitialValue)
-{}
+{
+    // std::cout << "Plane<VertexT, EdgeT>::Plane(int xSize, int ySize, VertexT vertexInitialValue, EdgeT edgeInitialValue)" << std::endl;
+}
 
-template<class VertexT, class EdgeT>
-Plane<VertexT, EdgeT>::Plane(const Plane& original)
-:vertexPlane_(original.vertexPlane_),
- edgePlane_(original.edgePlane_)
-{}
+// template<class VertexT, class EdgeT>
+// Plane<VertexT, EdgeT>::Plane(const Plane& original)
+// :vertexPlane_(original.vertexPlane_),
+//  edgePlane_(original.edgePlane_)
+// {
+//     std::cout << "Plane<VertexT, EdgeT>::Plane(const Plane& original)" << std::endl;
+// }
 
 template<class VertexT, class EdgeT>
 Plane<VertexT, EdgeT>::~Plane()
 {}
 
-template<class VertexT, class EdgeT>
-void Plane<VertexT, EdgeT>::operator=(const Plane& original)
-{
-    edgePlane_ = original.edgePlane_;
-    vertexPlane_ = original.vertexPlane_;
-}
+// template<class VertexT, class EdgeT>
+// void Plane<VertexT, EdgeT>::operator=(const Plane& original)
+// {
+//     edgePlane_ = original.edgePlane_;
+//     vertexPlane_ = original.vertexPlane_;
+// }
 
 
 template<class VertexT, class EdgeT>

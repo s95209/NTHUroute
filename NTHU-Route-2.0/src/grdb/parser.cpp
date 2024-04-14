@@ -56,7 +56,7 @@ void Parser24::setNetList()
     unsigned int i = 0;
     for (auto &[netName, net] : this->nets) {
         numPins = net.numPins;
-        builder_->beginAddANet(netName.c_str(), i, numPins, 0);
+        builder_->beginAddANet(netName.c_str(), numPins, 0);
         for (auto &Pin : net.accessPoints) {
             for (auto &AP : Pin) {
                 z = AP[0];
@@ -128,8 +128,9 @@ void Parser24::setEdgeCapacity()
     int nLayers = this->GcellCapacity.size();
     int xSize = this->GcellCapacity[0].size();
     int ySize = this->GcellCapacity[0][0].size();
-
+    std::cout << "^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^" <<std::endl;
     builder_->setGrid(xSize, ySize, nLayers);
+    std::cout << "^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^" <<std::endl;
     for (int i = 0; i < nLayers; ++i)
     {
         builder_->setLayerMinimumWidth(i, 0);
@@ -142,7 +143,7 @@ void Parser24::setEdgeCapacity()
     {
         builder_->setViaSpacing(i, 1);
     }
-
+    
     bool isVertical = false; //TODO don't hardcode it
     int resource, prev;
     for (int layer = 0; layer < nLayers; ++layer) {
@@ -166,6 +167,7 @@ void Parser24::setEdgeCapacity()
             }
         }
     }
+   
     for (int l = 0; l < nLayers; ++l) {
         if (l % 2 == 0) {
             for (int i=0; i<xSize; ++i) {
@@ -185,6 +187,7 @@ void Parser24::setEdgeCapacity()
 
 void Parser24::parseCapFile()
 {
+    std::cout << "parse" << endl;
     std::ifstream resourceFile(this->cap_file);
 
     std::string line;
@@ -278,8 +281,10 @@ void Parser24::parse(Builder *builder)
     builder_ = builder;
 
     this->parseCapFile();
-    this->setEdgeCapacity();
 
+    std::cout << "///////////////////////////////" << std::endl;
+    this->setEdgeCapacity();
+    std::cout << "///////////////////////////////" << std::endl;
     this->parseNetFile();
     this->setNetList();
 }  
