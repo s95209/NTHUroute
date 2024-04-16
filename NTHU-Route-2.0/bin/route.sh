@@ -49,7 +49,7 @@ fi
 
 
 echo -e "\nInfo: Running the Makefile ..."
-make -C ${NTHU_ROUTE_PATH}/src clean
+# make -C ${NTHU_ROUTE_PATH}/src clean
 make -C ${NTHU_ROUTE_PATH}/src -j
 
 if [ $choice -eq 0 ]; then
