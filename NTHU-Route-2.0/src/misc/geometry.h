@@ -119,9 +119,9 @@ namespace Jm
         bool isNeighbor(const Coordinate &co) const;
 
     protected:
-        int x_;
-        int y_;
-        int z_;
+        uint16_t x_;
+        uint16_t y_;
+        uint16_t z_;
     };
 
     typedef std::pair<Coordinate, Coordinate> CoordinatePair;

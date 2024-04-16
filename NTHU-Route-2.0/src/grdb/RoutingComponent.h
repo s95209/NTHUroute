@@ -48,8 +48,19 @@ class Net{
 };
 
 class RoutingSpace {
-        class RoutingEdge;
-        class Tile;
+    private:
+        class RoutingEdge {
+            public:
+                RoutingEdge (int capacity = 0): capacity(capacity) {}
+                int capacity;
+        };
+
+        class Tile {
+            public:
+                Tile(int x = 0, int y = 0, int z = 0): coordinate(x, y, z) {}
+                const Pin& getAnchor();
+                Pin coordinate;         //Coordinate of the tile
+        };
 
     public:
         int tileWidth;
@@ -80,21 +91,6 @@ class RoutingSpace {
 
     ///@brief Get the specified edge
     RoutingEdge&        edge(int x, int y, int z, Jm::DirectionType);
-
-
-    private:
-        struct RoutingEdge {
-            RoutingEdge (int capacity = 0): capacity(capacity) {}
-            int capacity;
-        };
-
-        struct Tile {
-            Tile(int x = 0, int y = 0, int z = 0): coordinate(x, y, z) {}
-            
-            const Pin& getAnchor();
-
-            Pin coordinate;         //Coordinate of the tile
-        };
 
 	private:
         std::vector< Plane<Tile, RoutingEdge> >* routingSpace_;
