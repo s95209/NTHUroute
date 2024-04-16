@@ -41,9 +41,9 @@ class Net{
 	private:
         std::string name;
         uint16_t minPinX;
-        int maxPinX;
-        int minPinY;
-        int maxPinY;
+        uint16_t maxPinX;
+        uint16_t minPinY;
+        uint16_t maxPinY;
         PinptrList pin_list;
 };
 

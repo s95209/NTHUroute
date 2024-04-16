@@ -151,9 +151,9 @@ class Vertex_flute
 {
 public:
     int x, y;
-    int type; // PIN, SETINER, DELETED
+    int16_t type; // PIN, SETINER, DELETED
     int index;
-    int visit;
+    int16_t visit;
     vector<Vertex_flute *> neighbor;
 
 public:

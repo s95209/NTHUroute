@@ -245,8 +245,8 @@ namespace Jm
     class Coordinate_2d
     {
     public:
-        int x;
-        int y;
+        uint16_t x;
+        uint16_t y;
     public:
         Coordinate_2d(int x = 0, int y = 0)
             : x(x), y(y) {}
@@ -286,9 +286,9 @@ namespace Jm
     class Coordinate_3d
     {
     public:
-        int x;
-        int y;
-        int z;
+        uint16_t x;
+        uint16_t y;
+        uint16_t z;
 
     public:
         Coordinate_3d(int x = 0, int y = 0, int z = 0)

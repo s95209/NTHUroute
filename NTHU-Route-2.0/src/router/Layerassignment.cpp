@@ -637,8 +637,8 @@ void update_path_for_klat(Coordinate_2d *start, int start_pin_layer) {
             // pin_num++;
 #ifdef PIN_LEF
             if (is_metal5) {
-                z_min = min(temp->z, path_map[temp->x][temp->y].min_pin_layer); // modified
-                z_max = max(temp->z, path_map[temp->x][temp->y].max_pin_layer); // modified
+                z_min = min(int(temp->z), path_map[temp->x][temp->y].min_pin_layer); // modified
+                z_max = max(int(temp->z), path_map[temp->x][temp->y].max_pin_layer); // modified
             }
             else {
                 if (temp->z > path_map[temp->x][temp->y].pin_layer) {
