@@ -52,8 +52,8 @@ class VertexPlane {
     std::vector<T>* vertexPool_;
 
     ///Plane size
-    int         xSize_;
-    int         ySize_;
+    uint16_t        xSize_;
+    uint16_t        ySize_;
 
     ///The initial value
     T           initialValue_;
@@ -254,14 +254,14 @@ class EdgePlane {
         std::vector<Vertex>* edgePool_;
 
         ///Plane size
-        int         xSize_;
-        int         ySize_;
+        uint16_t        xSize_;
+        uint16_t        ySize_;
 
         ///The initial value
         T           initialValue_;
 
-        static const int  transferTable[2][2];
-        static const int  Jr2JmTransferTable[4];
+        static const int16_t  transferTable[2][2];
+        static const int16_t  Jr2JmTransferTable[4];
 
     private:
         ///Copy the edgePlane
@@ -316,11 +316,11 @@ void EdgePlane<T>::operator=(const EdgePlane& original)
 }
 
 template<class T>
-const int EdgePlane<T>::transferTable[2][2] = 
+const int16_t EdgePlane<T>::transferTable[2][2] = 
 {{0, -1}, {-1, 0}};
 
 template<class T>
-const int EdgePlane<T>::Jr2JmTransferTable[4] = 
+const int16_t EdgePlane<T>::Jr2JmTransferTable[4] = 
 {0, 1, 3, 2};
 
 template<class T>

@@ -169,12 +169,13 @@ class Edge_2d
 public:
     Edge_2d();
 public:
-    double cur_cap;
+    float cur_cap;
+
     //2024/04/10 ying revise
     //double max_cap;
-    int max_cap;
+    float max_cap;
 
-    int history;
+    float history;
 
     RoutedNetTable used_net;
 
@@ -222,9 +223,9 @@ class Edge_3d
 public:
     Edge_3d();
 public:
-    int max_cap;
-    int cur_cap;
-    int cur_dem = 0;
+    float max_cap;
+    float cur_cap;
+    float cur_dem = 0;
     LRoutedNetTable used_net;
 };
 
@@ -241,11 +242,11 @@ class Vertex_3d
 public:
     Edge_3d_ptr edge_list[6]; // FRONT,BACK,LEFT,RIGHT,UP,DOWN
 
-    int dem_pred = 0;
+    float dem_pred = 0;
 
-    int cap = 0.0;
+    float cap = 0.0;
 
-    int max_cap = 0.0;
+    float max_cap = 0.0;
 };
 
 struct CacheEdge

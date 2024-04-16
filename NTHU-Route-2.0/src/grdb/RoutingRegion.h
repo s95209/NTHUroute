@@ -86,11 +86,9 @@ class RoutingRegion : public Builder {
     NetList* deletedNetList_ = new std::vector<Net>();
 
     //the second id is the net position in NetList
-    typedef std::unordered_map<int, int> NetIdLookupTable;
 
-    typedef std::set< std::tuple<int, int, int> > PinTable;
+    typedef std::set< std::tuple<uint16_t, uint16_t, uint16_t> > PinTable;
     PinTable*   pinTable_;
-    std::map<std::pair<int, int>, int> justCheck;
 };
 
 //Inline Functions

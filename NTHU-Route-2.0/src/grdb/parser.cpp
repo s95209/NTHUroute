@@ -134,8 +134,8 @@ void Parser24::setEdgeCapacity()
     {
         builder_->setViaSpacing(i, 1);
     }
-    
-    bool isVertical = false; //TODO don't hardcode it
+
+
     int resource, prev;
     for (int layer = 0; layer < nLayers; ++layer) {
         if (layerDirections[layer]) {
@@ -195,6 +195,7 @@ void Parser24::parseCapFile()
     // Get unit costs
     std::getline(resourceFile, line);
     std::istringstream unitCosts(line);
+
     double unit_length_wire_cost, unit_via_cost;
     unitCosts >> unit_length_wire_cost >> unit_via_cost;
 
@@ -223,7 +224,7 @@ void Parser24::parseCapFile()
 
     // Get capacity map
     // std::vector<std::vector<std::vector<double>>> GcellCapacity(nLayers, std::vector<std::vector<double>>(xSize, std::vector<double>(ySize)));
-    this->GcellCapacity.assign(nLayers, std::vector<std::vector<double>>(xSize, std::vector<double>(ySize)));
+    this->GcellCapacity.assign(nLayers, std::vector<std::vector<float>>(xSize, std::vector<float>(ySize)));
     
     std::vector<double> layerMinLengths;
 
@@ -262,7 +263,6 @@ void Parser24::parse(Builder *builder)
     builder_ = builder;
 
     this->parseCapFile();
-
 
     this->setEdgeCapacity();
 

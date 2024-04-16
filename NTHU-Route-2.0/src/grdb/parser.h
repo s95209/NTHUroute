@@ -148,7 +148,7 @@ class Parser24 : public GRParser
   std::string cap_file;
   std::string net_file;
 
-  std::vector<std::vector<std::vector<double>>> GcellCapacity;
+  std::vector<std::vector<std::vector<float>>> GcellCapacity;
   std::unordered_map<std::string, NetISPD24> nets;
 
   public:

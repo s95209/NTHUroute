@@ -40,7 +40,7 @@ class Net{
 
 	private:
         std::string name;
-        int minPinX;
+        uint16_t minPinX;
         int maxPinX;
         int minPinY;
         int maxPinY;
@@ -51,8 +51,8 @@ class RoutingSpace {
     private:
         class RoutingEdge {
             public:
-                RoutingEdge (int capacity = 0): capacity(capacity) {}
-                int capacity;
+                RoutingEdge (float capacity = 0): capacity(capacity) {}
+                float capacity;
         };
 
         class Tile {
