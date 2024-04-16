@@ -293,13 +293,11 @@ void setup_flute_order(int *order)
 
 void init_2d_map()
 {	
-	std::cout << "new EdgePlane<Edge_2d>" << std::endl;
+	std::cout  << "[DEBUG     ]" << "new EdgePlane<Edge_2d>" << std::endl;
 	printMemoryUsage();
-	std::cout << "-------------------" << endl;
 	congestionMap2d = new EdgePlane<Edge_2d>(rr_map->get_gridx(), rr_map->get_gridy(), Edge_2d());
-	std::cout << "new EdgePlane<Edge_2d> end" << std::endl;
+	std::cout  << "[DEBUG     ]" << "new EdgePlane<Edge_2d> end" << std::endl;
 	printMemoryUsage();
-	std::cout << "+++++++++++++++++++" << endl;
 	for (int x = rr_map->get_gridx() - 2; x >= 0; --x)
 	{
 		for (int y = rr_map->get_gridy() - 1; y >= 0; --y)
@@ -361,22 +359,20 @@ void init_3d_map()
 	Edge_3d_ptr newedge;
 
 	/*allocate space for cur_map_3d*/
-	std::cout << "cur_map_3d = (Vertex_3d ***)malloc(rr_map->get_gridx() * sizeof(Vertex_3d **));" << endl;
+	std::cout  << "[DEBUG     ]" << "cur_map_3d = (Vertex_3d ***)malloc(rr_map->get_gridx() * sizeof(Vertex_3d **));" << endl;
 	printMemoryUsage();
 	std::cout << "-------------------" << endl;
 	cur_map_3d = (Vertex_3d ***)malloc(rr_map->get_gridx() * sizeof(Vertex_3d **));
-	std::cout << "sizeof Vertex_3d ***: " << sizeof(cur_map_3d) << endl;
-	std::cout << "sizeof Vertex_3d **: " << sizeof(cur_map_3d[0]) << endl;
-	std::cout << "sizeof Vertex_3d *: " << sizeof(cur_map_3d[0][0]) << endl;
-	std::cout << "cur_map_3d = (Vertex_3d ***)malloc(rr_map->get_gridx() * sizeof(Vertex_3d **)); end" << endl;
+
+	std::cout  << "[DEBUG     ]" <<"cur_map_3d = (Vertex_3d ***)malloc(rr_map->get_gridx() * sizeof(Vertex_3d **)); end" << endl;
 	printMemoryUsage();
 	std::cout << "-------------------" << endl;
 
-	std::cout << "tmp_data = (Vertex_3d **)malloc(rr_map->get_gridx() * rr_map->get_gridy() * sizeof(Vertex_3d *));" << endl;
+	std::cout  << "[DEBUG     ]" << "tmp_data = (Vertex_3d **)malloc(rr_map->get_gridx() * rr_map->get_gridy() * sizeof(Vertex_3d *));" << endl;
 	printMemoryUsage();
 	std::cout << "-------------------" << endl;
 	tmp_data = (Vertex_3d **)malloc(rr_map->get_gridx() * rr_map->get_gridy() * sizeof(Vertex_3d *));
-	std::cout << "tmp_data = (Vertex_3d **)malloc(rr_map->get_gridx() * rr_map->get_gridy() * sizeof(Vertex_3d *)); end" << endl;
+	std::cout  << "[DEBUG     ]" << "tmp_data = (Vertex_3d **)malloc(rr_map->get_gridx() * rr_map->get_gridy() * sizeof(Vertex_3d *)); end" << endl;
 	printMemoryUsage();
 	std::cout << "-------------------" << endl;
 
@@ -384,18 +380,13 @@ void init_3d_map()
 
 		cur_map_3d[i] = tmp_data;
 
-	std::cout << "tmp_data2 = (Vertex_3d *)malloc(rr_map->get_gridx() * rr_map->get_gridy() * rr_map->get_layerNumber() * sizeof(Vertex_3d));" << endl;
+	std::cout  << "[DEBUG     ]" << "tmp_data2 = (Vertex_3d *)malloc(rr_map->get_gridx() * rr_map->get_gridy() * rr_map->get_layerNumber() * sizeof(Vertex_3d));" << endl;
 	printMemoryUsage();
 	std::cout << "-------------------" << endl;
 	tmp_data2 = (Vertex_3d *)malloc(rr_map->get_gridx() * rr_map->get_gridy() * rr_map->get_layerNumber() * sizeof(Vertex_3d));
-	std::cout << "tmp_data2 = (Vertex_3d *)malloc(rr_map->get_gridx() * rr_map->get_gridy() * rr_map->get_layerNumber() * sizeof(Vertex_3d)); end" << endl;
+	std::cout  << "[DEBUG     ]" << "tmp_data2 = (Vertex_3d *)malloc(rr_map->get_gridx() * rr_map->get_gridy() * rr_map->get_layerNumber() * sizeof(Vertex_3d)); end" << endl;
 	printMemoryUsage();
 	std::cout << "-------------------" << endl;
-
-	std::cout << "+++++++++++++++++++" << endl;
-	newedge = Create_Edge_3d();
-	std::cout << "sizeof Edge_3d: " << sizeof(*newedge) << endl;
-	std::cout << "+++++++++++++++++++" << endl;
 
 	for (i = 0; i < rr_map->get_gridx(); ++i)
 
@@ -416,7 +407,6 @@ void init_3d_map()
 				cur_map_3d[i][j][k].edge_list[RIGHT] = newedge;
 				cur_map_3d[i + 1][j][k].edge_list[LEFT] = newedge;
 			}
-	std::cout << "11111111111111111111111" << endl;
 	for (i = 0; i < rr_map->get_gridx(); ++i)
 		for (j = 0; j < rr_map->get_gridy() - 1; ++j)
 			for (k = 0; k < rr_map->get_layerNumber(); ++k)
@@ -425,7 +415,6 @@ void init_3d_map()
 				cur_map_3d[i][j][k].edge_list[FRONT] = newedge;
 				cur_map_3d[i][j + 1][k].edge_list[BACK] = newedge;
 			}
-	std::cout << "22222222222222222222222" << endl;
 	for (i = 0; i < rr_map->get_gridx(); ++i)
 		for (j = 0; j < rr_map->get_gridy(); ++j)
 			for (k = 0; k < rr_map->get_layerNumber() - 1; ++k)
@@ -434,19 +423,19 @@ void init_3d_map()
 				cur_map_3d[i][j][k].edge_list[UP] = newedge;
 				cur_map_3d[i][j][k + 1].edge_list[DOWN] = newedge;
 			}
-	std::cout << "3333333333333333333333333" << endl;
+
 	for (j = 0; j < rr_map->get_gridy(); ++j)
 		for (k = 0; k < rr_map->get_layerNumber(); ++k)
 			cur_map_3d[0][j][k].edge_list[LEFT] = cur_map_3d[rr_map->get_gridx() - 1][j][k].edge_list[RIGHT] = NULL;
-	std::cout << "4444444444444444444444444" << endl;
+
 	for (i = 0; i < rr_map->get_gridx(); ++i)
 		for (k = 0; k < rr_map->get_layerNumber(); ++k)
 			cur_map_3d[i][0][k].edge_list[BACK] = cur_map_3d[i][rr_map->get_gridy() - 1][k].edge_list[FRONT] = NULL;
-	std::cout << "55555555555555555555555555555" << endl;
+
 	for (i = 0; i < rr_map->get_gridx(); ++i)
 		for (j = 0; j < rr_map->get_gridy(); ++j)
 			cur_map_3d[i][j][0].edge_list[DOWN] = cur_map_3d[i][j][rr_map->get_layerNumber() - 1].edge_list[UP] = NULL;
-	std::cout << "666666666666666666666666666666666" << endl;
+
 }
 
 void init_2pin_list()
@@ -1781,12 +1770,11 @@ void gen_FR_congestion_map()
 
 				//它的結構是vector<Two_pin_list_2d *> net_2pin_list; 
 				//又typedef vector<Two_pin_element_2d *> Two_pin_list_2d;
-				cccc += sizeof(L_path);
+
 				net_2pin_list[netId]->push_back(L_path);
 				update_congestion_map_insert_two_pin_net(L_path);
 			}
 		}
-		cout << "net: " << netId << " path size: " << cccc << endl;
 		free(flute_order);
 	}
     pattern_end = std::chrono::high_resolution_clock::now();
@@ -3031,7 +3019,7 @@ double construct_2d_tree(RoutingRegion *rr)
 	if (routing_parameter->get_monotonic_en())
 	{
 		std::cout << "//////////////////////" << std::endl;
-		std::cout << "is enable..." << std::endl;
+		std::cout << "[DEBUG     ]"  << "is enable..." << std::endl;
 		std::cout << "//////////////////////" << std::endl;
 		allocate_monotonic(); // Allocate the memory for storing the data while searching monotonic path
 							  // 1. A 2D array that stores max congestion
@@ -3039,7 +3027,7 @@ double construct_2d_tree(RoutingRegion *rr)
 	}
 	else{
 		std::cout << "//////////////////////" << std::endl;
-		std::cout << "is not enable..." << std::endl;
+		std::cout << "[DEBUG     ]"  << "is not enable..." << std::endl;
 		std::cout << "//////////////////////" << std::endl;
 	}
 

@@ -12,9 +12,6 @@ HOME_DIR := $(shell echo $$HOME)
 BoostLibDir = $(HOME_DIR)/boost_1_77_0/stage/lib/
 BoostIncDir = $(HOME_DIR)/boost_1_77_0/
 
-# For DOCKER-BUILD
-BoostLibDirDocker = /usr/local/lib
-BoostIncDirDocker = /usr/local/include
 
 ZlibIncDir =
 Zlibrary   = -lz
@@ -39,7 +36,7 @@ GDlibrary = -lgd
 ##  library
 
 
-DebugOptions = -O3 -funroll-loops -march=nocona -finline-functions -DNDEBUG 
+DebugOptions = -O3 -funroll-loops -march=nocona -finline-functions -DNDEBUG -w
 ##  Add -DNDEBUG to remove the debugging assertions (unwise at this stage).
 ##  You might have to remove -g or -O2 if your C++ compiler cannot
 ##  handle both together.
@@ -50,14 +47,15 @@ WarnOptions = -W -Wall -Wextra -Wno-missing-braces
 ##  braces in struct/array initializer lists.
 
 
-IncDirs      = -I. $(ZlibIncDir) $(FlutelibIncDir)
+IncDirs      = -I. $(ZlibIncDir) -I$(BoostIncDir) -Irsyn/
 CxxOptions   = $(WarnOptions) $(DebugOptions)
 
-CXXFLAGS     = -std=c++17 $(CxxOptions) $(IncDirs) -w -fopenmp -I$(BoostIncDir)
+CXXFLAGS     = -std=c++17 $(CxxOptions) $(IncDirs)  -fopenmp 
 COMPILE_CXX  = $(CXX) $(CXXFLAGS)
 LINK_CXX     = $(CXX) $(CXXFLAGS) -L$(BoostLibDir)
-BoostLibraries = -lboost_system -lboost_filesystem -lboost_program_options
 
+
+BoostLibraries = -lboost_system -lboost_filesystem -lboost_program_options
 StandardGarbage = a.out core core.[0-9][0-9]* make.log xxx
 ##  Junk to be removed from each source directory by the 'clean' target.
 
@@ -69,8 +67,6 @@ StandardGarbage = a.out core core.[0-9][0-9]* make.log xxx
 bindir  = ../bin
 libdir  = ../lib
 objdir  = ../obj
-docdir	= ../doc
-docconfig	= doxygen_config
 ##  Executables are put in $(bindir), libraries in $(libdir), and .o
 ##  files in a subdirectory of $(objdir) corresponding to the source
 ##  subdirectory.  $(bindir), $(libdir) and $(objdir) with its
@@ -81,10 +77,7 @@ docconfig	= doxygen_config
 
 
 $(objdir)/%.o:	%.cpp
-	$(COMPILE_CXX) -c $< -Irsyn/ -o $@
-
-%.cpp:   %.l
-	$(FLEX) -o$@ $?
+	$(COMPILE_CXX) -c $< -o $@
 
 
 subdirs       = misc       grdb		   util       flute       route
@@ -92,7 +85,7 @@ subdirs_all   = misc_all   grdb_all    util_all   flute_all   router_all
 subdirs_clean = misc_clean grdb_clean  util_clean flute_clean router_clean 
 
 
-.PHONY:	   dirs tags all clean $(subdirs_all) $(subdirs_clean)
+.PHONY:	   dirs all clean $(subdirs_all) $(subdirs_clean)
 .DEFAULT:  all
 
 
@@ -102,18 +95,8 @@ clean:	$(subdirs_clean)
 	rm -f $(StandardGarbage)
 
 dirs:
-	mkdir -p $(objdir) $(libdir) $(bindir) $(docdir)
+	mkdir -p $(objdir) $(libdir) $(bindir)
 	for dir in $(subdirs);  do  mkdir -p $(objdir)/$$dir;  done
-
-doc:
-	rm -rf $(docdir); mkdir -p $(docdir); doxygen $(docconfig)
-
-tags:
-	ctags */*.cpp */*.h
-
-docker: BoostLibDir=$(BoostLibDirDocker)
-docker: BoostIncDir=$(BoostIncDirDocker)
-docker: all
 
 
 ##  Follow Peter Miller's advice in his paper "Recursive Make

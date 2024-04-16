@@ -409,7 +409,6 @@ inline int get_direction_2d(const Jm::Coordinate_2d *a, const Jm::Coordinate_2d 
 }
 
 inline
-
 void printMemoryUsage()
 {
     // for print out memory usage
@@ -419,8 +418,8 @@ void printMemoryUsage()
     std::string memory;
     int i = 0;
     while(getline(mem, memory)){
-        if(i == 17) std::cout << i << ": " << memory << std::endl;
-        if(i == 27) std::cout << i << ": " << memory << std::endl;
+        if(i == 17) std::cout << "[MEMORY    ]"  << i << ": " << memory << std::endl;
+        if(i == 27) std::cout << "[MEMORY    ]"  << i << ": " << memory << std::endl;
         ++i;
     }
 }

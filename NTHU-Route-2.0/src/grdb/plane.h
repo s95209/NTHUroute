@@ -13,14 +13,6 @@
 #include <vector>
 #include <utility>
 
-// // print memory usage function
-// #include <sys/resource.h>
-// inline
-// void printMemoryUsage() {
-//     struct rusage r_usage;
-//     getrusage(RUSAGE_SELF, &r_usage);
-//     std::cout << "Memory usage: " << r_usage.ru_maxrss << " KB" << std::endl;
-// }
 
 ///@brief The data structure for presenting the routing bins in global routing area.
 ///@details User can specify the data structure of routing bins by their own, and
@@ -85,7 +77,6 @@ VertexPlane<T>::VertexPlane(int xSize, int ySize, T initialValue)
  ySize_(ySize),
  initialValue_(initialValue)
 {
-    // std::cout << "VertexPlane<T>::VertexPlane(int xSize, int ySize, T initialValue)" << std::endl;
     resize(xSize_, ySize_);
 }
 
@@ -97,7 +88,6 @@ VertexPlane<T>::VertexPlane(const VertexPlane& original)
  ySize_(original.ySize_),
  initialValue_(original.initialValue_)
 {
-    // std::cout << "VertexPlane<T>::VertexPlane(const VertexPlane& original)" << std::endl;
     copyPlane(original);
 }
 
@@ -110,7 +100,6 @@ VertexPlane<T>::~VertexPlane(){
 template<class T>
 void VertexPlane<T>::operator=(const VertexPlane& original)
 {
-    // std::cout << "void VertexPlane<T>::operator=(const VertexPlane& original)" << std::endl;
     initialValue_ = original.initialValue_;
     copyPlane(original);
 }
@@ -151,7 +140,6 @@ T& VertexPlane<T>::vertex(int x, int y)
 template<class T>
 void VertexPlane<T>::resize(int xSize, int ySize)
 {
-    // std::cout << "void VertexPlane<T>::resize(int xSize, int ySize)" << std::endl;
     assert( xSize >= 0 );
     assert( ySize >= 0 );
 
@@ -170,7 +158,6 @@ void VertexPlane<T>::resize(int xSize, int ySize)
 template<class T>
 void VertexPlane<T>::copyPlane(const VertexPlane& original)
 {
-    // std::cout << "void VertexPlane<T>::copyPlane(const VertexPlane& original)" << std::endl;
     releasePlane();
 
 	xSize_ = original.xSize_;
@@ -302,7 +289,6 @@ EdgePlane<T>::EdgePlane(int xSize, int ySize, T initialValue)
  ySize_(ySize),
  initialValue_(initialValue)
 {
-    // std::cout << "EdgePlane<T>::EdgePlane(int xSize, int ySize, T initialValue)" << std::endl;
     resize(xSize_, ySize_);
 }
 
@@ -314,7 +300,6 @@ EdgePlane<T>::EdgePlane(const EdgePlane& original)
  ySize_(original.ySize_),
  initialValue_(original.initialValue_)
 {
-    // std::cout << "EdgePlane<T>::EdgePlane(const EdgePlane& original)" << std::endl;
     copyPlane(original);
 }
 
@@ -326,7 +311,6 @@ EdgePlane<T>::~EdgePlane(){
 template<class T>
 void EdgePlane<T>::operator=(const EdgePlane& original)
 {
-    // std::cout << "void EdgePlane<T>::operator=(const EdgePlane& original)" << std::endl;
     initialValue_ = original.initialValue_;
     copyPlane(original);
 }
@@ -393,7 +377,6 @@ T& EdgePlane<T>::edge(int x, int y, int JrDir)
 template<class T>
 void EdgePlane<T>::resize(int xSize, int ySize)
 {
-    // std::cout << "void EdgePlane<T>::resize(int xSize, int ySize)" << std::endl;
     releasePlane ();
     //Do not move the following 3 lines before releaseColorMap()
 
@@ -409,9 +392,6 @@ void EdgePlane<T>::resize(int xSize, int ySize)
 template<class T>
 void EdgePlane<T>::copyPlane(const EdgePlane& original)
 {
-    // std::cout << "******************************" << std::endl;
-    // std::cout << "copy Plane" << std::endl;
-    // std::cout << "******************************" << std::endl;
     releasePlane();
 
 	xSize_ = original.xSize_;
@@ -699,11 +679,11 @@ class Plane {
                       VertexT vertexInitialValue,
                       EdgeT edgeInitialValue);
 
-                // Plane(const Plane&);
+                Plane(const Plane&);
 
                 ~Plane();
 
-                // void operator=(const Plane&);
+                void operator=(const Plane&);
 
     ///@brief Change the size of plane. Every vertex will reset to initial value.
     void        resize(int xSize, int ySize);
@@ -756,27 +736,26 @@ Plane<VertexT, EdgeT>::Plane(int xSize, int ySize, VertexT vertexInitialValue, E
 :vertexPlane_(xSize, ySize, vertexInitialValue),
  edgePlane_(xSize, ySize, edgeInitialValue)
 {
-    // std::cout << "Plane<VertexT, EdgeT>::Plane(int xSize, int ySize, VertexT vertexInitialValue, EdgeT edgeInitialValue)" << std::endl;
+
 }
 
-// template<class VertexT, class EdgeT>
-// Plane<VertexT, EdgeT>::Plane(const Plane& original)
-// :vertexPlane_(original.vertexPlane_),
-//  edgePlane_(original.edgePlane_)
-// {
-//     std::cout << "Plane<VertexT, EdgeT>::Plane(const Plane& original)" << std::endl;
-// }
+template<class VertexT, class EdgeT>
+Plane<VertexT, EdgeT>::Plane(const Plane& original)
+:vertexPlane_(original.vertexPlane_),
+ edgePlane_(original.edgePlane_)
+{
+}
 
 template<class VertexT, class EdgeT>
 Plane<VertexT, EdgeT>::~Plane()
 {}
 
-// template<class VertexT, class EdgeT>
-// void Plane<VertexT, EdgeT>::operator=(const Plane& original)
-// {
-//     edgePlane_ = original.edgePlane_;
-//     vertexPlane_ = original.vertexPlane_;
-// }
+template<class VertexT, class EdgeT>
+void Plane<VertexT, EdgeT>::operator=(const Plane& original)
+{
+    edgePlane_ = original.edgePlane_;
+    vertexPlane_ = original.vertexPlane_;
+}
 
 
 template<class VertexT, class EdgeT>

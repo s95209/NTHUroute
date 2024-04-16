@@ -78,7 +78,7 @@ void Parser24::parseNetFile()
     std::string line;
     std::string name;
     int numPins = 0;
-    std::vector<std::vector<std::vector<int>>> accessPoints;
+    std::vector<std::vector<std::array<uint16_t, 3>>> accessPoints;
     while (std::getline(netFile, line)) {
         // 每個net的第一行
         if (line.find("(") == std::string::npos && line.find(")") == std::string::npos && line.length()>1) {
@@ -88,28 +88,21 @@ void Parser24::parseNetFile()
             if (found != std::string::npos) {
                 name.erase(found, 1);
             }
-            // netId = std::stoi(line.substr(3));
             numPins = 0;
-            // std::cout << name << " " << netId << std::endl;
         //每個net的每個pin
         } else if (line.find('[') != std::string::npos) {
-            std::vector<std::vector<int>> access;
+            std::vector<std::array<uint16_t, 3>> access;
             std::string text = line.substr(1, line.size() - 2); // Remove brackets and trailing comma
             std::string charsToRemove = "(),";
             text.erase(std::remove_if(text.begin(), text.end(), [&charsToRemove](char c) {
                 return charsToRemove.find(c) != std::string::npos;
             }), text.end());
-            // std::cout << "current line is: " << text << std::endl;
             std::istringstream ss(text);
             int x, y, z;
         //pin中的 access point
             while (ss >> x >> y >> z) {
-                std::vector<int> point;
-                point.push_back(x);
-                point.push_back(y);
-                point.push_back(z);
+                std::array<uint16_t, 3> point = {x, y ,z};
                 access.push_back(point);
-
             }
             accessPoints.push_back(access);
             numPins++;
@@ -128,9 +121,7 @@ void Parser24::setEdgeCapacity()
     int nLayers = this->GcellCapacity.size();
     int xSize = this->GcellCapacity[0].size();
     int ySize = this->GcellCapacity[0][0].size();
-    std::cout << "^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^" <<std::endl;
     builder_->setGrid(xSize, ySize, nLayers);
-    std::cout << "^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^" <<std::endl;
     for (int i = 0; i < nLayers; ++i)
     {
         builder_->setLayerMinimumWidth(i, 0);
@@ -187,7 +178,7 @@ void Parser24::setEdgeCapacity()
 
 void Parser24::parseCapFile()
 {
-    std::cout << "parse" << endl;
+    std::cout  << "[DEBUG     ]" << "parse" << std::endl;
     std::ifstream resourceFile(this->cap_file);
 
     std::string line;
@@ -201,8 +192,6 @@ void Parser24::parseCapFile()
     int xSize = dimensions[1];
     int ySize = dimensions[2];
 
-    std::cout << "dimensions: " << nLayers << " " << xSize << " " << ySize << std::endl;
-
     // Get unit costs
     std::getline(resourceFile, line);
     std::istringstream unitCosts(line);
@@ -214,7 +203,6 @@ void Parser24::parseCapFile()
     while (unitCosts >> cost) {
         unit_length_short_costs.push_back(cost);
     }
-    std::cout << "Got unit costs: " << unit_length_wire_cost << " " << unit_via_cost << " "  << std::endl;
 
     // Get edge lengths
     std::vector<double> hEdgeLengths;
@@ -224,9 +212,6 @@ void Parser24::parseCapFile()
         hEdgeLengths.push_back(cost);
     }
 
-    // for (int x=0; x<xSize-1; ++x) {
-    //     std::cout << "hedge " << x << " length " << hEdgeLengths[x] << std::endl;
-    // }
 
     std::vector<double> vEdgeLengths;
     std::getline(resourceFile, line);
@@ -234,11 +219,7 @@ void Parser24::parseCapFile()
     while (vEdgeLine >> cost) {
         vEdgeLengths.push_back(cost);
     }
-    // for (int y=0; y<ySize-1; ++y) {
-    //     std::cout << "vedge " << y << " length " << vEdgeLengths[y] << std::endl;
-    // }
 
-    // std::cout << "Got edge lengths: " << std::endl;
 
     // Get capacity map
     // std::vector<std::vector<std::vector<double>>> GcellCapacity(nLayers, std::vector<std::vector<double>>(xSize, std::vector<double>(ySize)));
@@ -282,9 +263,9 @@ void Parser24::parse(Builder *builder)
 
     this->parseCapFile();
 
-    std::cout << "///////////////////////////////" << std::endl;
+
     this->setEdgeCapacity();
-    std::cout << "///////////////////////////////" << std::endl;
+
     this->parseNetFile();
     this->setNetList();
 }  

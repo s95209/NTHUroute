@@ -135,9 +135,9 @@ class NetISPD24 {
     public:
         std::string name;
         int numPins;
-        std::vector<std::vector<std::vector<int>>> accessPoints;
+        std::vector<std::vector<std::array<uint16_t, 3>>> accessPoints;
 
-        NetISPD24(std::string n, int num, std::vector<std::vector<std::vector<int>>>& access) : name(n), numPins(num), accessPoints(access) {};
+        NetISPD24(std::string n, int num, std::vector<std::vector<std::array<uint16_t, 3>>>& access) : name(n), numPins(num), accessPoints(access) {};
         NetISPD24() {};
     };
 

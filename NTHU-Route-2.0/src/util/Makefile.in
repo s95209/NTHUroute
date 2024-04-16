@@ -33,5 +33,7 @@ $(util_library):   $(util_library_objects)
 
 util_clean:
 	rm -f $(util_library) $(util_exec)
-	rm -rf $(objdir)/util;   mkdir -p $(objdir)/util
-	cd util;  rm -f $(StandardGarbage)
+	rm -rf $(objdir)/util
+	mkdir -p $(objdir)/util
+	cd util
+	rm -f $(StandardGarbage)

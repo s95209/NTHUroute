@@ -48,9 +48,10 @@ $(router_library):   $(router_library_objects)
 	ar rv $@ $?
 
 $(bindir)/route:   $(objdir)/router/route.o $(router_dep_libs)
-	$(LINK_CXX) $(objdir)/router/route.o $(router_link_libs) -lboost_system -lboost_filesystem -lboost_program_options -lpthread -fopenmp -o $@
+	$(LINK_CXX) $(objdir)/router/route.o $(router_link_libs) $(BoostLibraries) -lpthread -fopenmp -o $@
 
 router_clean:
 	rm -f $(router_library) $(router_exec)
-	rm -rf $(objdir)/router;   mkdir -p $(objdir)/router
+	rm -rf $(objdir)/router
+	mkdir -p $(objdir)/router
 	cd router;  rm -f $(StandardGarbage)
