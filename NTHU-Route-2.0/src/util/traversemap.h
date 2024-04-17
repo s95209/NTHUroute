@@ -161,6 +161,8 @@ EdgeColorMap<T>::EdgeColorMap(int xSize, int ySize, /*int zSize,*/ T initialColo
 :edgePlane(xSize, ySize, /*zSize,*/ initialColor)
 {}
 
+
+
 template<class T>
 inline
 void EdgeColorMap<T>::resize(int xSize, int ySize)//, int zSize)

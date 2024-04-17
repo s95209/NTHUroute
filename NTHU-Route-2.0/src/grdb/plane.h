@@ -305,6 +305,7 @@ EdgePlane<T>::EdgePlane(const EdgePlane& original)
 
 template<class T>
 EdgePlane<T>::~EdgePlane(){
+    std::cout  << "[DEBUG     ]" << "~EdgePlane()" << std::endl;
     releasePlane ();
 }
 

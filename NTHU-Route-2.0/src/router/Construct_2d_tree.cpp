@@ -1499,7 +1499,7 @@ void update_congestion_map_insert_two_pin_net(Two_pin_element_2d *element)
 			++(congestionMap2d->edge(element->path[i]->x, element->path[i]->y, dir).cur_cap);
 			if (used_cost_flag != FASTROUTE_COST)
 			{
-				pre_evaluate_congestion_cost_fp(element->path[i]->x, element->path[i]->y, dir);
+				pre_evaluate_congestion_cost_fp(element->path[i]->x, element->path[i]->y, dir); //unread
 			}
 		}
 	}
@@ -3054,9 +3054,12 @@ double construct_2d_tree(RoutingRegion *rr)
 	{
 		for (int j = 0; j < (int)net_2pin_list[i]->size(); ++j)
 		{
-			two_pin_list.push_back((*net_2pin_list[i])[j]);
+			// std::cout  << "[DEBUG     ]" << (*(net_2pin_list[i]))[j]->net_id << std::endl;
+			two_pin_list.push_back((*(net_2pin_list[i]))[j]);
 		}
+		(*(net_2pin_list[i])).clear();
 	}
+	net_2pin_list.clear();
 
 	std::cout << "reallocate_two_pin_list" << std::endl;
 	printMemoryUsage();
