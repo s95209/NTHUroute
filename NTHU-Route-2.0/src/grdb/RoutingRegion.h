@@ -81,7 +81,8 @@ class RoutingRegion : public Builder {
     virtual void    endBuild ();
 
 	private:
-    NetList* netList_;
+    
+    NetList* netList_; //typedef std::vector<Net> NetList;
     RoutingSpace* routingSpace_;
     NetList* deletedNetList_ = new std::vector<Net>();
 

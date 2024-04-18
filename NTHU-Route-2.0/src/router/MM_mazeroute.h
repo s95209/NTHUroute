@@ -22,10 +22,7 @@ class Multisource_multisink_mazeroute
 		vector<Vertex_mmm *> neighbor;
 		int visit;
 		
-		Vertex_mmm(int x, int y)
-            :coor(&coor_array[x][y]),
-             visit(-1)
-        {}
+		Vertex_mmm(int x, int y): coor(&coor_array[x][y]), visit(-1){}
 	};
 
 	class MMM_element{
@@ -62,29 +59,21 @@ class Multisource_multisink_mazeroute
         public:
         class comp_mmm_element{
             public:
-                bool operator() (const MMM_element* a,
-                                 const MMM_element* b) const;
+                bool operator() (const MMM_element* a, const MMM_element* b) const;
         };
-
         public:
                 MMMPriortyQueue();
-
                 ~MMMPriortyQueue();
 
         void    push(MMM_element*);
-
         void    insert(MMM_element*);
         
         MMM_element* top();
-
         MMM_element* begin();
 
         void    pop();
-
         void    update(MMM_element*);
-
         bool    empty();
-
         void    clear();
 
         private:

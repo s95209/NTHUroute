@@ -45,7 +45,6 @@ EdgePlane<Edge_2d> *congestionMap2d;
 
 vector<Two_pin_element_2d *> two_pin_list;
 
-int two_pin_list_size;
 
 int flute_mode;
 
@@ -1510,37 +1509,25 @@ void update_congestion_map_insert_two_pin_net(Two_pin_element_2d *element)
 // If the net pass that edge more than once, this function will only decrease the counter.
 
 void update_congestion_map_remove_two_pin_net(Two_pin_element_2d *element)
-
 {
-
 	int dir;
-
 	NetDirtyBit[element->net_id] = true;
 
 	for (int i = element->path.size() - 2; i >= 0; --i)
-
 	{
-
 		dir = get_direction_2d(element->path[i], element->path[i + 1]);
 
 		RoutedNetTable::iterator find_result =
-
 			congestionMap2d->edge(element->path[i]->x, element->path[i]->y, dir).used_net.find(element->net_id);
 
 		--(find_result->second);	// delete the routing net
 
 		if (find_result->second == 0)	// if the routing net number becomes zero -> recalculate the congestion cost
-
 		{
-
 			congestionMap2d->edge(element->path[i]->x, element->path[i]->y, dir).used_net.erase(element->net_id);
-
 			--(congestionMap2d->edge(element->path[i]->x, element->path[i]->y, dir).cur_cap);
-
 			if (used_cost_flag != FASTROUTE_COST)
-
 			{
-
 				pre_evaluate_congestion_cost_fp(element->path[i]->x, element->path[i]->y, dir);
 			}
 		}
@@ -1548,13 +1535,9 @@ void update_congestion_map_remove_two_pin_net(Two_pin_element_2d *element)
 }
 
 void update_congestion_map_remove_multipin_net(Two_pin_list_2d *list)
-
 {
-
 	for (vector<Two_pin_element_2d *>::iterator it = list->begin(); it != list->end(); ++it)
-
 	{
-
 		update_congestion_map_remove_two_pin_net(*it);
 	}
 }
@@ -3069,22 +3052,10 @@ double construct_2d_tree(RoutingRegion *rr)
 	printMemoryUsage();
 	std::cout << "+++++++++++++++++++" << endl;
 
-	std::cout << "new EdgePlane<CacheEdge>" << std::endl;
-	printMemoryUsage();
-	std::cout << "-------------------" << endl;
+
 	cache = new EdgePlane<CacheEdge>(rr_map->get_gridx(), rr_map->get_gridy(), CacheEdge());
-	std::cout << "new EdgePlane<CacheEdge> end" << std::endl;
-	printMemoryUsage();
-	std::cout << "+++++++++++++++++++" << endl;
-
-
-	std::cout << "new Multisource_multisink_mazeroute" << std::endl;
-	printMemoryUsage();
-	std::cout << "-------------------" << endl;
 	mazeroute_in_range = new Multisource_multisink_mazeroute();
-	std::cout << "new Multisource_multisink_mazerout end" << std::endl;
-	printMemoryUsage();
-	std::cout << "+++++++++++++++++++" << endl;
+
 
 
 	// int pre_overflow = -1;

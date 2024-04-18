@@ -11,6 +11,8 @@
 using namespace Jm;
 using namespace std;
 
+int two_pin_list_size = 0;
+
 VertexPlane<Point_fc>* gridcell;//This is some kind of color map, for recording
                                //which 2-pin net passed which gCell
 
@@ -116,14 +118,15 @@ static void put_terminal_color_on_colormap(int net_id)
 	}
 }
 
-//return: one-degree terminal, non-one-degree terminal, one-degree nonterminal, steiner point, two-degree (dir)
+// one-degree terminal: -4, non-one-degree terminal: -3, 
+// one-degree nontermina: -2, steiner point: find_dir, more than two-degree: -1
 static int determine_is_terminal_or_steiner_point(int xx, int yy, int dir, int net_id)
 {
 	int find_dir = 0;
     static int gridxMinusOne = rr_map->get_gridx() - 1;
     static int gridyMinusOne = rr_map->get_gridy() - 1;
 
-    dir = dirTransferTable[dir];
+    dir = dirTransferTable[dir]; // 0:BACK 1:FRONT 2:RIGHT 3:LEFT
 	
     if(terminalMap->color(xx, yy) == net_id) {  
         for (int i = 3; i >= 0; --i) {
@@ -143,7 +146,7 @@ static int determine_is_terminal_or_steiner_point(int xx, int yy, int dir, int n
             }
         }
         return -4;  
-    } else {
+    }else {
         int other_passed_edge = 0;
         for (int i = 3; i >= 0; --i) {
             if (i != dir)  
@@ -163,6 +166,7 @@ static int determine_is_terminal_or_steiner_point(int xx, int yy, int dir, int n
                 }
             }
         }
+
         if(other_passed_edge == 0)
             return -2;      
         else return find_dir;   
@@ -178,6 +182,7 @@ void bfs_for_find_two_pin_list(Coordinate_2d *start_coor, int net_id, bool inser
 	vector<int> branch_n;
 	int head_index,tail_index,dir,ori_dir;
 	int x,y,xx,yy,i;
+
 	queue.push_back(start_coor);
 	parent.push_back(-1);
 	head_index=0;
@@ -194,6 +199,7 @@ void bfs_for_find_two_pin_list(Coordinate_2d *start_coor, int net_id, bool inser
 
 	while (head_index != tail_index)
 	{
+		// 0:FRONT 1:BACK 2:LEFT 3:RIGHT
 		for (i = 0; i <= 3; ++i)
 		{
 			if (i == parent[head_index])
@@ -201,15 +207,17 @@ void bfs_for_find_two_pin_list(Coordinate_2d *start_coor, int net_id, bool inser
 			x = queue[head_index]->x;
 			y = queue[head_index]->y;
 			dir = i;
-			if (x+dir_array[dir][0] >= 0 && 
-                x+dir_array[dir][0] < rr_map->get_gridx() &&
-                y+dir_array[dir][1] >= 0 && 
-                y+dir_array[dir][1] < rr_map->get_gridy() )
+
+			//是否還在範圍內
+			if (/*x*/ x+dir_array[dir][0] >= 0 && x+dir_array[dir][0] < rr_map->get_gridx() &&
+                /*y*/ y+dir_array[dir][1] >= 0 && y+dir_array[dir][1] < rr_map->get_gridy() )
 			{
+				// 這條net是否經過後這個tile
                 if(congestionMap2d->edge(x, y, dir).lookupNet(net_id))
 				{
 					Two_pin_element_2d* two_pin;
-					if (two_pin_list_size >= (int)two_pin_list.size())
+					// two_pin_list_size: 
+					if(two_pin_list_size >= (int)two_pin_list.size())
 					{
 						two_pin = new Two_pin_element_2d();
 					}else{
@@ -220,7 +228,7 @@ void bfs_for_find_two_pin_list(Coordinate_2d *start_coor, int net_id, bool inser
 					two_pin->net_id = net_id;
 					two_pin->path.clear();
 					two_pin->path.push_back(queue[head_index]);
-					while (1)
+					while(1)
 					{
                         traverseMap->color(x, y) = net_id;
 						xx = x+dir_array[dir][0];
@@ -228,23 +236,28 @@ void bfs_for_find_two_pin_list(Coordinate_2d *start_coor, int net_id, bool inser
 						ori_dir = dir;
 						dir = determine_is_terminal_or_steiner_point(xx,yy,dir,net_id);
 						two_pin->path.push_back(&coor_array[xx][yy]);
-						if (dir<0 && dir!=-2)
+
+						// one-degree terminal: -4, non-one-degree terminal: -3, 
+						// one-degree nonterminal: -2, steiner point: find_dir, more than two-degree: -1
+
+						if (dir<0 && dir!=-2) // 如果是 terminal 或 more than two-degree nontermina
 						{
-							if (traverseMap->color(xx, yy) != net_id)
+							if (traverseMap->color(xx, yy) != net_id) // 如果未被這個NET標記
 							{
 								two_pin->pin2.x = xx;
 								two_pin->pin2.y = yy;
-								if (two_pin_list_size >= (int)two_pin_list.size())
+								if (two_pin_list_size >= (int)two_pin_list.size()){
 									two_pin_list.push_back(two_pin);
+								}
 								two_pin_list_size++;
 								
-								if (insert_to_branch)
+								if(insert_to_branch)
 								{
 									branch_xy.push_back(&coor_array[xx][yy]);
 									branch_n.push_back(branch_ind[head_index]);
 								}
 								
-								if (dir!=-4)
+								if (dir!=-4)  // more than two-degree nonterminal: -1 non-one-degree terminal: -3,
 								{
 									queue.push_back(&coor_array[xx][yy]);
 									if (ori_dir==FRONT)
@@ -261,7 +274,7 @@ void bfs_for_find_two_pin_list(Coordinate_2d *start_coor, int net_id, bool inser
 									tail_index++;
 								}
                                 traverseMap->color(xx, yy) = net_id;
-							}else
+							}else //其他branch已經走過了會有cycle所以步行走
 							{
 								update_congestion_map_remove_two_pin_net(two_pin);
                                 NetDirtyBit[two_pin->net_id] = true;
@@ -272,11 +285,12 @@ void bfs_for_find_two_pin_list(Coordinate_2d *start_coor, int net_id, bool inser
 								}
 							}
 							break;
-						}else if (dir==-2)
+						}
+						else if (dir==-2)
 						{
 							update_congestion_map_remove_two_pin_net(two_pin);
                             NetDirtyBit[two_pin->net_id] = true;
-							if (two_pin_list_size>=(int)two_pin_list.size())
+							if (two_pin_list_size >= (int)two_pin_list.size())
 							{
 								two_pin->path.clear();
 								delete(two_pin);
@@ -323,9 +337,12 @@ void reallocate_two_pin_list(bool insert_to_branch)
 
 	two_pin_list_size = 0;
 
+
+	// 把還沒繞的線放到two_pin_list的前面
     int usedTwoPinListSize = 0;
 	for (int twoPinListPos = 0; twoPinListPos < (int)two_pin_list.size(); ++twoPinListPos) {
-        if( NetDirtyBit[ two_pin_list[twoPinListPos]->net_id ] == false ) {
+        if( NetDirtyBit[ two_pin_list[twoPinListPos]->net_id ] == false ) //false 這個net還沒被繞好
+		{
             if(usedTwoPinListSize != twoPinListPos) {
                 swap(two_pin_list[twoPinListPos], two_pin_list[usedTwoPinListSize]);
                 ++usedTwoPinListSize;
@@ -339,9 +356,9 @@ void reallocate_two_pin_list(bool insert_to_branch)
 
 	for (int netId = 0; netId < rr_map->get_netNumber(); ++netId) {
         if( NetDirtyBit[netId] == true ) {
-            put_terminal_color_on_colormap(netId);
-            int xx = rr_map->get_nPin(netId)[0]->get_tileX();
-            int yy = rr_map->get_nPin(netId)[0]->get_tileY();
+            put_terminal_color_on_colormap(netId); // 把net_id填到 "terminalMap" 上對應他pin的tile上
+            int xx = rr_map->get_nPin(netId)[0]->get_tileX();	//(netId)[0] pin的x
+            int yy = rr_map->get_nPin(netId)[0]->get_tileY();	//(netId)[0] pin的y
             Coordinate_2d* start_coor = &coor_array[xx][yy];
 
             bfs_for_find_two_pin_list(start_coor, netId, insert_to_branch);
