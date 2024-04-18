@@ -1388,8 +1388,7 @@ void DP(int x, int y, int z) {
         // B F R L D U
 
         if (x >= 0 && x < max_xx && y >= 0 && y < max_yy && z >= 0 && z < max_zz) {
-            if (cur_map_3d[x][y][z].edge_list[anti_dir[dir]]->used_net.find(net_id)
-                != cur_map_3d[x][y][z].edge_list[anti_dir[dir]]->used_net.end()) {
+            if (cur_map_3d[x][y][z].edge_list[anti_dir[dir]]->used_net.find(net_id) != cur_map_3d[x][y][z].edge_list[anti_dir[dir]]->used_net.end()) {
                 return true;
             }
             else
@@ -2231,105 +2230,163 @@ void DP(int x, int y, int z) {
 
         for (i = 1; i < max_xx; ++i)
             for (j = 0; j < max_yy; ++j) {
-                temp_cap = (congestionMap2d->edge(i, j, DIR_WEST).used_net.size()); // modified
-                for (k = 0; k < max_zz && temp_cap > 0; ++k)
-                    if (cur_map_3d[i][j][k].edge_list[LEFT]->max_cap > 0)
-                        temp_cap -= cur_map_3d[i][j][k].edge_list[LEFT]->max_cap;
-                if (k == max_zz)
-                    max_layer = max_zz - 1;
+                if(congestionMap2d->edge(i, j, DIR_WEST).used_net != nullptr)
+                {
+                    temp_cap = (congestionMap2d->edge(i, j, DIR_WEST).used_net->size()); // modified
+                }
                 else
+                {
+                    temp_cap = 0;
+                }
+
+                for (k = 0; k < max_zz && temp_cap > 0; ++k)
+                {
+                    if (cur_map_3d[i][j][k].edge_list[LEFT]->max_cap > 0)
+                    {
+                        temp_cap -= cur_map_3d[i][j][k].edge_list[LEFT]->max_cap;
+                    }
+                }
+                if (k == max_zz){
+                    max_layer = max_zz - 1;
+                }
+                else
+                {
                     max_layer = k;
-                if (congestionMap2d->edge(i, j, DIR_WEST).isOverflow() == false) {
-                    if (congestionMap2d->edge(i, j, DIR_WEST).used_net.size() > 0) {
-                        for (k = 0; k < max_zz && cur_map_3d[i][j][k].edge_list[LEFT]->max_cap == 0; ++k)
-                            ;
-                        if (k < max_zz) {
-                            if (cur_map_3d[i][j][k].edge_list[LEFT]->max_cap
-                                < (int)(congestionMap2d->edge(i, j, DIR_WEST).used_net.size())) // modified
-                                for (RoutedNetTable::iterator iter =
-                                         congestionMap2d->edge(i, j, DIR_WEST).used_net.begin();
-                                     iter != congestionMap2d->edge(i, j, DIR_WEST).used_net.end(); ++iter) {
+                }
+                if (congestionMap2d->edge(i, j, DIR_WEST).isOverflow() == false) 
+                {
+                    if(congestionMap2d->edge(i, j, DIR_WEST).used_net != nullptr){
+                        if (congestionMap2d->edge(i, j, DIR_WEST).used_net->size() > 0) 
+                        {
+                            for (k = 0; k < max_zz && cur_map_3d[i][j][k].edge_list[LEFT]->max_cap == 0; ++k)
+                                ;
+                            if (k < max_zz) {
+                                if (cur_map_3d[i][j][k].edge_list[LEFT]->max_cap < (int)(congestionMap2d->edge(i, j, DIR_WEST).used_net->size())) // modified
+                                { 
+                                    for (RoutedNetTable::iterator iter = congestionMap2d->edge(i, j, DIR_WEST).used_net->begin(); iter != congestionMap2d->edge(i, j, DIR_WEST).used_net->end(); ++iter) 
+                                    {
+                                        pre_solve[iter->first] = false;
+                                    }
+                                }
+                            }
+                            else{
+                                for (RoutedNetTable::iterator iter = congestionMap2d->edge(i, j, DIR_WEST).used_net->begin(); iter != congestionMap2d->edge(i, j, DIR_WEST).used_net->end(); ++iter) 
+                                {
                                     pre_solve[iter->first] = false;
                                 }
-                        }
-                        else
-                            for (RoutedNetTable::iterator iter = congestionMap2d->edge(i, j, DIR_WEST).used_net.begin();
-                                 iter != congestionMap2d->edge(i, j, DIR_WEST).used_net.end(); ++iter) {
-                                pre_solve[iter->first] = false;
                             }
+                        }
                     }
                 }
                 else {
-                    for (RoutedNetTable::iterator iter = congestionMap2d->edge(i, j, DIR_WEST).used_net.begin();
-                         iter != congestionMap2d->edge(i, j, DIR_WEST).used_net.end(); ++iter) {
-                        pre_solve[iter->first] = false;
+                    if(congestionMap2d->edge(i, j, DIR_WEST).used_net != nullptr){
+                        for (RoutedNetTable::iterator iter = congestionMap2d->edge(i, j, DIR_WEST).used_net->begin(); iter != congestionMap2d->edge(i, j, DIR_WEST).used_net->end(); ++iter) 
+                        {
+                            pre_solve[iter->first] = false;
+                        }
                     }
                 }
-                for (RoutedNetTable::iterator iter = congestionMap2d->edge(i, j, DIR_WEST).used_net.begin();
-                     iter != congestionMap2d->edge(i, j, DIR_WEST).used_net.end(); ++iter) {
-                    if (i - 1 < group_set[iter->first].sx)
-                        group_set[iter->first].sx = i - 1;
-                    if (i > group_set[iter->first].bx)
-                        group_set[iter->first].bx = i;
-                    if (j < group_set[iter->first].sy)
-                        group_set[iter->first].sy = j;
-                    if (j > group_set[iter->first].by)
-                        group_set[iter->first].by = j;
-                    average_order[iter->first].val += max_layer;
-                    ++average_order[iter->first].times;
+                if(congestionMap2d->edge(i, j, DIR_WEST).used_net != nullptr)
+                {
+                    for (RoutedNetTable::iterator iter = congestionMap2d->edge(i, j, DIR_WEST).used_net->begin(); iter != congestionMap2d->edge(i, j, DIR_WEST).used_net->end(); ++iter) {
+                        if (i - 1 < group_set[iter->first].sx)
+                        {
+                            group_set[iter->first].sx = i - 1;
+                        }
+                        if (i > group_set[iter->first].bx)
+                        {
+                            group_set[iter->first].bx = i;
+                        }
+                        if (j < group_set[iter->first].sy)
+                        {
+                            group_set[iter->first].sy = j;
+                        }
+                        if (j > group_set[iter->first].by)
+                        {
+                            group_set[iter->first].by = j;
+                        }
+                        average_order[iter->first].val += max_layer;
+                        ++average_order[iter->first].times;
+                    }
                 }
             }
         cout << "In find_group 4" << endl;
 
         for (i = 0; i < max_xx; ++i)
             for (j = 1; j < max_yy; ++j) {
-                temp_cap = (congestionMap2d->edge(i, j, DIR_SOUTH).used_net.size()); // modified
+                if(congestionMap2d->edge(i, j, DIR_SOUTH).used_net != nullptr)
+                {
+                    temp_cap = (congestionMap2d->edge(i, j, DIR_SOUTH).used_net->size()); // modified
+                }
+                else{
+                    temp_cap = 0;
+                }
                 for (k = 0; k < max_zz && temp_cap > 0; ++k)
+                {
                     if (cur_map_3d[i][j][k].edge_list[BACK]->max_cap > 0)
+                    {
                         temp_cap -= cur_map_3d[i][j][k].edge_list[BACK]->max_cap;
+                    }
+                }
                 if (k == max_zz)
                     max_layer = max_zz - 1;
                 else
                     max_layer = k;
                 if (congestionMap2d->edge(i, j, DIR_SOUTH).isOverflow() == false) {
-                    if (congestionMap2d->edge(i, j, DIR_SOUTH).used_net.size() > 0) {
-                        for (k = 0; k < max_zz && cur_map_3d[i][j][k].edge_list[BACK]->max_cap == 0; ++k)
-                            ;
-                        if (k < max_zz) {
-                            if (cur_map_3d[i][j][k].edge_list[BACK]->max_cap
-                                < (int)(congestionMap2d->edge(i, j, DIR_SOUTH).used_net.size())) // modified
-                                for (RoutedNetTable::iterator iter =
-                                         congestionMap2d->edge(i, j, DIR_SOUTH).used_net.begin();
-                                     iter != congestionMap2d->edge(i, j, DIR_SOUTH).used_net.end(); ++iter) {
+                    if(congestionMap2d->edge(i, j, DIR_SOUTH).used_net != nullptr)
+                    {
+                        if (congestionMap2d->edge(i, j, DIR_SOUTH).used_net->size() > 0) 
+                        {
+                            for (k = 0; k < max_zz && cur_map_3d[i][j][k].edge_list[BACK]->max_cap == 0; ++k);
+
+                            if (k < max_zz) {
+                                if (cur_map_3d[i][j][k].edge_list[BACK]->max_cap < (int)(congestionMap2d->edge(i, j, DIR_SOUTH).used_net->size())) // modified
+                                {                                    
+                                    for (RoutedNetTable::iterator iter = congestionMap2d->edge(i, j, DIR_SOUTH).used_net->begin(); iter != congestionMap2d->edge(i, j, DIR_SOUTH).used_net->end(); ++iter) 
+                                    {
+                                        pre_solve[iter->first] = false;
+                                    }
+                                }
+                            }
+                            else
+                                for (RoutedNetTable::iterator iter = congestionMap2d->edge(i, j, DIR_SOUTH).used_net->begin(); iter != congestionMap2d->edge(i, j, DIR_SOUTH).used_net->end(); ++iter)
+                                {
                                     pre_solve[iter->first] = false;
                                 }
                         }
-                        else
-                            for (RoutedNetTable::iterator iter =
-                                     congestionMap2d->edge(i, j, DIR_SOUTH).used_net.begin();
-                                 iter != congestionMap2d->edge(i, j, DIR_SOUTH).used_net.end(); ++iter) {
-                                pre_solve[iter->first] = false;
-                            }
                     }
                 }
                 else {
-                    for (RoutedNetTable::iterator iter = congestionMap2d->edge(i, j, DIR_SOUTH).used_net.begin();
-                         iter != congestionMap2d->edge(i, j, DIR_SOUTH).used_net.end(); ++iter) {
-                        pre_solve[iter->first] = false;
+                    if(congestionMap2d->edge(i, j, DIR_SOUTH).used_net != nullptr)
+                    {
+                        for (RoutedNetTable::iterator iter = congestionMap2d->edge(i, j, DIR_SOUTH).used_net->begin(); iter != congestionMap2d->edge(i, j, DIR_SOUTH).used_net->end(); ++iter) 
+                        {
+                            pre_solve[iter->first] = false;
+                        }
                     }
                 }
-                for (RoutedNetTable::iterator iter = congestionMap2d->edge(i, j, DIR_SOUTH).used_net.begin();
-                     iter != congestionMap2d->edge(i, j, DIR_SOUTH).used_net.end(); ++iter) {
-                    if (i < group_set[iter->first].sx)
-                        group_set[iter->first].sx = i;
-                    if (i > group_set[iter->first].bx)
-                        group_set[iter->first].bx = i;
-                    if (j - 1 < group_set[iter->first].sy)
-                        group_set[iter->first].sy = j - 1;
-                    if (j > group_set[iter->first].by)
-                        group_set[iter->first].by = j;
-                    average_order[iter->first].val += max_layer;
-                    ++average_order[iter->first].times;
+                if(congestionMap2d->edge(i, j, DIR_SOUTH).used_net != nullptr){
+                    for (RoutedNetTable::iterator iter = congestionMap2d->edge(i, j, DIR_SOUTH).used_net->begin(); iter != congestionMap2d->edge(i, j, DIR_SOUTH).used_net->end(); ++iter)
+                    {
+                        if (i < group_set[iter->first].sx)
+                        {
+                            group_set[iter->first].sx = i;
+                        }
+                        if (i > group_set[iter->first].bx)
+                        {
+                            group_set[iter->first].bx = i;
+                        }
+                        if (j - 1 < group_set[iter->first].sy)
+                        {
+                            group_set[iter->first].sy = j - 1;
+                        }
+                        if (j > group_set[iter->first].by)
+                        {
+                            group_set[iter->first].by = j;
+                        }
+                        average_order[iter->first].val += max_layer;
+                        ++average_order[iter->first].times;
+                    }
                 }
             }
         cout << "In find_group 5" << endl;
@@ -2338,19 +2395,20 @@ void DP(int x, int y, int z) {
                 group_set[i].pi = -1;
         for (i = 1; i < max_xx; ++i)
             for (j = 0; j < max_yy; ++j) {
-                for (k = 0; k < max_zz && cur_map_3d[i][j][k].edge_list[LEFT]->max_cap == 0; ++k)
-                    ;
-                if ((int)(congestionMap2d->edge(i, j, DIR_WEST).used_net.size())
-                    > cur_map_3d[i][j][k].edge_list[LEFT]->max_cap) // modified
+                for (k = 0; k < max_zz && cur_map_3d[i][j][k].edge_list[LEFT]->max_cap == 0; ++k);
+                if(congestionMap2d->edge(i, j, DIR_WEST).used_net != nullptr)
                 {
-                    if (congestionMap2d->edge(i, j, DIR_WEST).used_net.size() > 1) {
-                        RoutedNetTable::iterator iter = congestionMap2d->edge(i, j, DIR_WEST).used_net.begin();
-                        a = backtrace(iter->first);
-                        for (iter++; iter != congestionMap2d->edge(i, j, DIR_WEST).used_net.end(); ++iter) {
-                            b = backtrace(iter->first);
-                            if (a != b) {
-                                group_set[b].pi = a;
-                                group_set[a].num += group_set[b].num;
+                    if ((int)(congestionMap2d->edge(i, j, DIR_WEST).used_net->size()) > cur_map_3d[i][j][k].edge_list[LEFT]->max_cap) // modified
+                    {
+                        if (congestionMap2d->edge(i, j, DIR_WEST).used_net->size() > 1) {
+                            RoutedNetTable::iterator iter = congestionMap2d->edge(i, j, DIR_WEST).used_net->begin();
+                            a = backtrace(iter->first);
+                            for (iter++; iter != congestionMap2d->edge(i, j, DIR_WEST).used_net->end(); ++iter) {
+                                b = backtrace(iter->first);
+                                if (a != b) {
+                                    group_set[b].pi = a;
+                                    group_set[a].num += group_set[b].num;
+                                }
                             }
                         }
                     }
@@ -2360,19 +2418,19 @@ void DP(int x, int y, int z) {
 
         for (i = 0; i < max_xx; ++i)
             for (j = 1; j < max_yy; ++j) {
-                for (k = 0; k < max_zz && cur_map_3d[i][j][k].edge_list[BACK]->max_cap == 0; ++k)
-                    ;
-                if ((int)(congestionMap2d->edge(i, j, DIR_SOUTH).used_net.size())
-                    > cur_map_3d[i][j][k].edge_list[BACK]->max_cap) // modified
-                {
-                    if (congestionMap2d->edge(i, j, DIR_SOUTH).used_net.size() > 1) {
-                        RoutedNetTable::iterator iter = congestionMap2d->edge(i, j, DIR_SOUTH).used_net.begin();
-                        a = backtrace(iter->first);
-                        for (iter++; iter != congestionMap2d->edge(i, j, DIR_SOUTH).used_net.end(); ++iter) {
-                            b = backtrace(iter->first);
-                            if (a != b) {
-                                group_set[b].pi = a;
-                                group_set[a].num += group_set[b].num;
+                for (k = 0; k < max_zz && cur_map_3d[i][j][k].edge_list[BACK]->max_cap == 0; ++k);
+                if(congestionMap2d->edge(i, j, DIR_SOUTH).used_net != nullptr){
+                    if ((int)(congestionMap2d->edge(i, j, DIR_SOUTH).used_net->size()) > cur_map_3d[i][j][k].edge_list[BACK]->max_cap) // modified
+                    {
+                        if (congestionMap2d->edge(i, j, DIR_SOUTH).used_net->size() > 1) {
+                            RoutedNetTable::iterator iter = congestionMap2d->edge(i, j, DIR_SOUTH).used_net->begin();
+                            a = backtrace(iter->first);
+                            for (iter++; iter != congestionMap2d->edge(i, j, DIR_SOUTH).used_net->end(); ++iter) {
+                                b = backtrace(iter->first);
+                                if (a != b) {
+                                    group_set[b].pi = a;
+                                    group_set[a].num += group_set[b].num;
+                                }
                             }
                         }
                     }

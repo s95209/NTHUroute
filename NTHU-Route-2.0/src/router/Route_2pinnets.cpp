@@ -88,10 +88,12 @@ static void reset_c_map_used_net_to_one()
     {
 		for (int j = rr_map->get_gridy() - 1; j >= 0; --j)
 		{
-            RoutedNetTable* table = &(congestionMap2d->edge(i, j, DIR_EAST).used_net);
-            for(iter = table->begin(); iter != table->end(); ++iter) {
-                (*table)[iter->first] = 1;
-            }
+            RoutedNetTable* table = (congestionMap2d->edge(i, j, DIR_EAST).used_net);
+			if(table != nullptr){
+				for(iter = table->begin(); iter != table->end(); ++iter) {
+					(*table)[iter->first] = 1;
+				}
+			}
 		}
     }
 
@@ -99,10 +101,12 @@ static void reset_c_map_used_net_to_one()
     {
 		for (int j = rr_map->get_gridy() - 2; j >= 0; --j)
 		{
-            RoutedNetTable* table = &(congestionMap2d->edge(i, j, DIR_NORTH).used_net);
-            for(iter = table->begin(); iter != table->end(); ++iter) {
-                (*table)[iter->first] = 1;
-            }
+            RoutedNetTable* table = (congestionMap2d->edge(i, j, DIR_NORTH).used_net);
+			if(table != nullptr){
+				for(iter = table->begin(); iter != table->end(); ++iter) {
+					(*table)[iter->first] = 1;
+				}
+			}
 		}
     }
 }

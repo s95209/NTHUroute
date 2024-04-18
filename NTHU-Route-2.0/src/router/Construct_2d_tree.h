@@ -177,7 +177,7 @@ public:
 
     float history;
 
-    RoutedNetTable used_net;
+    RoutedNetTable* used_net;
 
     int sign(double x) {
         const double EPS = 1e-5;
@@ -203,7 +203,14 @@ public:
         // return static_cast<int>(cur_cap - max_cap); 
     }
 
-    bool lookupNet(int netId) { return (used_net.find(netId) != used_net.end()); }
+    bool lookupNet(int netId) { 
+        if(used_net != nullptr){
+            return (used_net->find(netId) != used_net->end()); 
+        }
+        else{
+            return false;
+        }
+    }
 
     double congestion() { 
         if (sign(max_cap) == 0) {

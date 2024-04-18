@@ -125,7 +125,7 @@ Edge_2d::Edge_2d()
 	  
 	  //2024/04/10 ying revise
 	  //used_net(128),
-	  used_net()
+	  used_net(nullptr)
 
 {
 }
@@ -1484,8 +1484,11 @@ void update_congestion_map_insert_two_pin_net(Two_pin_element_2d *element)
 	{
 		// get an edge from congestion map - c_map_2d
 		dir = get_direction_2d(element->path[i], element->path[i + 1]);
+		if(congestionMap2d->edge(element->path[i]->x, element->path[i]->y, dir).used_net == nullptr){
+			congestionMap2d->edge(element->path[i]->x, element->path[i]->y, dir).used_net = new RoutedNetTable;
+		}
 		pair<RoutedNetTable::iterator, bool> insert_result =
-			congestionMap2d->edge(element->path[i]->x, element->path[i]->y, dir).used_net.insert(pair<int, int>(element->net_id, 1));
+			congestionMap2d->edge(element->path[i]->x, element->path[i]->y, dir).used_net->insert(pair<int, int>(element->net_id, 1));
 
 		if (!insert_result.second)
 		{
@@ -1517,18 +1520,20 @@ void update_congestion_map_remove_two_pin_net(Two_pin_element_2d *element)
 	{
 		dir = get_direction_2d(element->path[i], element->path[i + 1]);
 
-		RoutedNetTable::iterator find_result =
-			congestionMap2d->edge(element->path[i]->x, element->path[i]->y, dir).used_net.find(element->net_id);
+		if(congestionMap2d->edge(element->path[i]->x, element->path[i]->y, dir).used_net != nullptr){
+			RoutedNetTable::iterator find_result =
+				congestionMap2d->edge(element->path[i]->x, element->path[i]->y, dir).used_net->find(element->net_id);
 
-		--(find_result->second);	// delete the routing net
+			--(find_result->second);	// delete the routing net
 
-		if (find_result->second == 0)	// if the routing net number becomes zero -> recalculate the congestion cost
-		{
-			congestionMap2d->edge(element->path[i]->x, element->path[i]->y, dir).used_net.erase(element->net_id);
-			--(congestionMap2d->edge(element->path[i]->x, element->path[i]->y, dir).cur_cap);
-			if (used_cost_flag != FASTROUTE_COST)
+			if (find_result->second == 0)	// if the routing net number becomes zero -> recalculate the congestion cost
 			{
-				pre_evaluate_congestion_cost_fp(element->path[i]->x, element->path[i]->y, dir);
+				congestionMap2d->edge(element->path[i]->x, element->path[i]->y, dir).used_net->erase(element->net_id);
+				--(congestionMap2d->edge(element->path[i]->x, element->path[i]->y, dir).cur_cap);
+				if (used_cost_flag != FASTROUTE_COST)
+				{
+					pre_evaluate_congestion_cost_fp(element->path[i]->x, element->path[i]->y, dir);
+				}
 			}
 		}
 	}
