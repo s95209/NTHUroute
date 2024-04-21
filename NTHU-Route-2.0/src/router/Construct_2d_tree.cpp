@@ -4,6 +4,8 @@
 
 #include "Route_2pinnets.h"
 
+#include "../grdb/parser.h"
+
 #include "flute/flute4nthuroute.h"
 
 #include "grdb/RoutingComponent.h"
@@ -30,6 +32,7 @@ using namespace Jm;
  * Global Variable Begin
 
  * ********************/
+extern std::vector<int> layerDirections;
 
 int par_ind = 0;
 
@@ -169,17 +172,11 @@ int cal_max_overflow()
 	// obtain the max. overflow and total overflowed value of RIGHT edge of every gCell
 
 	for (int i = rr_map->get_gridx() - 2; i >= 0; --i)
-
 	{
-
 		for (int j = rr_map->get_gridy() - 1; j >= 0; --j)
-
 		{
-
 			if (congestionMap2d->edge(i, j, DIR_EAST).isOverflow()) // overflow occur
-
 			{
-
 				max_2d_of = max(max_2d_of, congestionMap2d->edge(i, j, DIR_EAST).overUsage());
 				dif_curmax += congestionMap2d->edge(i, j, DIR_EAST).overUsage();
 			}
@@ -189,19 +186,12 @@ int cal_max_overflow()
 	// obtain the max. overflow and total overflowed value of FRONT edge of every gCell
 
 	for (int i = rr_map->get_gridx() - 1; i >= 0; --i)
-
 	{
-
 		for (int j = rr_map->get_gridy() - 2; j >= 0; --j)
-
 		{
-
 			if (congestionMap2d->edge(i, j, DIR_NORTH).isOverflow()) // overflow occur
-
 			{
-
 				max_2d_of = max(max_2d_of, congestionMap2d->edge(i, j, DIR_NORTH).overUsage());
-				
 				dif_curmax += congestionMap2d->edge(i, j, DIR_NORTH).overUsage();
 			}
 		}
@@ -303,11 +293,13 @@ void init_2d_map()
 		{
 			for (int layer = rr_map->get_layerNumber() - 1; layer >= 0; --layer)
 			{
+				if(layerDirections[layer] == 0){
 				// Because the wire width = 1 and wire spaceing = 1,
 
 				// the edge capacity on congestion map = edge capacity on every layer /2.
 
-				congestionMap2d->edge(x, y, DIR_EAST).max_cap += (rr_map->capacity(layer, x, y, x + 1, y));
+					congestionMap2d->edge(x, y, DIR_EAST).max_cap += (rr_map->capacity(layer, x, y, x + 1, y));
+				}
 			}
 		}
 	}
@@ -318,9 +310,11 @@ void init_2d_map()
 		{
 			for (int layer = rr_map->get_layerNumber() - 1; layer >= 0; --layer)
 			{
+				if(layerDirections[layer] == 1){
 				// Because the wire width = 1 and wire spaceing = 1,
 				// the edge capacity on congestion map = edge capacity on every layer /2.
-				congestionMap2d->edge(x, y, DIR_NORTH).max_cap += (rr_map->capacity(layer, x, y, x, y + 1));
+					congestionMap2d->edge(x, y, DIR_NORTH).max_cap += (rr_map->capacity(layer, x, y, x, y + 1));
+				}
 			}
 		}
 	}
@@ -358,39 +352,28 @@ void init_3d_map()
 	Edge_3d_ptr newedge;
 
 	/*allocate space for cur_map_3d*/
-	std::cout  << "[DEBUG     ]" << "cur_map_3d = (Vertex_3d ***)malloc(rr_map->get_gridx() * sizeof(Vertex_3d **));" << endl;
-	printMemoryUsage();
-	std::cout << "-------------------" << endl;
-	cur_map_3d = (Vertex_3d ***)malloc(rr_map->get_gridx() * sizeof(Vertex_3d **));
 
-	std::cout  << "[DEBUG     ]" <<"cur_map_3d = (Vertex_3d ***)malloc(rr_map->get_gridx() * sizeof(Vertex_3d **)); end" << endl;
-	printMemoryUsage();
-	std::cout << "-------------------" << endl;
+	// cur_map_3d = (Vertex_3d ***)malloc(rr_map->get_gridx() * sizeof(Vertex_3d **));
+	cur_map_3d = (Vertex_3d ***)malloc(7891 * sizeof(Vertex_3d **));
 
-	std::cout  << "[DEBUG     ]" << "tmp_data = (Vertex_3d **)malloc(rr_map->get_gridx() * rr_map->get_gridy() * sizeof(Vertex_3d *));" << endl;
-	printMemoryUsage();
-	std::cout << "-------------------" << endl;
-	tmp_data = (Vertex_3d **)malloc(rr_map->get_gridx() * rr_map->get_gridy() * sizeof(Vertex_3d *));
-	std::cout  << "[DEBUG     ]" << "tmp_data = (Vertex_3d **)malloc(rr_map->get_gridx() * rr_map->get_gridy() * sizeof(Vertex_3d *)); end" << endl;
-	printMemoryUsage();
-	std::cout << "-------------------" << endl;
 
-	for (i = 0; i < rr_map->get_gridx(); ++i, tmp_data += rr_map->get_gridy())
+    // tmp_data = (Vertex_3d **)malloc(rr_map->get_gridx() * rr_map->get_gridy() * sizeof(Vertex_3d *));
+	tmp_data = (Vertex_3d **)malloc(7891 * 10708 * sizeof(Vertex_3d *));
 
+
+	// for (i = 0; i < rr_map->get_gridx(); ++i, tmp_data += rr_map->get_gridy())
+	// 	cur_map_3d[i] = tmp_data;
+	for (i = 0; i < 7891; ++i, tmp_data += 10708)
 		cur_map_3d[i] = tmp_data;
 
-	std::cout  << "[DEBUG     ]" << "tmp_data2 = (Vertex_3d *)malloc(rr_map->get_gridx() * rr_map->get_gridy() * rr_map->get_layerNumber() * sizeof(Vertex_3d));" << endl;
-	printMemoryUsage();
-	std::cout << "-------------------" << endl;
-	tmp_data2 = (Vertex_3d *)malloc(rr_map->get_gridx() * rr_map->get_gridy() * rr_map->get_layerNumber() * sizeof(Vertex_3d));
-	std::cout  << "[DEBUG     ]" << "tmp_data2 = (Vertex_3d *)malloc(rr_map->get_gridx() * rr_map->get_gridy() * rr_map->get_layerNumber() * sizeof(Vertex_3d)); end" << endl;
-	printMemoryUsage();
-	std::cout << "-------------------" << endl;
 
-	for (i = 0; i < rr_map->get_gridx(); ++i)
+	tmp_data2 = (Vertex_3d *)malloc(7891 * 10708 * 10 * sizeof(Vertex_3d));
+	// tmp_data2 = (Vertex_3d *)malloc(rr_map->get_gridx() * rr_map->get_gridy() * rr_map->get_layerNumber() * sizeof(Vertex_3d));
 
-		for (j = 0; j < rr_map->get_gridy(); ++j, tmp_data2 += rr_map->get_layerNumber())
-
+	// for (i = 0; i < rr_map->get_gridx(); ++i)
+	// 	for (j = 0; j < rr_map->get_gridy(); ++j, tmp_data2 += rr_map->get_layerNumber())
+	for (i = 0; i < 7891; ++i)
+		for (j = 0; j < 10708; ++j, tmp_data2 += rr_map->get_layerNumber())
 			cur_map_3d[i][j] = tmp_data2;
 
 	// initialize capacity
@@ -661,9 +644,7 @@ void (*pre_evaluate_congestion_cost_fp)(int i, int j, int dir);
 void pre_evaluate_congestion_cost_all(int i, int j, int dir)
 {
 	static const int inc = 1;
-
 	double cong;
-
 	DirectionType dirType = static_cast<DirectionType>(Jr2JmDirArray[dir]);
 
 	// if capacity == 0, then the cost is very large
@@ -673,20 +654,14 @@ void pre_evaluate_congestion_cost_all(int i, int j, int dir)
 	}
 
 	if (used_cost_flag == HISTORY_COST)		// main stage for MM routing
-
 	{
-
-		cong = (congestionMap2d->edge(i, j, dirType).cur_cap + inc) /
-
-			   (congestionMap2d->edge(i, j, dirType).max_cap *
-
-				(1.0 - ((congestionMap2d->edge(i, j, dirType).history - 1) /
-
-						(cur_iter * (1.5 + 3 * factor)))));
+		cong = 	(congestionMap2d->edge(i, j, dirType).cur_cap + inc) /
+			   	(congestionMap2d->edge(i, j, dirType).max_cap *
+			   	(1.0 - ((congestionMap2d->edge(i, j, dirType).history - 1) /
+				(cur_iter * (1.5 + 3 * factor)))));
 
 		cache->edge(i, j, dirType).cost = WL_Cost +
-
-										  (congestionMap2d->edge(i, j, dirType).history) * pow(cong, exponent);
+				(congestionMap2d->edge(i, j, dirType).history) * pow(cong, exponent);
 	}
 
 	else	// refinement stage
@@ -695,54 +670,37 @@ void pre_evaluate_congestion_cost_all(int i, int j, int dir)
 		// cache->edge(i, j, dirType).cost = (congestionMap2d->edge(i, j, dirType).isFull()) 
 		// ? 1 + congestionMap2d->edge(i, j, dirType).overUsage() : 0;
 		if (congestionMap2d->edge(i, j, dirType).isFull())
-
 			cache->edge(i, j, dirType).cost = 1.0;
-
 		else
-
 			cache->edge(i, j, dirType).cost = 0.0;
 	}
+
 	assert(sign(cache->edge(i, j, dirType).cost) >= 0);
 
 }
 
 void pre_evaluate_congestion_cost()
-
 {
-
 	for (int i = rr_map->get_gridx() - 1; i >= 0; --i)
-
 	{
-
 		for (int j = rr_map->get_gridy() - 2; j >= 0; --j)
-
 		{
-
 			pre_evaluate_congestion_cost_fp(i, j, FRONT); // Function Pointer to Cost function
 
 			if (congestionMap2d->edge(i, j, DIR_NORTH).isOverflow())
-
 			{
-
 				++congestionMap2d->edge(i, j, DIR_NORTH).history;
 			}
 		}
 	}
 
 	for (int i = rr_map->get_gridx() - 2; i >= 0; --i)
-
 	{
-
 		for (int j = rr_map->get_gridy() - 1; j >= 0; --j)
-
 		{
-
 			pre_evaluate_congestion_cost_fp(i, j, RIGHT);
-
 			if (congestionMap2d->edge(i, j, DIR_EAST).isOverflow())
-
 			{
-
 				++congestionMap2d->edge(i, j, DIR_EAST).history;
 			}
 		}
@@ -1508,7 +1466,6 @@ void update_congestion_map_insert_two_pin_net(Two_pin_element_2d *element)
 }
 
 // Remove a net from an edge.
-
 // If the net pass that edge more than once, this function will only decrease the counter.
 
 void update_congestion_map_remove_two_pin_net(Two_pin_element_2d *element)
@@ -1521,14 +1478,15 @@ void update_congestion_map_remove_two_pin_net(Two_pin_element_2d *element)
 		dir = get_direction_2d(element->path[i], element->path[i + 1]);
 
 		if(congestionMap2d->edge(element->path[i]->x, element->path[i]->y, dir).used_net != nullptr){
-			RoutedNetTable::iterator find_result =
-				congestionMap2d->edge(element->path[i]->x, element->path[i]->y, dir).used_net->find(element->net_id);
+			if(congestionMap2d->edge(element->path[i]->x, element->path[i]->y, dir).used_net->size() == 0) continue;
 
+			RoutedNetTable::iterator find_result = congestionMap2d->edge(element->path[i]->x, element->path[i]->y, dir).used_net->find(element->net_id);
 			--(find_result->second);	// delete the routing net
 
 			if (find_result->second == 0)	// if the routing net number becomes zero -> recalculate the congestion cost
 			{
 				congestionMap2d->edge(element->path[i]->x, element->path[i]->y, dir).used_net->erase(element->net_id);
+				
 				--(congestionMap2d->edge(element->path[i]->x, element->path[i]->y, dir).cur_cap);
 				if (used_cost_flag != FASTROUTE_COST)
 				{
@@ -1539,13 +1497,6 @@ void update_congestion_map_remove_two_pin_net(Two_pin_element_2d *element)
 	}
 }
 
-void update_congestion_map_remove_multipin_net(Two_pin_list_2d *list)
-{
-	for (vector<Two_pin_element_2d *>::iterator it = list->begin(); it != list->end(); ++it)
-	{
-		update_congestion_map_remove_two_pin_net(*it);
-	}
-}
 
 void edge_shifting(Tree *t);
 
@@ -1595,11 +1546,8 @@ void gen_FR_congestion_map()
 	std::cout << "+++++++++++++++++++" << endl;
 
 
-	std::cout << "flutet" << std::endl;
-	printMemoryUsage();
-	std::cout << "-------------------" << endl;
-	init_flute(); // initial the information of pin's coordinte and group by net for flute
 
+	init_flute(); // initial the information of pin's coordinte and group by net for flute // 建netNumber棵tree
 	flute_mode = NORMAL; // wirelength driven	mode
 
 	/*assign 0.7 demand to each net*/
@@ -1607,19 +1555,8 @@ void gen_FR_congestion_map()
 	// for storing the RSMT which retruned by flute
 
 	Flute netRoutingTreeRouter;
-
 	flutetree = (Tree *)calloc(rr_map->get_netNumber(), sizeof(Tree));
-
-	std::cout << "flutet end" << std::endl;
-	printMemoryUsage();
-	std::cout << "+++++++++++++++++++" << endl;
 	// Get every net's possible RSMT by flute, then use it to calculate the possible congestion
-
-	#ifdef MESSAGE
-
-	printf("bbox routing start...\n");
-
-	#endif
 
 	std::cout << "bbox routing" << std::endl;
 	printMemoryUsage();
@@ -1709,7 +1646,7 @@ void gen_FR_congestion_map()
 	// Now begins the initial routing by pattern routing
 	// Edge shifting will also be applyed to the routing.
 	bool do_edge_shifting = false;
-	double cccc = 0;
+
 	std::cout << "L-shaped pattern routing middle" << std::endl;
 	printMemoryUsage();
 	std::cout << "mmmmmmmmmmmmmmmmmmmm" << endl;
@@ -1718,6 +1655,7 @@ void gen_FR_congestion_map()
 	for (auto it = sort_net.begin(); it != sort_net.end(); ++it)
 	{
 		int netId = (*it)->id;
+		
 		// flutetree[i].number 是該net有的node數
 		flute_order = (int *)malloc(sizeof(int) * flutetree[netId].number);
 
@@ -1738,19 +1676,14 @@ void gen_FR_congestion_map()
 		for (int k = 0; k < flutetree[netId].number; ++k)
 		{
 			int j = flute_order[k];
-
 			int x1 = (int)flutetree[netId].branch[j].x;
-
 			int y1 = (int)flutetree[netId].branch[j].y;
-
 			int x2 = (int)flutetree[netId].branch[flutetree[netId].branch[j].n].x;
-
 			int y2 = (int)flutetree[netId].branch[flutetree[netId].branch[j].n].y;
 
 			if (!(x1 == x2 && y1 == y2))
 			{
 				/*choose the L-shpae with lower congestion to assing new demand 1*/
-
 				L_path = new Two_pin_element_2d();
 				L_pattern_route(x1, y1, x2, y2, L_path, netId);
 
@@ -1758,7 +1691,6 @@ void gen_FR_congestion_map()
 
 				//它的結構是vector<Two_pin_list_2d *> net_2pin_list; 
 				//又typedef vector<Two_pin_element_2d *> Two_pin_list_2d;
-
 				net_2pin_list[netId]->push_back(L_path);
 				update_congestion_map_insert_two_pin_net(L_path);
 			}
@@ -1786,7 +1718,7 @@ void gen_FR_congestion_map()
 	std::cout << "+++++++++++++++++++" << endl;
 
 
-
+	free_memory_con2d();
 	delete bboxRouteStateMap;
 }
 
@@ -1848,6 +1780,7 @@ void find_saferange(Vertex_flute_ptr a, Vertex_flute_ptr b, int *low, int *high,
 	// Horizontal edge doing vertical shifting
 	if(dir == HOR)
 	{
+		// 找highest stenier point
 		cur = a;
 		while(cur->type != PIN)
 		{
@@ -1867,6 +1800,7 @@ void find_saferange(Vertex_flute_ptr a, Vertex_flute_ptr b, int *low, int *high,
 		}
 
 		*high = min(*high, cur->y);
+
 		cur = b;
 		while(cur->type != PIN){
 			find = *(cur->neighbor.begin());
@@ -1884,11 +1818,12 @@ void find_saferange(Vertex_flute_ptr a, Vertex_flute_ptr b, int *low, int *high,
 		}
 
 		*high = min(*high, cur->y);
+		
+		// 找lowest stenier point
 		cur = a;
 		while(cur->type != PIN)
 		{
 			find = *(cur->neighbor.begin());
-
 			//vector<Vertex_flute_ptr>::iterator
 			for(auto nei = cur->neighbor.begin() + 1; nei != cur->neighbor.end(); ++nei){
 				if ((*nei)->y < find->y){
@@ -1900,12 +1835,11 @@ void find_saferange(Vertex_flute_ptr a, Vertex_flute_ptr b, int *low, int *high,
 				break;
 			}
 		}
-
 		*low = max(*low, cur->y);
+
 		cur = b;
 		while(cur->type != PIN){
 			find = *(cur->neighbor.begin());
-
 			//vector<Vertex_flute_ptr>::iterator
 			for(auto nei = cur->neighbor.begin() + 1; nei != cur->neighbor.end(); ++nei){
 				if ((*nei)->y < find->y){
@@ -1920,6 +1854,7 @@ void find_saferange(Vertex_flute_ptr a, Vertex_flute_ptr b, int *low, int *high,
 		*low = max(*low, cur->y);
 	}
 	else{
+		// 找最右
 		cur = a;
 		while(cur->type != PIN){
 			find = *(cur->neighbor.begin());
@@ -1935,8 +1870,8 @@ void find_saferange(Vertex_flute_ptr a, Vertex_flute_ptr b, int *low, int *high,
 				break;
 			}
 		}
-
 		*high = min(*high, cur->x);
+
 		cur = b;
 		while(cur->type != PIN){
 			find = *(cur->neighbor.begin());
@@ -1952,8 +1887,9 @@ void find_saferange(Vertex_flute_ptr a, Vertex_flute_ptr b, int *low, int *high,
 				break;
 			}
 		}
-
 		*high = min(*high, cur->x);
+
+		//找最左
 		cur = a;
 		while(cur->type != PIN){
 			find = *(cur->neighbor.begin());
@@ -1969,7 +1905,6 @@ void find_saferange(Vertex_flute_ptr a, Vertex_flute_ptr b, int *low, int *high,
 				break;
 			}
 		}
-
 		*low = max(*low, cur->x);
 		cur = b;
 		while(cur->type != PIN){
@@ -2027,36 +1962,24 @@ bool move_edge(Vertex_flute_ptr a, Vertex_flute_ptr b, int best_pos, int dir){
 			while(cur->y < best_pos){
 				find = *(cur->neighbor.begin());
 				for(vector<Vertex_flute_ptr>::iterator nei = cur->neighbor.begin() + 1; nei != cur->neighbor.end(); ++nei)
-
+				{
 					if ((*nei)->y > find->y)
-
 						find = *nei;
-
+				}
 				cur = find;
-
 				st_pt.push_back(cur);
 			}
 
 			// exchange neighb
-
 			for (int i = 0; i < (int)st_pt.size(); ++i)
-
 			{
-
 				if (st_pt[i]->y < best_pos)
-
 				{
-
 					for (ind1 = 0;; ++ind1)
-
 					{
-
 						if (!(((a->neighbor[ind1]->x == b->x) && (a->neighbor[ind1]->y == b->y)) ||
-
 							  ((a->neighbor[ind1]->x == st_pt[i]->x) && (a->neighbor[ind1]->y == st_pt[i]->y))))
-
 						{
-
 							break;
 						}
 					}
@@ -2093,13 +2016,9 @@ bool move_edge(Vertex_flute_ptr a, Vertex_flute_ptr b, int best_pos, int dir){
 
 					a->y = st_pt[i]->y;
 				}
-
 				else if (st_pt[i]->x == a->x && st_pt[i]->y == best_pos)
-
 					overlap_a = st_pt[i];
-
 				else
-
 					break;
 			}
 
@@ -2718,110 +2637,72 @@ void traverse_tree(double *ori_cost)
 
 	Vertex_flute_ptr node;
 
-	for (vector<Vertex_flute_ptr>::iterator it_v = vertex_fl.begin();
-
-		 it_v != vertex_fl.end();
-
-		 ++it_v)
-
+	for (vector<Vertex_flute_ptr>::iterator it_v = vertex_fl.begin(); it_v != vertex_fl.end(); ++it_v)
 	{
-
 		node = *it_v;
-
 		node->visit = 1;
 
 		if (node->type == STEINER && node->neighbor.size() <= 3) // remove3!!!
-
 		{
 
 			for (vector<Vertex_flute_ptr>::iterator it = node->neighbor.begin(); it != node->neighbor.end(); ++it)
 
 				if ((*it)->visit == 0 && ((*it)->type == STEINER && (*it)->neighbor.size() <= 3)) //!!!remove3!!
-
 				{
 
 					int low = 0, high = INT_MAX;
 
 					Vertex_flute_ptr a = node, b = (*it);
+					
 
 					if ((*it)->y == node->y) // horizontal edge (vertical shifting)
-
 					{
-
 						find_saferange(a, b, &low, &high, HOR); // compute safe range
 
 						best_cost = *ori_cost;
-
 						cur_cost = (*ori_cost) - compute_L_pattern_cost(a->x, a->y, b->x, b->y, -1);
 
 						for (int pos = low; pos <= high; ++pos)
-
 						{
-
 							tmp_cost = cur_cost + compute_L_pattern_cost(a->x, pos, b->x, pos, -1);
-
 							if (tmp_cost < best_cost)
-
 							{
-
 								best_cost = tmp_cost;
-
 								best_pos = pos;
 							}
 						}
 
 						if (best_cost < *ori_cost) // edge need shifting
-
 						{
-
 							move_edge(a, b, best_pos, HOR);
-
 							// move to best position,exchange steiner points if needed
-
 							*ori_cost = best_cost;
 						}
 					}
-
 					else if ((*it)->x == node->x) // vertical edge (horizontal shifting)
-
 					{
-
 						find_saferange(a, b, &low, &high, VER); // compute safe range
 
 						best_cost = *ori_cost;
-
 						cur_cost = (*ori_cost) - compute_L_pattern_cost(a->x, a->y, b->x, b->y, -1);
-
 						for (int pos = low; pos <= high; ++pos)
-
 						{
-
 							tmp_cost = cur_cost + compute_L_pattern_cost(pos, a->y, pos, b->y, -1);
-
 							if (tmp_cost < best_cost)
-
 							{
-
 								best_cost = tmp_cost;
-
 								best_pos = pos;
 							}
 						}
-
 						if (best_cost < *ori_cost) // edge need shifting
-
 						{
-
 							move_edge(a, b, best_pos, VER);
 
 							// move to best position,exchange steiner points if needed
-
 							*ori_cost = best_cost;
 						}
 					}
-
 					else
-
 						continue;
 				}
 		}
@@ -2864,6 +2745,7 @@ void dfs_output_tree(Vertex_flute_ptr node, Tree *t)
 void edge_shifting(Tree *t)
 {
 	Vertex_flute_ptr new_v;
+
 	double ori_cost; // the original cost without edge shifting
 	ori_cost = 0;
 
@@ -2894,7 +2776,7 @@ void edge_shifting(Tree *t)
 		// compute original tree cost
 		ori_cost += compute_L_pattern_cost(vertex_fl[i]->x, vertex_fl[i]->y, vertex_fl[t->branch[i].n]->x, vertex_fl[t->branch[i].n]->y, -1);
 	}
-
+	// x先比,小的前面.   y小的前面,   一樣大的時候 pin 點前面
 	sort(vertex_fl.begin(), vertex_fl.end(), comp_vertex_fl);
 
 	for (int i = 0, j = 1; j < 2 * (t->deg) - 2; ++j)
@@ -2904,10 +2786,10 @@ void edge_shifting(Tree *t)
 			vertex_fl[j]->type = DELETED;
 			for (vector<Vertex_flute_ptr>::iterator it = vertex_fl[j]->neighbor.begin(); it != vertex_fl[j]->neighbor.end(); ++it)
 			{
-				if (((*it)->x != vertex_fl[i]->x) || ((*it)->y != vertex_fl[i]->y)) // not i,add 0430
+				if (((*it)->x != vertex_fl[i]->x) || ((*it)->y != vertex_fl[i]->y)) // 把j的 非ineighbor 加入 i 的 neighbor 
 				{
 					vertex_fl[i]->neighbor.push_back(*it);
-					for (int k = 0; k < (int)(*it)->neighbor.size(); k++)
+					for (int k = 0; k < (*it)->neighbor.size(); k++)
 					{
 						if ((*it)->neighbor[k]->x == vertex_fl[i]->x && (*it)->neighbor[k]->y == vertex_fl[i]->y)
 						{
@@ -2924,6 +2806,7 @@ void edge_shifting(Tree *t)
 
 	for (int i = 0; i < 2 * t->deg - 2; ++i)
 		vertex_fl[i]->visit = 0;
+
 	traverse_tree(&ori_cost); // dfs to find 2 adjacent steiner points(h or v edge) and do edge_shifhting
 
 	// Output the result (2-pin lists) to a Tree structure in DFS order
@@ -2965,13 +2848,15 @@ void output_3d_map()
 		for (j = 0; j < rr_map->get_gridy(); ++j)
 			for (k = 0; k < rr_map->get_layerNumber(); ++k)
 			{
-				cur_map_3d[i][j][k].edge_list[RIGHT]->max_cap = rr_map->capacity(k, i, j, i + 1, j);
+				if(layerDirections[k] == 0)
+					cur_map_3d[i][j][k].edge_list[RIGHT]->max_cap = rr_map->capacity(k, i, j, i + 1, j);
 			}
 	for (i = 0; i < rr_map->get_gridx(); ++i)
 		for (j = 0; j < rr_map->get_gridy() - 1; ++j)
 			for (k = 0; k < rr_map->get_layerNumber(); ++k)
 			{
-				cur_map_3d[i][j][k].edge_list[FRONT]->max_cap = rr_map->capacity(k, i, j, i, j + 1);
+				if(layerDirections[k] == 1)
+					cur_map_3d[i][j][k].edge_list[FRONT]->max_cap = rr_map->capacity(k, i, j, i, j + 1);
 			}
 
 #ifdef DEBUG1
@@ -3052,10 +2937,11 @@ double construct_2d_tree(RoutingRegion *rr)
 	std::cout << "reallocate_two_pin_list" << std::endl;
 	printMemoryUsage();
 	std::cout << "-------------------" << endl;
-	reallocate_two_pin_list(true);
+	reallocate_two_pin_list(true);  
 	std::cout << "reallocate_two_pin_list end" << std::endl;
 	printMemoryUsage();
 	std::cout << "+++++++++++++++++++" << endl;
+
 
 
 	cache = new EdgePlane<CacheEdge>(rr_map->get_gridx(), rr_map->get_gridy(), CacheEdge());
@@ -3073,15 +2959,15 @@ double construct_2d_tree(RoutingRegion *rr)
 	std::cout << "-------------------" << endl;
 	for(cur_iter = 1, done_iter = cur_iter; cur_iter <= routing_parameter->get_iteration_p2(); ++cur_iter, done_iter = cur_iter) // do n-1 times
 	{
-		cout << "\033[31mIteration:\033[m " << cur_iter << endl;
+		cout << "[INFO      ]" << "\033[31mIteration:\033[m " << cur_iter << endl;
 
-		factor = (1.0 - exp(-5 * exp(-(0.1 * cur_iter))));
+		factor = (1.0 - exp(-5 * exp(-(0.1 * cur_iter))));  // 越多iter factor愈小
+		WL_Cost = factor; //越來越不重要
+		via_cost = static_cast<int>(4 * factor); //越來越不重要
 
-		WL_Cost = factor;
-		via_cost = static_cast<int>(4 * factor);
-		adjust_value = cur_iter * (1.25 + 3 * factor); // tuned for experimant
+		adjust_value = cur_iter * (1.25 + 3 * factor); // tuned for experimant // 沒用到
 
-		pre_evaluate_congestion_cost();
+		pre_evaluate_congestion_cost(); // 若擁擠就加 history cost
 
 		// route_all_2pin_net(false);
 		route_all_2pin_net();
@@ -3112,7 +2998,7 @@ double construct_2d_tree(RoutingRegion *rr)
     main_end = std::chrono::high_resolution_clock::now();
 	// std::cout << "Max turns = " << maxTurns << "\n";
     
-	free_memory_con2d();
+	
 #ifdef MESSAGE
 	cout << "================================================================" << endl;
 	cout << "===                   Enter Post Processing                  ===" << endl;

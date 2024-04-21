@@ -21,7 +21,6 @@ class Multisource_multisink_mazeroute
         Jm::Coordinate_2d *coor;
 		vector<Vertex_mmm *> neighbor;
 		int visit;
-		
 		Vertex_mmm(int x, int y): coor(&coor_array[x][y]), visit(-1){}
 	};
 
@@ -34,8 +33,10 @@ class Multisource_multisink_mazeroute
         int via_num;            //Via count from source to current element
         int visit;              //default: -1. If the element be visited, this value
                                 //will be set to current iteration ID (visit_counter)
+
         int dst;                //defalut: -1. If the element is a sink, this value
                                 //will be set to current dst ID (dst_counter)
+                                
         int walkableID;         //If this element is walkable, then ID = visit_counter
         int pqIndex;            //Index in MMMPriortyQueue
 

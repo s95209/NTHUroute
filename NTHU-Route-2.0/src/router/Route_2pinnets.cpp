@@ -31,9 +31,7 @@ extern int sign(double x);
 
 void allocate_gridcell()
 {
-    gridcell = new VertexPlane<Point_fc>(rr_map->get_gridx(),
-                                          rr_map->get_gridy(),
-                                          Point_fc());
+    gridcell = new VertexPlane<Point_fc>(rr_map->get_gridx(),  rr_map->get_gridy(), Point_fc());
     for(int x = rr_map->get_gridx() - 1; x >=0; --x) {
         for(int y = rr_map->get_gridy() - 1; y >=0; --y) {
             gridcell->vertex(x, y).x = x;
@@ -51,31 +49,34 @@ static void init_gridcell()
 	for (int i=0; i<rr_map->get_gridx();++i) {
 		for (int j=0; j<rr_map->get_gridy(); ++j)
 		{
-			gridcell->vertex(i, j).points.clear();
+			gridcell->vertex(i, j).points.clear();  // vector<Two_pin_element_2d*> points;
 		}
     }
-	int length = two_pin_list.size();
-	for (int i=0; i < length; ++i)
+
+
+	for (int i=0; i < two_pin_list.size(); ++i)
 	{
 		//add pin1
 		int cur_x = two_pin_list[i]->pin1.x;
 		int cur_y = two_pin_list[i]->pin1.y;
+
+		// 在它上面的 pin 的 2pin_element
         gridcell->vertex(cur_x, cur_y).points.push_back(two_pin_list[i]);
 		//add pin2
 		cur_x = two_pin_list[i]->pin2.x;
 		cur_y = two_pin_list[i]->pin2.y;
+		
         gridcell->vertex(cur_x, cur_y).points.push_back(two_pin_list[i]);
 	}
 }
 
 void route_all_2pin_net(void )
 {
-	vector<Point_fc *> all_cells;
+	init_gridcell(); // 初始化gridcell並將 2pin nets 的起點終點標上
 	
-	init_gridcell(); 
-	
-	define_interval();
-	divide_grid_edge_into_interval();
+	define_interval();  // 定義interval 也就是切出 1~maxcongestion 的十等分的區間
+
+	divide_grid_edge_into_interval(); // 將 grid_edge 分類進對應的 interval 中
 	
 	specify_all_range();
 }
@@ -88,7 +89,7 @@ static void reset_c_map_used_net_to_one()
     {
 		for (int j = rr_map->get_gridy() - 1; j >= 0; --j)
 		{
-            RoutedNetTable* table = (congestionMap2d->edge(i, j, DIR_EAST).used_net);
+            RoutedNetTable* table = congestionMap2d->edge(i, j, DIR_EAST).used_net;
 			if(table != nullptr){
 				for(iter = table->begin(); iter != table->end(); ++iter) {
 					(*table)[iter->first] = 1;
@@ -101,7 +102,7 @@ static void reset_c_map_used_net_to_one()
     {
 		for (int j = rr_map->get_gridy() - 2; j >= 0; --j)
 		{
-            RoutedNetTable* table = (congestionMap2d->edge(i, j, DIR_NORTH).used_net);
+            RoutedNetTable* table = congestionMap2d->edge(i, j, DIR_NORTH).used_net;
 			if(table != nullptr){
 				for(iter = table->begin(); iter != table->end(); ++iter) {
 					(*table)[iter->first] = 1;
@@ -179,20 +180,23 @@ static int determine_is_terminal_or_steiner_point(int xx, int yy, int dir, int n
 
 void bfs_for_find_two_pin_list(Coordinate_2d *start_coor, int net_id, bool insert_to_branch)
 {
-	vector<Coordinate_2d *> queue;
-	vector<int> parent;
+	vector<Coordinate_2d *> queue; //要探索的坐标点
+	vector<int> parent; // 防cycle
+
 	vector<int> branch_ind;
 	vector<Coordinate_2d *> branch_xy;
 	vector<int> branch_n;
+
 	int head_index,tail_index,dir,ori_dir;
 	int x,y,xx,yy,i;
 
 	queue.push_back(start_coor);
 	parent.push_back(-1);
+
 	head_index=0;
 	tail_index=1;
 
-    traverseMap->color(queue[head_index]->x, queue[head_index]->y) = net_id;
+    traverseMap->color(queue[head_index]->x, queue[head_index]->y) = net_id; //標記走過了
 
 	if (insert_to_branch)
 	{
@@ -206,8 +210,8 @@ void bfs_for_find_two_pin_list(Coordinate_2d *start_coor, int net_id, bool inser
 		// 0:FRONT 1:BACK 2:LEFT 3:RIGHT
 		for (i = 0; i <= 3; ++i)
 		{
-			if (i == parent[head_index])
-				continue;
+			if (i == parent[head_index]) continue;
+			
 			x = queue[head_index]->x;
 			y = queue[head_index]->y;
 			dir = i;
@@ -217,21 +221,23 @@ void bfs_for_find_two_pin_list(Coordinate_2d *start_coor, int net_id, bool inser
                 /*y*/ y+dir_array[dir][1] >= 0 && y+dir_array[dir][1] < rr_map->get_gridy() )
 			{
 				// 這條net是否經過後這個tile
-                if(congestionMap2d->edge(x, y, dir).lookupNet(net_id))
+                if(congestionMap2d->edge(x, y, dir).lookupNet(net_id)) // 要找走過的路
 				{
 					Two_pin_element_2d* two_pin;
-					// two_pin_list_size: 
+
 					if(two_pin_list_size >= (int)two_pin_list.size())
 					{
 						two_pin = new Two_pin_element_2d();
 					}else{
-						two_pin = two_pin_list[two_pin_list_size];
+						two_pin = two_pin_list[two_pin_list_size]; 
                     }
-					two_pin->pin1.x = queue[head_index]->x;
-					two_pin->pin1.y = queue[head_index]->y;
+
+					two_pin->pin1.x = queue[head_index]->x;  // 2pin net的開頭
+					two_pin->pin1.y = queue[head_index]->y;  // 2pin net的開頭
 					two_pin->net_id = net_id;
 					two_pin->path.clear();
 					two_pin->path.push_back(queue[head_index]);
+
 					while(1)
 					{
                         traverseMap->color(x, y) = net_id;
@@ -242,9 +248,11 @@ void bfs_for_find_two_pin_list(Coordinate_2d *start_coor, int net_id, bool inser
 						two_pin->path.push_back(&coor_array[xx][yy]);
 
 						// one-degree terminal: -4, non-one-degree terminal: -3, 
-						// one-degree nonterminal: -2, steiner point: find_dir, more than two-degree: -1
+						// one-degree nonterminal: -2, steiner point: > 0
+						// more than two-degree nonterminal: -1
 
-						if (dir<0 && dir!=-2) // 如果是 terminal 或 more than two-degree nontermina
+
+						if (dir<0 && dir!=-2) // 如果是 terminal 或 more than two-degree nonterminal -4 -3 -1
 						{
 							if (traverseMap->color(xx, yy) != net_id) // 如果未被這個NET標記
 							{
@@ -254,13 +262,13 @@ void bfs_for_find_two_pin_list(Coordinate_2d *start_coor, int net_id, bool inser
 									two_pin_list.push_back(two_pin);
 								}
 								two_pin_list_size++;
-								
+
 								if(insert_to_branch)
 								{
 									branch_xy.push_back(&coor_array[xx][yy]);
 									branch_n.push_back(branch_ind[head_index]);
 								}
-								
+
 								if (dir!=-4)  // more than two-degree nonterminal: -1 non-one-degree terminal: -3,
 								{
 									queue.push_back(&coor_array[xx][yy]);
@@ -278,9 +286,10 @@ void bfs_for_find_two_pin_list(Coordinate_2d *start_coor, int net_id, bool inser
 									tail_index++;
 								}
                                 traverseMap->color(xx, yy) = net_id;
-							}else //其他branch已經走過了會有cycle所以步行走
+							}
+							else
 							{
-								update_congestion_map_remove_two_pin_net(two_pin);
+								update_congestion_map_remove_two_pin_net(two_pin); // 自己已經走過了被接上了
                                 NetDirtyBit[two_pin->net_id] = true;
 								if (two_pin_list_size>=(int)two_pin_list.size())
 								{
@@ -337,7 +346,7 @@ void reallocate_two_pin_list(bool insert_to_branch)
     traverseMap = new VertexColorMap<int>(rr_map->get_gridx(), rr_map->get_gridy(), -1);
     terminalMap = new VertexColorMap<int>(rr_map->get_gridx(), rr_map->get_gridy(), -1);
 	
-	reset_c_map_used_net_to_one();
+	reset_c_map_used_net_to_one(); // 使用次數都設為1
 
 	two_pin_list_size = 0;
 
@@ -366,7 +375,6 @@ void reallocate_two_pin_list(bool insert_to_branch)
             Coordinate_2d* start_coor = &coor_array[xx][yy];
 
             bfs_for_find_two_pin_list(start_coor, netId, insert_to_branch);
-
             NetDirtyBit[netId] = false;
             ++dirty_count;
         }
@@ -391,13 +399,14 @@ void reallocate_two_pin_list(bool insert_to_branch)
 				edge_idx = (x_dir == 1) ? RIGHT : LEFT;
 			else	// y_dir
 				edge_idx = (y_dir == 1) ? FRONT : BACK;
+
 			int x = two_pin_list[i]->path[j]->x;
 			int y = two_pin_list[i]->path[j]->y;
+
 			if (!two_pin_list[i]->path_through_zero_edge && sign(congestionMap2d->edge(x, y, edge_idx).max_cap) == 0)
 				two_pin_list[i]->path_through_zero_edge = true;
 		}
 	}
-
     delete traverseMap;
     delete terminalMap;
 }

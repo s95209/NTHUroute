@@ -127,7 +127,9 @@ RoutingSpace::Tile& RoutingSpace::tile(int x, int y, int z)
 inline
 RoutingSpace::RoutingEdge& RoutingSpace::edge(int x, int y, int z, Jm::DirectionType dir)
 {
+    // std::cout << "55555555555555555555" << std::endl;
     return (*routingSpace_)[z].edge(x, y, dir);
+    // std::cout << "666666666666666666" << std::endl;
 }
 
 inline

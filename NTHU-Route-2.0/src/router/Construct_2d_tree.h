@@ -259,7 +259,7 @@ public:
 struct CacheEdge
 {
 
-    double cost; // Used as cache of cost in whole program
+    float cost; // Used as cache of cost in whole program
 
     int MMVisitFlag; // Used as cache of hash table lookup result in MM_mazeroute
 

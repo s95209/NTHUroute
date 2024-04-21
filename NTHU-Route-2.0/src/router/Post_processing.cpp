@@ -59,7 +59,7 @@ bool check_path_no_overflow(vector<Coordinate_2d*> *path, int net_id, int inc_fl
 }
 
 // obtain a cost of a path, including via cost.
-void compute_path_total_cost_and_distance(Two_pin_element_2d *element, Monotonic_element* mn)
+void compute_path_total_cost_and_distance(Two_pin_element_2d* element, Monotonic_element* mn)
 {
 	int distance;
 	int pre_dir = -1;
@@ -265,12 +265,15 @@ void Post_processing(void)
     BOXSIZE_INC = routing_parameter->get_init_box_size_p3();
     inc_num = routing_parameter->get_box_size_inc_p3();
     Post_processing_iteration = routing_parameter->get_iteration_p3();
+
 #ifdef MESSAGE
 	printf("size: (%d %d)\n",BOXSIZE_INC,inc_num);
 #endif
+
 	done_iter++;
 	used_cost_flag = MADEOF_COST;
 	cur_overflow = cal_max_overflow();
+	
     if(cur_overflow > 0) {
         //In post processing, we only need to pre-evaluate all cost once.
         //The other update will be done by update_add(remove)_edge

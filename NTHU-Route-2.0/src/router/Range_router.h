@@ -11,10 +11,10 @@
 class Range_element
 {
 	public:
-		int x1;
-        int y1;
-        int x2;
-        int y2;
+		uint16_t x1;
+        uint16_t y1;
+        uint16_t x2;
+        uint16_t y2;
 		
     public:
 		Range_element(int x1, int y1, int x2, int y2)
@@ -25,11 +25,10 @@ class Grid_edge_element
 {
 	public:
         Jm::Coordinate_2d* grid;
-		int dir;
+		uint16_t dir;
 		
     public:
-		Grid_edge_element(Jm::Coordinate_2d* grid, int dir)
-            :grid(grid), dir(dir) {}
+		Grid_edge_element(Jm::Coordinate_2d* grid, int dir) :grid(grid), dir(dir) {}
 };
 
 class Interval_element

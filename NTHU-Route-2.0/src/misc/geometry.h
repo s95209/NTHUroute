@@ -121,7 +121,7 @@ namespace Jm
     protected:
         uint16_t x_;
         uint16_t y_;
-        uint16_t z_;
+        uint8_t z_;
     };
 
     typedef std::pair<Coordinate, Coordinate> CoordinatePair;
@@ -288,7 +288,7 @@ namespace Jm
     public:
         uint16_t x;
         uint16_t y;
-        uint16_t z;
+        uint8_t z;
 
     public:
         Coordinate_3d(int x = 0, int y = 0, int z = 0)

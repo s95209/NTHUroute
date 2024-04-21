@@ -16,6 +16,7 @@
 #include "gr_db/GrNet.h"
 #include <fstream>
 #include "../router/parameter.h"
+#include "../router/Construct_2d_tree.h"
 
 #define MAX_STRING_BUFER_LENGTH 512
 #define MAX_PIN 1000
@@ -105,6 +106,7 @@ void Parser24::parseNetFile()
                 access.push_back(point);
             }
             accessPoints.push_back(access);
+            access.clear();
             numPins++;
         //每個net的結尾            
         } else if (line.find(')') != std::string::npos) {
@@ -135,7 +137,6 @@ void Parser24::setEdgeCapacity()
         builder_->setViaSpacing(i, 1);
     }
 
-
     int resource, prev;
     for (int layer = 0; layer < nLayers; ++layer) {
         if (layerDirections[layer]) {
@@ -153,12 +154,13 @@ void Parser24::setEdgeCapacity()
                     resource = this->GcellCapacity[layer][i][j];
                     if (layer == 0)
                         resource = 0;
+                    // std::cout << "i: " << i << " j: " << j << std::endl;
                     builder_->adjustEdgeCapacity(i, j, layer, i+1, j, layer, resource);
                 }
             }
         }
     }
-   
+    
     for (int l = 0; l < nLayers; ++l) {
         if (l % 2 == 0) {
             for (int i=0; i<xSize; ++i) {
@@ -262,12 +264,38 @@ void Parser24::parse(Builder *builder)
     assert(builder != NULL);
     builder_ = builder;
 
+
+    std::cout << "[DEBUG     ]" << "parseCapFile" << std::endl;
+    printMemoryUsage();
+    std::cout << "-------------------" << endl;
     this->parseCapFile();
+    std::cout << "[DEBUG     ]" << "parseCapFile end" << endl;
+    printMemoryUsage();
+    std::cout << "+++++++++++++++++++" << endl;
 
+    std::cout << "[DEBUG     ]" << "setEdgeCapacity" << std::endl;
+    printMemoryUsage();
+    std::cout << "-------------------" << endl;
     this->setEdgeCapacity();
+    std::cout << "[DEBUG     ]" << "setEdgeCapacity end" << std::endl;
+    printMemoryUsage();
+    std::cout << "+++++++++++++++++++" << endl;
 
+    std::cout << "[DEBUG     ]" << "parseNetFile" << std::endl;
+    printMemoryUsage();
+    std::cout << "-------------------" << endl;
     this->parseNetFile();
+    std::cout << "[DEBUG     ]" << "parseNetFile end" << std::endl;
+    printMemoryUsage();
+    std::cout << "+++++++++++++++++++" << endl;
+
+    std::cout << "[DEBUG     ]" << "setNetList" << std::endl;
+    printMemoryUsage();
+    std::cout << "-------------------" << endl;
     this->setNetList();
+    std::cout << "[DEBUG     ]" << "setNetList end" << std::endl;
+    printMemoryUsage();
+    std::cout << "+++++++++++++++++++" << endl;
 }  
 
 

@@ -104,6 +104,7 @@ void RoutingRegion::adjustEdgeCapacity (unsigned int x1,
 
 	//get horizontal capacity
 	if( (x1 != x2) && (y1 == y2) ){
+        // std::cout << "x: " << x << " y: " << y << std::endl;
         routingSpace_->edge(x, y, z1, DIR_EAST).capacity = capacity;
 	}
 }
@@ -119,20 +120,15 @@ void RoutingRegion::setTileTransformInformation (unsigned int llx,
     routingSpace_->tileHeight = tHeight;
 }
 
-void RoutingRegion::beginAddANet (const char* netName,
-                                  unsigned int, //pinNumber,
-                                  unsigned int minWidth)
+void RoutingRegion::beginAddANet(const char* netName, unsigned int, unsigned int minWidth)
 {
     int netId = netList_->size();
 	netList_->push_back( Net(netName, netId) );
 }
 
-void RoutingRegion::addPin (unsigned int x,
-                            unsigned int y,
-                            unsigned int layer)
+void RoutingRegion::addPin(unsigned int x, unsigned int y, unsigned int layer)
 {
     if (pinTable_ == NULL) pinTable_ = new PinTable();
-
 	//transfer pin's coordinate to tile position
 	int tileX = ((x - get_llx()) / get_tileWidth());
 	int tileY = ((y - get_lly()) / get_tileHeight());
@@ -142,33 +138,11 @@ void RoutingRegion::addPin (unsigned int x,
     assert(tileY == y);
 
     if (!pinTable_->count({tileX, tileY, layer})) {
-        // cout << "Insert " << tileX << ' ' << tileY << ' ' << layer << '\n';
         pinTable_->insert({tileX, tileY, layer});
-        // if (justCheck.count({tileX, tileY})) {
-        //     int prev = justCheck[{tileX, tileY}];
-        //     if (prev != layer) {
-        //         std::cout << tileX << ' ' << tileY << ' ' << prev << " existed, "
-        //                     << " new: " << layer << '\n'; 
-        //     }
-        //     assert(prev == layer);
-        // }
-        // justCheck[{tileX, tileY}] = layer;
-        netList_->back().add_pin(
-            &(routingSpace_->tile(tileX, tileY, layer).getAnchor()));
+        netList_->back().add_pin(&(routingSpace_->tile(tileX, tileY, layer).getAnchor()));
     } else {
         // cout << tileX << ' ' << tileY << ' ' << layer << " multiple pins in the same gcell\n";
     }
-
-    // if ( pinTable_->find( pair<int, int>(tileX, tileY) ) == pinTable_->end() ) {
-    //     pinTable_->insert( pair<int, int>(tileX, tileY) );
-    //     netList_->back().add_pin( 
-    //         &(routingSpace_->tile(tileX, tileY, layer).getAnchor())
-    //     );
-    //     std::cout << tileX << ' ' << tileY << " insert pin; layer: " << layer << "\n";
-    // } else {
-    //     std::cout << tileX << ' ' << tileY << " already has pins; layer:" << layer << "\n";
-    //     // assert(false);
-    // }
 }
 
 void RoutingRegion::endAddANet ()

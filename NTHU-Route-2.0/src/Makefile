@@ -50,7 +50,7 @@ WarnOptions = -W -Wall -Wextra -Wno-missing-braces
 IncDirs      = -I. $(ZlibIncDir) -I$(BoostIncDir) -Irsyn/
 CxxOptions   = $(WarnOptions) $(DebugOptions)
 
-CXXFLAGS     = -std=c++17 $(CxxOptions) $(IncDirs)  -fopenmp 
+CXXFLAGS     = -std=c++17 $(CxxOptions) $(IncDirs)  -fopenmp -g
 COMPILE_CXX  = $(CXX) $(CXXFLAGS)
 LINK_CXX     = $(CXX) $(CXXFLAGS) -L$(BoostLibDir)
 
