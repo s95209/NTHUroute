@@ -282,11 +282,7 @@ void setup_flute_order(int *order)
 
 void init_2d_map()
 {	
-	std::cout  << "[DEBUG     ]" << "new EdgePlane<Edge_2d>" << std::endl;
-	printMemoryUsage();
 	congestionMap2d = new EdgePlane<Edge_2d>(rr_map->get_gridx(), rr_map->get_gridy(), Edge_2d());
-	std::cout  << "[DEBUG     ]" << "new EdgePlane<Edge_2d> end" << std::endl;
-	printMemoryUsage();
 	for (int x = rr_map->get_gridx() - 2; x >= 0; --x)
 	{
 		for (int y = rr_map->get_gridy() - 1; y >= 0; --y)
@@ -377,9 +373,6 @@ void init_3d_map()
 			cur_map_3d[i][j] = tmp_data2;
 
 	// initialize capacity
-	std::cout << "allocate space for edge_list" << endl;
-	printMemoryUsage();
-	std::cout << "-------------------" << endl;
 
 	for (i = 0; i < rr_map->get_gridx() - 1; ++i)
 		for (j = 0; j < rr_map->get_gridy(); ++j)
@@ -593,40 +586,30 @@ void insert_all_two_pin_list(Two_pin_element_2d *mn_path_2d)
 
 // importance: overflow > WL > #via
 inline bool smaller_than_lower_bound(
-
-	double total_cost, int distance, int via_num,
-
-	double bound_cost, int bound_distance, int bound_via_num)
-
+	double total_cost, 
+	int distance, 
+	int via_num,
+	double bound_cost, 
+	int bound_distance, 
+	int bound_via_num)
 {
-
 	if ((total_cost - bound_cost) < neg_error_bound)
-
 		return true;
 
 	else if ((total_cost - bound_cost) > error_bound)
-
 		return false;
 
 	else
-
 	{
 		// std::cout << "Tie\n";
-
 		if (distance < bound_distance)
-
 			return true;
 
 		else if (distance > bound_distance)
-
 			return false;
 
 		else
-
-		{
-
 			return (via_num < bound_via_num);
-		}
 	}
 }
 
@@ -661,7 +644,7 @@ void pre_evaluate_congestion_cost_all(int i, int j, int dir)
 				(cur_iter * (1.5 + 3 * factor)))));
 
 		cache->edge(i, j, dirType).cost = WL_Cost +
-				(congestionMap2d->edge(i, j, dirType).history) * pow(cong, exponent);
+				(congestionMap2d->edge(i, j, dirType).history) * pow(cong, exponent); //exponent == 5
 	}
 
 	else	// refinement stage
@@ -669,7 +652,7 @@ void pre_evaluate_congestion_cost_all(int i, int j, int dir)
 	{
 		// cache->edge(i, j, dirType).cost = (congestionMap2d->edge(i, j, dirType).isFull()) 
 		// ? 1 + congestionMap2d->edge(i, j, dirType).overUsage() : 0;
-		if (congestionMap2d->edge(i, j, dirType).isFull())
+		if (congestionMap2d->edge(i, j, dirType).isFull()) // 直接變有congestion就是0
 			cache->edge(i, j, dirType).cost = 1.0;
 		else
 			cache->edge(i, j, dirType).cost = 0.0;
@@ -715,7 +698,6 @@ double get_cost_2d(int i, int j, int dir, int net_id, int *distance)
 	DirectionType dirType = static_cast<DirectionType>(Jr2JmDirArray[dir]);
 
 	// Check if the specified net pass the edge.
-	
 
 	// sign 是在處理浮點數跟整數比較的問題
 	// 2024/04/14 ying 應該是為了 congestion 要為 0
@@ -724,6 +706,8 @@ double get_cost_2d(int i, int j, int dir, int net_id, int *distance)
 		(*distance) = 1e5;
 		return 1e9;
 	}
+
+	
 
 	// If it have passed the edge before, then the cost is 0.
 	if (congestionMap2d->edge(i, j, dirType).lookupNet(net_id) == false)
@@ -987,382 +971,233 @@ void allocate_monotonic()
 }
 
 void compare_two_direction_congestion(int i, int j, int dir1, int pre_i, int dir2, int pre_j, int net_id, double bound_cost, int bound_distance, int bound_via_num, bool bound_flag)
-
 {
-
 	Monotonic_element left_element, vertical_element, *choose_element;
-
 	double cost;
-
 	int distance = 1;
-
 	bool left_flag, right_flag;
-
 	int pre_dir;
-
 	left_flag = right_flag = true;
 
 	if (parent_monotonic[pre_i][j] != -2)
-
 	{
-
 		cost = get_cost_2d(i, j, dir1, net_id, &distance);
-
 		left_element.max_cost = max(cost, cong_monotonic[pre_i][j].max_cost);
-
 		left_element.total_cost = cong_monotonic[pre_i][j].total_cost +
-
 								  max(static_cast<double>(0), cost);
-
 		left_element.distance = cong_monotonic[pre_i][j].distance + distance;
-
 		pre_dir = parent_monotonic[pre_i][j];
 
-		if (pre_dir < 2)
-
+		if (pre_dir < 2) //FRONT OR BACK
 		{
-
 			left_element.via_num = cong_monotonic[pre_i][j].via_num + via_cost;
-
 			if (distance != 0)
-
 			{
-
 				left_element.distance += via_cost;
-
 				if (used_cost_flag == HISTORY_COST)
-
 					left_element.total_cost += via_cost;
 			}
 		}
-
 		else
-
 			left_element.via_num = cong_monotonic[pre_i][j].via_num;
 
 		if (!bound_flag || (bound_flag && smaller_than_lower_bound(left_element.total_cost, left_element.distance, left_element.via_num, bound_cost, bound_distance, bound_via_num)))
-
 		{
 			left_flag = true;
 		}
-
 		else
-
 			left_flag = false;
 	}
-
 	else
-
 		left_flag = false;
 
+
 	if (parent_monotonic[i][pre_j] != -2)
-
 	{
-
 		cost = get_cost_2d(i, j, dir2, net_id, &distance);
-
 		vertical_element.max_cost = max(cost, cong_monotonic[i][pre_j].max_cost);
-
 		vertical_element.total_cost = cong_monotonic[i][pre_j].total_cost +
-
 									  max(static_cast<double>(0), cost);
-
 		vertical_element.distance = cong_monotonic[i][pre_j].distance + distance;
-
 		pre_dir = parent_monotonic[i][pre_j];
-
 		if (pre_dir >= 2)
-
 		{
-
 			vertical_element.via_num = cong_monotonic[i][pre_j].via_num + via_cost;
-
 			if (distance != 0)
-
 			{
-
 				vertical_element.distance += via_cost;
-
 				if (used_cost_flag == HISTORY_COST)
-
 					vertical_element.total_cost += via_cost;
 			}
 		}
-
 		else
-
 			vertical_element.via_num = cong_monotonic[i][pre_j].via_num;
-
 		if (!bound_flag || (bound_flag && smaller_than_lower_bound(vertical_element.total_cost, vertical_element.distance, vertical_element.via_num, bound_cost, bound_distance, bound_via_num)))
-
 		{
-
 			right_flag = true;
 		}
-
 		else
-
 			right_flag = false;
 	}
-
 	else
-
 		right_flag = false;
 
 	if ((!left_flag) && (!right_flag))
-
 	{
-
 		parent_monotonic[i][j] = -2;
-
 		return;
 	}
-
 	else if (left_flag && right_flag)
-
 		choose_element = compare_cost(&left_element, &vertical_element);
 
 	else if (left_flag)
-
 		choose_element = &left_element;
 
 	else
-
 		choose_element = &vertical_element;
 
 	cong_monotonic[i][j].max_cost = choose_element->max_cost;
-
 	cong_monotonic[i][j].total_cost = choose_element->total_cost;
-
 	cong_monotonic[i][j].distance = choose_element->distance;
-
 	cong_monotonic[i][j].via_num = choose_element->via_num;
 
 	if (choose_element == (&left_element))
-
 		parent_monotonic[i][j] = dir1;
-
 	else if (choose_element == (&vertical_element))
-
 		parent_monotonic[i][j] = dir2;
-
 	else
-
 	{
-
 		puts("compare has problem!!!\n");
-
 		exit(0);
 	}
 }
 
 void monotonic_routing_algorithm(int x1, int y1, int x2, int y2, int dir, int net_id, double bound_cost, int bound_distance, int bound_via_num, bool bound_flag)
-
 {
-
 	int i, j;
-
 	double cost;
-
 	int distance = 1;
 
 	// initialize cong_monotonic and parent_monotonic
-
 	cong_monotonic[x1][y1].max_cost = -1000000;
-
 	cong_monotonic[x1][y1].total_cost = 0;
-
 	cong_monotonic[x1][y1].distance = 0;
-
 	cong_monotonic[x1][y1].via_num = 0;
-
 	parent_monotonic[x1][y1] = -1;
 
 	// Update the cost of top boundary or bottom boundary, which draw with double line.
-
 	// The source can in left-top corner or left-bottom corner
-
 	// go right
+	// 先update 最上面或最下面的邊界看y1而定
 	for (i = x1 + 1; i <= x2; ++i)
-
 	{
-
 		if (parent_monotonic[i - 1][y1] != -2)
-
 		{
-
 			cost = get_cost_2d(i, y1, LEFT, net_id, &distance);
 
 			cong_monotonic[i][y1].max_cost = max(cost, cong_monotonic[i - 1][y1].max_cost);
-
 			cong_monotonic[i][y1].total_cost = cong_monotonic[i - 1][y1].total_cost + max(static_cast<double>(0), cost);
-
 			cong_monotonic[i][y1].distance = cong_monotonic[i - 1][y1].distance + distance;
-
 			cong_monotonic[i][y1].via_num = cong_monotonic[i - 1][y1].via_num;
 
 			if (!bound_flag || (bound_flag && smaller_than_lower_bound(cong_monotonic[i][y1].total_cost, cong_monotonic[i][y1].distance, cong_monotonic[i][y1].via_num, bound_cost, bound_distance, bound_via_num)))
-
 			{
-
 				parent_monotonic[i][y1] = LEFT;
 			}
-
 			else
-
 				parent_monotonic[i][y1] = -2;
 		}
-
 		else
-
 			parent_monotonic[i][y1] = -2;
 	}
 
-	// If source is in the left-top corner
-	// go down
-
+	// BACK代表source在左下 畫左邊界 往上畫
 	if (dir == BACK)
-
 	{
-
 		for (j = y1 + 1; j <= y2; ++j)
-
 		{
-
 			if (parent_monotonic[x1][j - 1] != -2)
-
 			{
-
 				cost = get_cost_2d(x1, j, dir, net_id, &distance);
-
 				cong_monotonic[x1][j].max_cost = max(cost, cong_monotonic[x1][j - 1].max_cost);
-
 				cong_monotonic[x1][j].total_cost = cong_monotonic[x1][j - 1].total_cost + max(static_cast<double>(0), cost);
-
 				cong_monotonic[x1][j].distance = cong_monotonic[x1][j - 1].distance + distance;
-
 				cong_monotonic[x1][j].via_num = cong_monotonic[x1][j - 1].via_num;
 
 				if (!bound_flag || (bound_flag && smaller_than_lower_bound(cong_monotonic[x1][j].total_cost, cong_monotonic[x1][j].distance, cong_monotonic[x1][j].via_num, bound_cost, bound_distance, bound_via_num)))
-
 				{
-
 					parent_monotonic[x1][j] = dir;
 				}
-
 				else
-
 					parent_monotonic[x1][j] = dir;
 			}
-
 			else
-
 				parent_monotonic[x1][j] = -2;
 		}
-
-		// If source is in the left-bottom corner
 	}
-
 	// go top
+	// FRONT代表source在左上 畫左邊界 往上畫
 	else if (dir == FRONT)
-
 	{
-
 		for (j = y1 - 1; j >= y2; --j)
-
 		{
-
 			if (parent_monotonic[x1][j + 1] != -2)
-
 			{
-
 				cost = get_cost_2d(x1, j, dir, net_id, &distance);
 
 				cong_monotonic[x1][j].max_cost = max(cost, cong_monotonic[x1][j + 1].max_cost);
-
 				cong_monotonic[x1][j].total_cost = cong_monotonic[x1][j + 1].total_cost + max(static_cast<double>(0), cost);
-
 				cong_monotonic[x1][j].distance = cong_monotonic[x1][j + 1].distance + distance;
-
 				cong_monotonic[x1][j].via_num = cong_monotonic[x1][j + 1].via_num;
 
 				if (!bound_flag || (bound_flag && smaller_than_lower_bound(cong_monotonic[x1][j].total_cost, cong_monotonic[x1][j].distance, cong_monotonic[x1][j].via_num, bound_cost, bound_distance, bound_via_num)))
-
 				{
-
 					parent_monotonic[x1][j] = dir;
 				}
-
 				else
-
 					parent_monotonic[x1][j] = -2;
 			}
-
 			else
-
 				parent_monotonic[x1][j] = -2;
 		}
 	}
 
 	// to judge whether go right or go top(down)
 	for (i = x1 + 1; i <= x2; ++i)
-
 	{
-
 		// If source is in the left-bottom corner
-
 		if (dir == BACK)
-
 		{
-
 			for (j = y1 + 1; j <= y2; ++j)
-
 				compare_two_direction_congestion(i, j, LEFT, i - 1, dir, j - 1, net_id, bound_cost, bound_distance, bound_via_num, bound_flag);
-
 			// If source is in the left-top corner
 		}
-
 		else
-
 		{
-
 			for (j = y1 - 1; j >= y2; --j)
-
 				compare_two_direction_congestion(i, j, LEFT, i - 1, dir, j + 1, net_id, bound_cost, bound_distance, bound_via_num, bound_flag);
 		}
 	}
 }
 
 void traverse_parent_monotonic(int x1, int y1, int x2, int y2, Two_pin_element_2d *two_pin_monotonic_path)
-
 {
-
 	int i = x2;
-
 	int j = y2;
-
 	// Sink != Source
-
 	while ((i != x1) || (j != y1))
-
 	{
-
 		// Push the path in to a list
-
 		(*two_pin_monotonic_path).path.push_back(&coor_array[i][j]);
 
 		// Update the coordinate of tracing cell
-
 		if (parent_monotonic[i][j] == LEFT)
-
 			--i;
 
 		else if (parent_monotonic[i][j] == FRONT)
-
 			++j;
 
 		else
-
 			--j;
 	}
 
@@ -1376,46 +1211,28 @@ void traverse_parent_monotonic(int x1, int y1, int x2, int y2, Two_pin_element_2
 // Return true if there exist one such path
 
 bool monotonic_pattern_route(int x1, int y1,
-
 							 int x2, int y2,
-
 							 Two_pin_element_2d *two_pin_monotonic_path,
-
 							 int net_id,
-
 							 double bound_cost,
-
 							 int bound_distance,
-
 							 int bound_via_num,
-
 							 bool bound_flag)
-
 {
-
 	if (x1 > x2)
-
 	{
-
 		swap(x1, x2);
-
 		swap(y1, y2);
 	}
 
 	if (y1 <= y2) // s->t RIGHT and FRONT (source is in the left-bottom corner)
-
 		monotonic_routing_algorithm(x1, y1, x2, y2, BACK, net_id, bound_cost, bound_distance, bound_via_num, bound_flag);
-
 	// use x1,y+1.edge_list[back]
-
 	else if (y1 > y2) // s->t RIGHT and BACK (source is in the left-top corner)
-
 		monotonic_routing_algorithm(x1, y1, x2, y2, FRONT, net_id, bound_cost, bound_distance, bound_via_num, bound_flag);
 
 	// If there is no solution for this 2-pin net, return false
-
-	if (parent_monotonic[x2][y2] == -2)
-
+	if (parent_monotonic[x2][y2] == -2) //parent_monotonic是用來記錄 parent (x,y) during finding monotonic path
 		return false;
 
 	// travese parent_monotonic to find path in two_pin_monotonic_path
@@ -1438,30 +1255,64 @@ void update_congestion_map_insert_two_pin_net(Two_pin_element_2d *element)
 {
 	int dir;
 	NetDirtyBit[element->net_id] = true;
-	for (int i = element->path.size() - 2; i >= 0; --i)
+	for (int i = 0; i < element->path.size()-1; ++i)
 	{
+		int x1 = element->path[i]->x;
+		int y1 = element->path[i]->y;
+		int x2 = element->path[i+1]->x;
+		int y2 = element->path[i+1]->y;
+
 		// get an edge from congestion map - c_map_2d
 		dir = get_direction_2d(element->path[i], element->path[i + 1]);
-		if(congestionMap2d->edge(element->path[i]->x, element->path[i]->y, dir).used_net == nullptr){
-			congestionMap2d->edge(element->path[i]->x, element->path[i]->y, dir).used_net = new RoutedNetTable;
-		}
-		pair<RoutedNetTable::iterator, bool> insert_result =
-			congestionMap2d->edge(element->path[i]->x, element->path[i]->y, dir).used_net->insert(pair<int, int>(element->net_id, 1));
-
-		if (!insert_result.second)
-		{
-			// 同一條net的2pin net用到同個edge不用有額外的capacity
-			++((insert_result.first)->second);	// insert the routing edge
-		}
-		else
-		{
-			// 成功插入增加demand
-			++(congestionMap2d->edge(element->path[i]->x, element->path[i]->y, dir).cur_cap);
-			if (used_cost_flag != FASTROUTE_COST)
-			{
-				pre_evaluate_congestion_cost_fp(element->path[i]->x, element->path[i]->y, dir); //unread
+		if(dir == LEFT || dir == RIGHT){
+			if(x1 > x2) 
+				std::swap(x1, x2);
+			for(int j = x1; j < x2; ++j){
+				if(congestionMap2d->edge(j, y1, RIGHT).used_net == nullptr){
+					congestionMap2d->edge(j, y1, RIGHT).used_net = new RoutedNetTable;
+				}
+				pair<RoutedNetTable::iterator, bool> insert_result =
+					congestionMap2d->edge(j, y1, RIGHT).used_net->insert(pair<int, int>(element->net_id, 1));
+				if (!insert_result.second){
+					// 同一條net的2pin net用到同個edge不用有額外的capacity
+					++((insert_result.first)->second);	// insert the routing edge
+				}
+				else
+				{
+					// 成功插入增加demand
+					++(congestionMap2d->edge(j, y1, RIGHT).cur_cap);
+					if (used_cost_flag != FASTROUTE_COST)
+					{
+						pre_evaluate_congestion_cost_fp(j, y1, RIGHT); //unread
+					}
+				}
 			}
 		}
+		else{
+			if(y1 > y2) 
+				std::swap(y1, y2);
+			for(int j = y1; j < y2; ++j){
+				if(congestionMap2d->edge(x1, j, FRONT).used_net == nullptr){
+					congestionMap2d->edge(x1, j, FRONT).used_net = new RoutedNetTable;
+				}
+				pair<RoutedNetTable::iterator, bool> insert_result =
+					congestionMap2d->edge(x1, j, FRONT).used_net->insert(pair<int, int>(element->net_id, 1));
+				if (!insert_result.second){
+					// 同一條net的2pin net用到同個edge不用有額外的capacity
+					++((insert_result.first)->second);	// insert the routing edge
+				}
+				else
+				{
+					// 成功插入增加demand
+					++(congestionMap2d->edge(x1, j, FRONT).cur_cap);
+					if (used_cost_flag != FASTROUTE_COST)
+					{
+						pre_evaluate_congestion_cost_fp(x1, j, FRONT); //unread
+					}
+				}
+			}
+		}
+	
 	}
 }
 
@@ -1473,24 +1324,53 @@ void update_congestion_map_remove_two_pin_net(Two_pin_element_2d *element)
 	int dir;
 	NetDirtyBit[element->net_id] = true;
 
-	for (int i = element->path.size() - 2; i >= 0; --i)
+	for (int i =  0; i < element->path.size()-1; ++i)
 	{
+		int x1 = element->path[i]->x;
+		int y1 = element->path[i]->y;
+		int x2 = element->path[i+1]->x;
+		int y2 = element->path[i+1]->y;
 		dir = get_direction_2d(element->path[i], element->path[i + 1]);
 
-		if(congestionMap2d->edge(element->path[i]->x, element->path[i]->y, dir).used_net != nullptr){
-			if(congestionMap2d->edge(element->path[i]->x, element->path[i]->y, dir).used_net->size() == 0) continue;
-
-			RoutedNetTable::iterator find_result = congestionMap2d->edge(element->path[i]->x, element->path[i]->y, dir).used_net->find(element->net_id);
-			--(find_result->second);	// delete the routing net
-
-			if (find_result->second == 0)	// if the routing net number becomes zero -> recalculate the congestion cost
-			{
-				congestionMap2d->edge(element->path[i]->x, element->path[i]->y, dir).used_net->erase(element->net_id);
-				
-				--(congestionMap2d->edge(element->path[i]->x, element->path[i]->y, dir).cur_cap);
-				if (used_cost_flag != FASTROUTE_COST)
-				{
-					pre_evaluate_congestion_cost_fp(element->path[i]->x, element->path[i]->y, dir);
+		if(dir == LEFT || dir == RIGHT){
+			if(x1 > x2) 
+				std::swap(x1, x2);
+			for(int j = x1; j < x2; ++j){
+				if(congestionMap2d->edge(j, y1, RIGHT).used_net != nullptr){
+					if(congestionMap2d->edge(j, y1, RIGHT).used_net->size() == 0) continue;
+					RoutedNetTable::iterator find_result = 
+						congestionMap2d->edge(j, y1, RIGHT).used_net->find(element->net_id);
+					--(find_result->second);	// delete the routing net
+					if (find_result->second == 0)	// if the routing net number becomes zero -> recalculate the congestion cost
+					{
+						congestionMap2d->edge(j, y1, RIGHT).used_net->erase(element->net_id);
+						--(congestionMap2d->edge(j, y1, RIGHT).cur_cap);
+						if (used_cost_flag != FASTROUTE_COST)
+						{
+							pre_evaluate_congestion_cost_fp(j, y1, RIGHT);
+						}
+					}
+				}
+			}
+		}
+		else{
+			if(y1 > y2) 
+				std::swap(y1, y2);
+			for(int j = y1; j < y2; ++j){
+				if(congestionMap2d->edge(x1, j, FRONT).used_net != nullptr){
+					if(congestionMap2d->edge(x1, j, FRONT).used_net->size() == 0) continue;
+					RoutedNetTable::iterator find_result = 
+						congestionMap2d->edge(x1, j, FRONT).used_net->find(element->net_id);
+					--(find_result->second);	// delete the routing net
+					if (find_result->second == 0)	// if the routing net number becomes zero -> recalculate the congestion cost
+					{
+						congestionMap2d->edge(x1, j, FRONT).used_net->erase(element->net_id);
+						--(congestionMap2d->edge(x1, j, FRONT).cur_cap);
+						if (used_cost_flag != FASTROUTE_COST)
+						{
+							pre_evaluate_congestion_cost_fp(x1, j, FRONT);
+						}
+					}
 				}
 			}
 		}
@@ -1526,24 +1406,12 @@ void gen_FR_congestion_map()
 
 	bboxRouteStateMap = new EdgeColorMap<int8_t>(rr_map->get_gridx(), rr_map->get_gridy(), -1);
 
-	std::cout << "init_2d_map" << std::endl;
-	printMemoryUsage();
-	std::cout << "-------------------" << endl;
 	init_2d_map(); 
 	// initial congestion map: calculating every edge's capacity
 	// 建立congestionMap2d = new EdgePlane<Edge_2d>(rr_map->get_gridx(), rr_map->get_gridy(), Edge_2d());
 	// 裡面存每條edge的 max capacity
-	std::cout << "init_2d_map end" << std::endl;
-	printMemoryUsage();
-	std::cout << "+++++++++++++++++++" << endl;
 
-	std::cout << "init_2pin_list" << std::endl;
-	printMemoryUsage();
-	std::cout << "-------------------" << endl;
 	init_2pin_list(); // initial 2-pin net container
-	std::cout << "init_2pin_list end" << std::endl;
-	printMemoryUsage();
-	std::cout << "+++++++++++++++++++" << endl;
 
 
 
@@ -1647,9 +1515,6 @@ void gen_FR_congestion_map()
 	// Edge shifting will also be applyed to the routing.
 	bool do_edge_shifting = false;
 
-	std::cout << "L-shaped pattern routing middle" << std::endl;
-	printMemoryUsage();
-	std::cout << "mmmmmmmmmmmmmmmmmmmm" << endl;
 	// sort_net 的datatype vector<const Net *> sort_net;
 	//每條net拿來做L-shape pattern route
 	for (auto it = sort_net.begin(); it != sort_net.end(); ++it)
@@ -1709,13 +1574,7 @@ void gen_FR_congestion_map()
 	print_cap("cur");
 #endif
 
-	std::cout << "cal_max_overflow();" << std::endl;
-	printMemoryUsage();
-	std::cout << "-------------------" << endl;
 	cal_max_overflow();
-	std::cout << "cal_max_overflow() end;" << std::endl;
-	printMemoryUsage();
-	std::cout << "+++++++++++++++++++" << endl;
 
 
 	free_memory_con2d();
@@ -2891,17 +2750,11 @@ double construct_2d_tree(RoutingRegion *rr)
 
 	if (routing_parameter->get_monotonic_en())
 	{
-		std::cout << "//////////////////////" << std::endl;
-		std::cout << "[DEBUG     ]"  << "is enable..." << std::endl;
-		std::cout << "//////////////////////" << std::endl;
 		allocate_monotonic(); // Allocate the memory for storing the data while searching monotonic path
 							  // 1. A 2D array that stores max congestion
 							  // 2. A 2D array that stores parent (x,y) during finding monotonic path
 	}
 	else{
-		std::cout << "//////////////////////" << std::endl;
-		std::cout << "[DEBUG     ]"  << "is not enable..." << std::endl;
-		std::cout << "//////////////////////" << std::endl;
 	}
 
 	gen_FR_congestion_map(); // Generate congestion map by flute, then route all nets by L-shap pattern routing with
@@ -2913,13 +2766,7 @@ double construct_2d_tree(RoutingRegion *rr)
     main_start = std::chrono::high_resolution_clock::now();
 
 
-	std::cout << "allocate_gridcell" << std::endl;
-	printMemoryUsage();
-	std::cout << "-------------------" << endl;
 	allocate_gridcell(); // question: I don't know what this for. (jalamorm, 07/10/31)
-	std::cout << "allocate_gridcell end" << std::endl;
-	printMemoryUsage();
-	std::cout << "+++++++++++++++++++" << endl;
 
 
 	// Make a 2-pin net list without group by net
@@ -2927,22 +2774,13 @@ double construct_2d_tree(RoutingRegion *rr)
 	{
 		for (int j = 0; j < (int)net_2pin_list[i]->size(); ++j)
 		{
-			// std::cout  << "[DEBUG     ]" << (*(net_2pin_list[i]))[j]->net_id << std::endl;
 			two_pin_list.push_back((*(net_2pin_list[i]))[j]);
 		}
 		(*(net_2pin_list[i])).clear();
 	}
 	net_2pin_list.clear();
 
-	std::cout << "reallocate_two_pin_list" << std::endl;
-	printMemoryUsage();
-	std::cout << "-------------------" << endl;
 	reallocate_two_pin_list(true);  
-	std::cout << "reallocate_two_pin_list end" << std::endl;
-	printMemoryUsage();
-	std::cout << "+++++++++++++++++++" << endl;
-
-
 
 	cache = new EdgePlane<CacheEdge>(rr_map->get_gridx(), rr_map->get_gridy(), CacheEdge());
 	mazeroute_in_range = new Multisource_multisink_mazeroute();
@@ -2957,7 +2795,7 @@ double construct_2d_tree(RoutingRegion *rr)
 	std::cout << "Iteration:" << std::endl;
 	printMemoryUsage();
 	std::cout << "-------------------" << endl;
-	for(cur_iter = 1, done_iter = cur_iter; cur_iter <= routing_parameter->get_iteration_p2(); ++cur_iter, done_iter = cur_iter) // do n-1 times
+	for(cur_iter = 1, done_iter = cur_iter; cur_iter <= routing_parameter->get_iteration_p2(); ++cur_iter, done_iter = cur_iter) // do n times
 	{
 		cout << "[INFO      ]" << "\033[31mIteration:\033[m " << cur_iter << endl;
 

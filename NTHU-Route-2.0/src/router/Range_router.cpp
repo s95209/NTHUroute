@@ -16,7 +16,6 @@ using namespace std;
 static vector<Range_element*> range_vector;
 static Interval_element interval_list[INTERVAL_NUM];
 
-static int total_twopin=0;
 static int num_of_grid_edge = 0;
 static double min_congestion = 0.; 
 static double max_congestion = 0.;
@@ -149,7 +148,7 @@ void divide_grid_edge_into_interval()
 		{
             tmp = congestionMap2d->edge(i, j, DIR_NORTH).congestion();
 			if (tmp > 1)
-				insert_to_interval(tmp,&coor_array[i][j],FRONT);
+				insert_to_interval(tmp, &coor_array[i][j],FRONT);
 		}
     }
 }
@@ -282,15 +281,14 @@ static void expand_range(int x1, int y1, int x2, int y2, int interval_index)
 				edge_num++;
 			}
 		}
-		
-        expandMap->color(cur_end.x, cur_end.y) = interval_index;
+        expandMap->color(cur_end.x, cur_end.y) = interval_index; //右上角落那塊
 		
 		start = cur_start;
 		end = cur_end;
 		avg_cong = total_cong / edge_num;
 	}// end of while loop
 
-    int extraExpandRange = cur_iter / 10;
+    int extraExpandRange = cur_iter / 10; //10個iteration了，就再expand一格
     start.x = max(start.x-extraExpandRange,0);
     end.x = min(end.x+extraExpandRange,rr_map->get_gridx()-1);
     start.y = max(start.y-extraExpandRange,0);
@@ -307,7 +305,6 @@ static void range_router(Two_pin_element_2d * two_pin)
 {
 	if ( !check_path_no_overflow(&two_pin->path,two_pin->net_id, false) )
 	{
-		++total_twopin;
         //Coordinate_2d pin1 = two_pin->pin1;
         //Coordinate_2d pin2 = two_pin->pin2;
 
@@ -315,8 +312,7 @@ static void range_router(Two_pin_element_2d * two_pin)
 
         update_congestion_map_remove_two_pin_net(two_pin);
 
-		vector<Coordinate_2d*>* bound_path =
-            new vector<Coordinate_2d*>(two_pin->path);
+		vector<Coordinate_2d*>* bound_path = new vector<Coordinate_2d*>(two_pin->path);
 
 		// use monotonic routing first
         Monotonic_element mn;
@@ -335,7 +331,8 @@ static void range_router(Two_pin_element_2d * two_pin)
         if( routing_parameter->get_monotonic_en() ) {
             bool find_path_flag = monotonic_pattern_route(two_pin->pin1.x, two_pin->pin1.y, 
                     two_pin->pin2.x, two_pin->pin2.y, 
-                    two_pin,two_pin->net_id,
+                    two_pin,
+					two_pin->net_id,
                     bound_cost,
                     bound_distance,
                     bound_via_num,
@@ -426,7 +423,6 @@ static void query_range_2pin(int left_x, int bottom_y, int right_x, int top_y, v
 		{
             if( (*it)->done != done_iter ) { // 還沒繞好
 				//routeStateMap初始值為 -1
-				//該條 NET 只要一個PIN在裡面就OK了
                 if(routeStateMap->color((*it)->pin1.x, (*it)->pin1.y) != done_counter &&
                    routeStateMap->color((*it)->pin2.x, (*it)->pin2.y) != done_counter)
                 {
@@ -452,7 +448,6 @@ void specify_all_range(void)
     expandMap = new VertexColorMap<int>(rr_map->get_gridx(), rr_map->get_gridy(), -1);
     routeStateMap = new VertexColorMap<int>(rr_map->get_gridx(), rr_map->get_gridy(), -1);
 	
-	total_twopin = 0;
 	// intervalCount 前面 define 為 10
 	for (int i = intervalCount - 1; i >= 0; --i) {
 
@@ -476,6 +471,7 @@ void specify_all_range(void)
 
             int nei_x = x;
             int nei_y = y;
+			
             if (dir == RIGHT)
                 ++nei_x;
             else ++nei_y;
@@ -502,7 +498,7 @@ void specify_all_range(void)
 		// 有經過 zero_edge 的放前面，boxSize大的放前面
 		sort(twopin_list.begin(),twopin_list.end(), comp_stn_2pin);
 
-		// 繞那些完全在range中的線
+		// 繞那些pin有在range中的線
         for (int j = 0; j < (int)twopin_list.size(); ++j) { 
             range_router(twopin_list[j]);
         }
@@ -514,7 +510,7 @@ void specify_all_range(void)
 
 
 
-	// 沒在congestion region 的線現在來繞
+	// 沒在congestion region 的線現在來繞, range_route會檢查是否有overflow，沒有就不繞
 	int length = two_pin_list.size();
 	for (int i=0; i<length; ++i)
 	{

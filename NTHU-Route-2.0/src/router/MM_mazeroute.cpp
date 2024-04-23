@@ -66,27 +66,9 @@ void Multisource_multisink_mazeroute::trace_back_to_find_path_2d(MMM_element *en
 		if (cur_pos == NULL)
 			break;
 		this->element->path.push_back(cur_pos->coor);
-        // std::cout << "<-(" << cur_pos->coor->x << "," << cur_pos->coor->y << ")";
-// #ifdef GAMER
-//         if (is_start) {
-//             is_start = false;
-//         } else {
-//             pre_dir = get_direction_2d_simple(cur_pos->coor, prev_pos->coor);
-//             if (cur_pos->parent != nullptr) {
-//                 now_dir = get_direction_2d_simple(cur_pos->coor, cur_pos->parent->coor);
-//                 if (pre_dir != now_dir)
-//                     numTurns++;
-//             }
-//         }
-//         prev_pos = cur_pos;
-// #endif
+
 		cur_pos = cur_pos->parent;
 	}
-    // std::cout << "\n";
-    // std::cout << "#Turns = " << numTurns << '\n';
-// #ifdef GAMER
-//     maxTurns = max(maxTurns, numTurns);
-// #endif
 }
 
 //store new 2pins and adjust dfs tree
@@ -1000,7 +982,6 @@ bool Multisource_multisink_mazeroute::mm_maze_route_p3(Two_pin_element_2d *eleme
     MMM_element* cur_pos = NULL;
     MMM_element* next_pos = NULL;
     MMM_element* sink_pos = NULL;
-
     element->path.clear();
     this->element = element;
     this->boundary_l = start.x;

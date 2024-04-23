@@ -32,27 +32,62 @@ int comp(const COUNTER& a, const COUNTER& b)
 //Return false if the edge is overflowed
 bool check_path_no_overflow(vector<Coordinate_2d*> *path, int net_id, int inc_flag)
 {
-	for (int i = path->size() - 2; i >= 0; --i)
+	int dir;
+	for (int i = 0; i < path->size() - 1; ++i)
 	{
-		int dir = get_direction_2d((*path)[i],(*path)[i+1]);
+		int x1 = ((*path)[i])->x;
+		int y1 = ((*path)[i])->y;
+		int x2 = ((*path)[i])->x;
+		int y2 = ((*path)[i+1])->y;
+		dir = get_direction_2d((*path)[i],(*path)[i+1]);
         //There are two modes:
         // 1. inc_flag = 0: Just report if the specified edge is overflowd
         // 2. inc_flag = 1: Check if the specified edge will be overflowed if wd add a demand on it.
-		if (inc_flag==0)
+		if (inc_flag == 0)
 		{
-            if(congestionMap2d->edge((*path)[i]->x, (*path)[i]->y, dir).isOverflow())
-                return false;
+			if(dir == LEFT || dir == RIGHT){
+				if(x1 > x2) 
+					std::swap(x1, x2);
+
+				for(int j = x1; j <= x2; ++j){
+					if(congestionMap2d->edge(j, y1, RIGHT).isOverflow())
+						return false;
+				}
+			}
+			else{
+				if(y1 > y2) 
+					std::swap(y1, y2);
+
+				for(int j = y1; j <= y2; ++j){
+					if(congestionMap2d->edge(x1, j, FRONT).isOverflow())
+						return false;
+				}
+			}
 		}else
 		{
-			int inc = 1;
-            //If there is another 2-pin net from the same net is using the specified edge,
+			//If there is another 2-pin net from the same net is using the specified edge,
             //then we don't need to increase a demand on it. We can use the edge directly
-            if(congestionMap2d->edge((*path)[i]->x, (*path)[i]->y, dir).lookupNet(net_id)) 
-                inc = 0;
-
-			if (sign(congestionMap2d->edge((*path)[i]->x, (*path)[i]->y, dir).cur_cap + inc -
-                congestionMap2d->edge((*path)[i]->x, (*path)[i]->y, dir).max_cap) > 0)
-				return false;
+			int inc = 1;
+			if(dir == LEFT || dir == RIGHT){
+				if(x1 > x2) 
+					std::swap(x1, x2);
+				for(int j = x1; j <= x2; ++j){
+					if(congestionMap2d->edge(j, y1, RIGHT).lookupNet(net_id)) 
+						inc = 0;
+					if (sign(congestionMap2d->edge(j, y1, RIGHT).cur_cap + inc - congestionMap2d->edge(j, y1, RIGHT).max_cap) > 0)
+						return false;
+				}
+			}
+			else{
+				if(y1 > y2) 
+					std::swap(y1, y2);
+				for(int j = x1; j <= x2; ++j){
+					if(congestionMap2d->edge(x1, j, FRONT).lookupNet(net_id)) 
+						inc = 0;
+					if (sign(congestionMap2d->edge(x1, j, FRONT).cur_cap + inc - congestionMap2d->edge(x1, j, FRONT).max_cap) > 0)
+						return false;
+				}
+			}
 		}
 	}
 	return true;
@@ -69,11 +104,29 @@ void compute_path_total_cost_and_distance(Two_pin_element_2d* element, Monotonic
 	mn->via_num=0;
 
 	// to get through each net between the two pins
-	for(int i = element->path.size() - 2; i >= 0; --i)
+	for(int i = 0; i < element->path.size() - 1; ++i)
 	{
+		int x1 = element->path[i]->x;
+		int y1 = element->path[i]->y;
+		int x2 = element->path[i+1]->x;
+		int y2 = element->path[i+1]->y;
 		int dir = get_direction_2d(element->path[i], element->path[i+1]);
-		mn->total_cost += get_cost_2d(element->path[i]->x, element->path[i]->y, dir, element->net_id, &distance);
-		mn->distance += distance;
+		if(dir == LEFT || dir == RIGHT){
+			if(x1 > x2) 
+				std::swap(x1, x2);
+			for(int j = x1; j <= x2; ++j){
+				mn->total_cost += get_cost_2d(j, y1, RIGHT, element->net_id, &distance);
+				mn->distance += distance;
+			}
+		}
+		else{
+			if(y1 > y2) 
+				std::swap(y1, y2);
+			for(int j = y1; j <= y2; ++j){
+				mn->total_cost += get_cost_2d(x1, j, FRONT, element->net_id, &distance);
+				mn->distance += distance;
+			}
+		}
 		if (pre_dir != -1)
 		{
             //if the wire need to bend, then we need to add via cost to it (top(down) -> right(left))
@@ -104,30 +157,41 @@ void initial_for_post_processing()
 	
 	for(i = two_pin_list.size() -1; i >= 0; --i)
 	{
-		if (two_pin_list[i]->path.size() == 0)
+
+		if(two_pin_list[i]->path.size() == 0)
 			temp_list.push_back(two_pin_list[i]);
 		counter[i].id = i;
 		counter[i].total_overflow = 0;
 		counter[i].bsize = abs(two_pin_list[i]->pin1.x - two_pin_list[i]->pin2.x)
                          + abs(two_pin_list[i]->pin1.y - two_pin_list[i]->pin2.y);
 		counter[i].path_through_zero_edge = false;
-		for(j = two_pin_list[i]->path.size()-1; j > 0; --j)
+		
+		for(j = 0; j < two_pin_list[i]->path.size()-1; --j)
 		{
-			x_dir = two_pin_list[i]->path[j-1]->x - two_pin_list[i]->path[j]->x;
-			y_dir = two_pin_list[i]->path[j-1]->y - two_pin_list[i]->path[j]->y;
-			if(x_dir)
-				edge_idx = (x_dir == 1) ? RIGHT : LEFT;
-			else	// y_dir
-				edge_idx = (y_dir == 1) ? FRONT : BACK;
-			x = two_pin_list[i]->path[j]->x;
-			y = two_pin_list[i]->path[j]->y;
-			if (congestionMap2d->edge(x, y, edge_idx).isOverflow())
-			{
-				counter[i].total_overflow += max(0, congestionMap2d->edge(x, y, edge_idx).overUsage());
+			int x1 = two_pin_list[i]->path[j]->x;
+			int y1 = two_pin_list[i]->path[j]->y;
+			int x2 = two_pin_list[i]->path[j+1]->x;
+			int y2 = two_pin_list[i]->path[j+1]->y;		
+			int edge_dir;
+			if(x1 != x2){
+				if(x1 > x2) edge_dir = LEFT;
+				else edge_dir = RIGHT;
 			}
-			if (sign(congestionMap2d->edge(x, y, edge_idx).max_cap) == 0)
+			else{
+				if(y1 > y2) edge_dir = BACK;
+				else edge_dir = FRONT;
+			}
+
+			if (congestionMap2d->edge(x1, y1, edge_dir).isOverflow())
+			{
+				counter[i].total_overflow += max(0, congestionMap2d->edge(x1, y1, edge_dir).overUsage());
+			}
+
+			if (sign(congestionMap2d->edge(x1, y1, edge_dir).max_cap) == 0)
 				counter[i].path_through_zero_edge = true;
 		}
+
+
 		if (counter[i].total_overflow > 0)
 		{
 			total_no_overflow = false;
@@ -197,36 +261,7 @@ void initial_for_post_processing()
 				end.x = min(rr_map->get_gridx()-1,end.x+BOXSIZE_INC);
 				end.y = min(rr_map->get_gridy()-1,end.y+BOXSIZE_INC);
 
-				// if (two_pin_list[id]->net_id == 892 && bound_cost > 1000) {
-				// 	ofstream fout("search_space.txt");
-				// 	fout << "Pin1: " << two_pin_list[id]->pin1.x << ' ' << two_pin_list[id]->pin1.y << '\n';
-				// 	fout << "Pin2: " << two_pin_list[id]->pin2.x << ' ' << two_pin_list[id]->pin2.y << '\n';
-				// 	int start_x = max(0, start.x-3);
-				// 	int start_y = max(0, start.y-3);
-				// 	int end_x = min(rr_map->get_gridx()-1,end.x+3);
-				// 	int end_y = min(rr_map->get_gridy()-1,end.y+3);
-				// 	for (int x=start_x; x<end_x; ++x) {
-				// 		for (int y=start_y; y<=end_y; ++y) {
-				// 			fout << x << ' ' << y << ' ' << x+1 << ' ' << y << ' ';
-				// 			int cap = 0;
-				// 			for (int k=0; k<rr_map->get_layerNumber(); ++k)
-				// 				cap += rr_map->capacity(k, x, y, x+1, y);
-				// 			fout << cap << '\n';
-				// 			// << std::round(congestionMap2d->edge(x, y, DIR_EAST).max_cap - congestionMap2d->edge(x, y, DIR_EAST).cur_cap) << '\n';
-				// 		}
-				// 	}
-				// 	for (int x=start_x; x<=end_x; ++x) {
-				// 		for (int y=start_y; y<end_y; ++y) {
-				// 			fout << x << ' ' << y << ' ' << x << ' ' << y+1 << ' ';
-				// 			int cap = 0;
-				// 			for (int k=0; k<rr_map->get_layerNumber(); ++k)
-				// 				cap += rr_map->capacity(k, x, y, x, y+1);
-				// 			fout << cap << '\n';
-				// 			// << std::round(congestionMap2d->edge(x, y, DIR_NORTH).max_cap - congestionMap2d->edge(x, y, DIR_NORTH).cur_cap) << '\n';
-				// 		}
-				// 	}
-				// 	fout.close();
-				// }	
+
 
     			using namespace std::chrono;
 				auto maze_start = std::chrono::high_resolution_clock::now();
@@ -277,13 +312,9 @@ void Post_processing(void)
     if(cur_overflow > 0) {
         //In post processing, we only need to pre-evaluate all cost once.
         //The other update will be done by update_add(remove)_edge
-		std::cout << "pre_evaluate_congestion_cost" << endl;
-        printMemoryUsage();
-        std::cout << "-------------------" << endl;
+
         pre_evaluate_congestion_cost();
-		std::cout << "pre_evaluate_congestion_cost end" << endl;
-        printMemoryUsage();
-        std::cout << "-------------------" << endl;
+
         for (int i = 0; i < Post_processing_iteration; ++i,++done_iter)
         {
             printf("\033[31mIteration: \033[m%d\n",i+1);

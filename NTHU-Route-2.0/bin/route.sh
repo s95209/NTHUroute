@@ -123,6 +123,7 @@ LOG_FILE="$GUIDE_FOLDER/$TESTCASE.log"
 
 
 echo "Running command: ./route -cap $CAP_FILE -net $NET_FILE -output $GUIDE_FILE |& tee $LOG_FILE"
+# valgrind ./route -cap $CAP_FILE -net $NET_FILE -output $GUIDE_FILE |& tee $LOG_FILE
 ./route -cap $CAP_FILE -net $NET_FILE -output $GUIDE_FILE |& tee $LOG_FILE
 
 if [ -e "$GUIDE_FILE" ]; then

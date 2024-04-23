@@ -119,15 +119,14 @@ public:
 
 class Monotonic_element
 {
+    public:
+        double max_cost;
 
-public:
-    double max_cost;
+        double total_cost; // record the acculmated congestion of the monotonic path
 
-    double total_cost; // record the acculmated congestion of the monotonic path
+        int distance;
 
-    int distance;
-
-    int via_num;
+        int via_num;
 };
 
 class Two_pin_element
@@ -366,13 +365,10 @@ extern bool smaller_than_lower_bound(double total_cost,
                                      int bound_via_num);
 
 inline bool comp_stn_2pin(const Two_pin_element_2d *a, const Two_pin_element_2d *b)
-
 {
-    // if (a->path_through_zero_edge || b->path_through_zero_edge) cout << "ok\n";
     if (a->path_through_zero_edge && !b->path_through_zero_edge) return true;
     if (!a->path_through_zero_edge && b->path_through_zero_edge) return false;
     return (a->boxSize() > b->boxSize());
-    // return (a->boxSize() < b->boxSize());
 }
 
 inline int get_direction_2d_simple(const Jm::Coordinate_2d *a,

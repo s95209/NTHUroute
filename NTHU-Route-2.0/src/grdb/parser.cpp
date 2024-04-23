@@ -154,7 +154,6 @@ void Parser24::setEdgeCapacity()
                     resource = this->GcellCapacity[layer][i][j];
                     if (layer == 0)
                         resource = 0;
-                    // std::cout << "i: " << i << " j: " << j << std::endl;
                     builder_->adjustEdgeCapacity(i, j, layer, i+1, j, layer, resource);
                 }
             }
@@ -180,7 +179,6 @@ void Parser24::setEdgeCapacity()
 
 void Parser24::parseCapFile()
 {
-    std::cout  << "[DEBUG     ]" << "parse" << std::endl;
     std::ifstream resourceFile(this->cap_file);
 
     std::string line;
@@ -265,37 +263,14 @@ void Parser24::parse(Builder *builder)
     builder_ = builder;
 
 
-    std::cout << "[DEBUG     ]" << "parseCapFile" << std::endl;
-    printMemoryUsage();
-    std::cout << "-------------------" << endl;
+
     this->parseCapFile();
-    std::cout << "[DEBUG     ]" << "parseCapFile end" << endl;
-    printMemoryUsage();
-    std::cout << "+++++++++++++++++++" << endl;
 
-    std::cout << "[DEBUG     ]" << "setEdgeCapacity" << std::endl;
-    printMemoryUsage();
-    std::cout << "-------------------" << endl;
     this->setEdgeCapacity();
-    std::cout << "[DEBUG     ]" << "setEdgeCapacity end" << std::endl;
-    printMemoryUsage();
-    std::cout << "+++++++++++++++++++" << endl;
 
-    std::cout << "[DEBUG     ]" << "parseNetFile" << std::endl;
-    printMemoryUsage();
-    std::cout << "-------------------" << endl;
     this->parseNetFile();
-    std::cout << "[DEBUG     ]" << "parseNetFile end" << std::endl;
-    printMemoryUsage();
-    std::cout << "+++++++++++++++++++" << endl;
 
-    std::cout << "[DEBUG     ]" << "setNetList" << std::endl;
-    printMemoryUsage();
-    std::cout << "-------------------" << endl;
     this->setNetList();
-    std::cout << "[DEBUG     ]" << "setNetList end" << std::endl;
-    printMemoryUsage();
-    std::cout << "+++++++++++++++++++" << endl;
 }  
 
 

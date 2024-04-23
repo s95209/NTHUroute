@@ -53,7 +53,7 @@ static void init_gridcell()
 		}
     }
 
-
+	std::cout << "here: " << two_pin_list.size() << std::endl;
 	for (int i=0; i < two_pin_list.size(); ++i)
 	{
 		//add pin1
@@ -290,7 +290,7 @@ void bfs_for_find_two_pin_list(Coordinate_2d *start_coor, int net_id, bool inser
 							else
 							{
 								update_congestion_map_remove_two_pin_net(two_pin); // 自己已經走過了被接上了
-                                NetDirtyBit[two_pin->net_id] = true;
+								NetDirtyBit[two_pin->net_id] = true;
 								if (two_pin_list_size>=(int)two_pin_list.size())
 								{
 									two_pin->path.clear();
@@ -342,19 +342,19 @@ void bfs_for_find_two_pin_list(Coordinate_2d *start_coor, int net_id, bool inser
 
 void reallocate_two_pin_list(bool insert_to_branch)
 {
-    int dirty_count = 0;
     traverseMap = new VertexColorMap<int>(rr_map->get_gridx(), rr_map->get_gridy(), -1);
     terminalMap = new VertexColorMap<int>(rr_map->get_gridx(), rr_map->get_gridy(), -1);
 	
+
 	reset_c_map_used_net_to_one(); // 使用次數都設為1
 
 	two_pin_list_size = 0;
 
 
-	// 把還沒繞的線放到two_pin_list的前面
+	// 把還沒髒的線放到two_pin_list的前面
     int usedTwoPinListSize = 0;
 	for (int twoPinListPos = 0; twoPinListPos < (int)two_pin_list.size(); ++twoPinListPos) {
-        if( NetDirtyBit[ two_pin_list[twoPinListPos]->net_id ] == false ) //false 這個net還沒被繞好
+        if( NetDirtyBit[ two_pin_list[twoPinListPos]->net_id ] == false ) 
 		{
             if(usedTwoPinListSize != twoPinListPos) {
                 swap(two_pin_list[twoPinListPos], two_pin_list[usedTwoPinListSize]);
@@ -375,11 +375,13 @@ void reallocate_two_pin_list(bool insert_to_branch)
             Coordinate_2d* start_coor = &coor_array[xx][yy];
 
             bfs_for_find_two_pin_list(start_coor, netId, insert_to_branch);
+
             NetDirtyBit[netId] = false;
-            ++dirty_count;
         }
 	}
 
+
+	// 扣掉多出來的NET
 	for (int i = two_pin_list.size()-1; i >= two_pin_list_size; --i)
 	{
 		delete(two_pin_list[i]);
@@ -387,6 +389,7 @@ void reallocate_two_pin_list(bool insert_to_branch)
 	}
 
 	// added
+	
 	for(int i = two_pin_list.size() -1; i >= 0; --i)
 	{
 		two_pin_list[i]->path_through_zero_edge = false;

@@ -104,7 +104,6 @@ void RoutingRegion::adjustEdgeCapacity (unsigned int x1,
 
 	//get horizontal capacity
 	if( (x1 != x2) && (y1 == y2) ){
-        // std::cout << "x: " << x << " y: " << y << std::endl;
         routingSpace_->edge(x, y, z1, DIR_EAST).capacity = capacity;
 	}
 }
