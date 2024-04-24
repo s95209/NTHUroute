@@ -34,6 +34,8 @@
 
 #include "gr_db/GrDbTrans.h"
 
+// #include "absl/strings/str_join.h"
+
 double LARGE_NUM = 100000000;
 
 string route_dict;
@@ -165,6 +167,9 @@ void transOutput(const std::string &in_file, const std::string &out_file)
 
 int main(int argc, char *argv[])
 {
+    // std::vector<std::string> v = {"foo","bar","baz"};
+    // std::string s = absl::StrJoin(v, "-");
+    // std::cout << "Joined string: " << s << "\n";
 
     cout << "=======================================================" << endl
 

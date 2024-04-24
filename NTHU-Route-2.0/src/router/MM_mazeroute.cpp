@@ -61,12 +61,9 @@ void Multisource_multisink_mazeroute::trace_back_to_find_path_2d(MMM_element *en
 	
 	cur_pos = end_point;
     // std::cout << "Path: end";
-	while (1)
+	while (cur_pos)
 	{
-		if (cur_pos == NULL)
-			break;
 		this->element->path.push_back(cur_pos->coor);
-
 		cur_pos = cur_pos->parent;
 	}
 }

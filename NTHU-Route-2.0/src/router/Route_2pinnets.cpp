@@ -52,8 +52,6 @@ static void init_gridcell()
 			gridcell->vertex(i, j).points.clear();  // vector<Two_pin_element_2d*> points;
 		}
     }
-
-	std::cout << "here: " << two_pin_list.size() << std::endl;
 	for (int i=0; i < two_pin_list.size(); ++i)
 	{
 		//add pin1
@@ -156,11 +154,11 @@ static int determine_is_terminal_or_steiner_point(int xx, int yy, int dir, int n
         for (int i = 3; i >= 0; --i) {
             if (i != dir)  
             {
-                 if((i == 3 && xx >= gridxMinusOne) || 
-                    (i == 2 && xx <= 0)             ||
-                    (i == 1 && yy <= 0)             ||
-                    (i == 0 && yy >= gridyMinusOne) ) continue;
-                 else
+				if((i == 3 && xx >= gridxMinusOne) || 
+				   (i == 2 && xx <= 0)             ||
+				   (i == 1 && yy <= 0)             ||
+				   (i == 0 && yy >= gridyMinusOne)) continue;
+				else
                 {
                     if(congestionMap2d->edge(xx, yy, i).lookupNet(net_id))
                     {
@@ -205,7 +203,7 @@ void bfs_for_find_two_pin_list(Coordinate_2d *start_coor, int net_id, bool inser
 		branch_ind.push_back(0);
 	}
 
-	while (head_index != tail_index)
+	while(head_index != tail_index)
 	{
 		// 0:FRONT 1:BACK 2:LEFT 3:RIGHT
 		for (i = 0; i <= 3; ++i)
@@ -231,7 +229,6 @@ void bfs_for_find_two_pin_list(Coordinate_2d *start_coor, int net_id, bool inser
 					}else{
 						two_pin = two_pin_list[two_pin_list_size]; 
                     }
-
 					two_pin->pin1.x = queue[head_index]->x;  // 2pin net的開頭
 					two_pin->pin1.y = queue[head_index]->y;  // 2pin net的開頭
 					two_pin->net_id = net_id;
@@ -243,9 +240,13 @@ void bfs_for_find_two_pin_list(Coordinate_2d *start_coor, int net_id, bool inser
                         traverseMap->color(x, y) = net_id;
 						xx = x+dir_array[dir][0];
 						yy = y+dir_array[dir][1];
+
 						ori_dir = dir;
 						dir = determine_is_terminal_or_steiner_point(xx,yy,dir,net_id);
-						two_pin->path.push_back(&coor_array[xx][yy]);
+						
+						if(ori_dir != dir){
+							two_pin->path.push_back(&coor_array[xx][yy]);
+						}
 
 						// one-degree terminal: -4, non-one-degree terminal: -3, 
 						// one-degree nonterminal: -2, steiner point: > 0
@@ -258,6 +259,7 @@ void bfs_for_find_two_pin_list(Coordinate_2d *start_coor, int net_id, bool inser
 							{
 								two_pin->pin2.x = xx;
 								two_pin->pin2.y = yy;
+
 								if (two_pin_list_size >= (int)two_pin_list.size()){
 									two_pin_list.push_back(two_pin);
 								}
@@ -280,9 +282,9 @@ void bfs_for_find_two_pin_list(Coordinate_2d *start_coor, int net_id, bool inser
 										parent.push_back(LEFT);
 									else parent.push_back(RIGHT);
 									
-									if (insert_to_branch)
+									if (insert_to_branch){
 										branch_ind.push_back(branch_xy.size()-1);
-										
+									}
 									tail_index++;
 								}
                                 traverseMap->color(xx, yy) = net_id;
@@ -392,22 +394,35 @@ void reallocate_two_pin_list(bool insert_to_branch)
 	
 	for(int i = two_pin_list.size() -1; i >= 0; --i)
 	{
+		int dir;
 		two_pin_list[i]->path_through_zero_edge = false;
-		for(int j = two_pin_list[i]->path.size()-1; j > 0; --j)
+		for(int j = 0; j < two_pin_list[i]->path.size()-1; ++j)
 		{
-			int x_dir = two_pin_list[i]->path[j-1]->x - two_pin_list[i]->path[j]->x;
-			int y_dir = two_pin_list[i]->path[j-1]->y - two_pin_list[i]->path[j]->y;
-			int edge_idx;
-			if(x_dir)
-				edge_idx = (x_dir == 1) ? RIGHT : LEFT;
-			else	// y_dir
-				edge_idx = (y_dir == 1) ? FRONT : BACK;
-
-			int x = two_pin_list[i]->path[j]->x;
-			int y = two_pin_list[i]->path[j]->y;
-
-			if (!two_pin_list[i]->path_through_zero_edge && sign(congestionMap2d->edge(x, y, edge_idx).max_cap) == 0)
-				two_pin_list[i]->path_through_zero_edge = true;
+			int x1 = two_pin_list[i]->path[j]->x;
+			int y1 = two_pin_list[i]->path[j]->y;
+			int x2 = two_pin_list[i]->path[j+1]->x;
+			int y2 = two_pin_list[i]->path[j+1]->y;
+			dir = get_direction_2d(two_pin_list[i]->path[j], two_pin_list[i]->path[j+1]);
+			if(dir == LEFT || dir == RIGHT){
+				if(x1 > x2) 
+					std::swap(x1, x2);
+				for(int z = x1; z <= x2; ++z){
+					if (!two_pin_list[i]->path_through_zero_edge && sign(congestionMap2d->edge(x1, y1, RIGHT).max_cap) == 0)
+					{
+						two_pin_list[i]->path_through_zero_edge = true;
+					}
+				}
+			}
+			else{
+				if(y1 > y2) 
+					std::swap(y1, y2);
+				for(int z = y1; z <= y2; ++z){
+					if (!two_pin_list[i]->path_through_zero_edge && sign(congestionMap2d->edge(x1, y1, FRONT).max_cap) == 0)
+					{
+						two_pin_list[i]->path_through_zero_edge = true;
+					}
+				}
+			}
 		}
 	}
     delete traverseMap;

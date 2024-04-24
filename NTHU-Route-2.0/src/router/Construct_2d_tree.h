@@ -161,7 +161,7 @@ public:
     }
 };
 
-typedef std::unordered_map<int, int> RoutedNetTable;
+typedef std::unordered_map<int, int16_t> RoutedNetTable;
 
 class Edge_2d
 {
@@ -222,7 +222,7 @@ public:
     }
 };
 
-typedef std::unordered_map<int, int> LRoutedNetTable;
+typedef std::unordered_map<int, int16_t> LRoutedNetTable;
 
 class Edge_3d
 {

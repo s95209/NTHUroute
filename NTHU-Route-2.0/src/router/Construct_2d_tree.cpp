@@ -1184,21 +1184,27 @@ void traverse_parent_monotonic(int x1, int y1, int x2, int y2, Two_pin_element_2
 {
 	int i = x2;
 	int j = y2;
+	int predir = -1;
 	// Sink != Source
 	while ((i != x1) || (j != y1))
 	{
 		// Push the path in to a list
-		(*two_pin_monotonic_path).path.push_back(&coor_array[i][j]);
-
+		if(parent_monotonic[i][j] != predir){
+			(*two_pin_monotonic_path).path.push_back(&coor_array[i][j]);
+		}
 		// Update the coordinate of tracing cell
-		if (parent_monotonic[i][j] == LEFT)
+		if (parent_monotonic[i][j] == LEFT){
+			predir = LEFT;
 			--i;
-
-		else if (parent_monotonic[i][j] == FRONT)
+		}
+		else if (parent_monotonic[i][j] == FRONT){
+			predir = FRONT;
 			++j;
-
-		else
+		}
+		else{
+			predir = BACK;
 			--j;
+		}
 	}
 
 	// push the source to list
