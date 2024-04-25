@@ -34,6 +34,8 @@
 
 #include <unordered_map>
 
+#include "unordered_dense.h"
+
 using std::vector;
 
 using std::set;
@@ -160,8 +162,7 @@ public:
     {
     }
 };
-
-typedef std::unordered_map<int, int16_t> RoutedNetTable;
+typedef ankerl::unordered_dense::map<int, int16_t> RoutedNetTable;
 
 class Edge_2d
 {
@@ -222,7 +223,7 @@ public:
     }
 };
 
-typedef std::unordered_map<int, int16_t> LRoutedNetTable;
+typedef ankerl::unordered_dense::map<int, int16_t> LRoutedNetTable;
 
 class Edge_3d
 {

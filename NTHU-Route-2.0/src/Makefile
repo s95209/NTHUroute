@@ -34,7 +34,7 @@ Flutelibrary   =
 GDlibrary = -lgd
 ##	Make sure you have point to the directory which contains GD
 ##  library
-
+Unordered_denseIncDir = $(HOME_DIR)/library/unordered_dense/include/ankerl/
 
 DebugOptions = -O3 -funroll-loops -march=nocona -finline-functions -DNDEBUG -w
 ##  Add -DNDEBUG to remove the debugging assertions (unwise at this stage).
@@ -47,7 +47,7 @@ WarnOptions = -W -Wall -Wextra -Wno-missing-braces
 ##  braces in struct/array initializer lists.
 
 
-IncDirs      = -I. $(ZlibIncDir) -I$(BoostIncDir) -Irsyn/
+IncDirs      = -I. $(ZlibIncDir) -I$(BoostIncDir) -Irsyn/ -I$(Unordered_denseIncDir)
 CxxOptions   = $(WarnOptions) $(DebugOptions)
 
 CXXFLAGS     = -std=c++17 $(CxxOptions) $(IncDirs)  -fopenmp -g

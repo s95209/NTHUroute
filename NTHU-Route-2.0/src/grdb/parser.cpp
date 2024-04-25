@@ -262,15 +262,38 @@ void Parser24::parse(Builder *builder)
     assert(builder != NULL);
     builder_ = builder;
 
-
-
+    std::cout << "parseCapFile" << std::endl;
+	printMemoryUsage();
+	std::cout << "-------------------" << endl;
     this->parseCapFile();
+    std::cout << "parseCapFile end" << std::endl;
+	printMemoryUsage();
+	std::cout << "+++++++++++++++++++" << endl;
 
+
+    std::cout << "setEdgeCapacity" << std::endl;
+	printMemoryUsage();
+	std::cout << "-------------------" << endl;
     this->setEdgeCapacity();
+    std::cout << "setEdgeCapacity end" << std::endl;
+	printMemoryUsage();
+	std::cout << "+++++++++++++++++++" << endl;
 
+    std::cout << "parseNetFile" << std::endl;
+	printMemoryUsage();
+	std::cout << "-------------------" << endl;
     this->parseNetFile();
+    std::cout << "parseNetFile end" << std::endl;
+	printMemoryUsage();
+	std::cout << "+++++++++++++++++++" << endl;
 
+    std::cout << "setNetList" << std::endl;
+	printMemoryUsage();
+	std::cout << "-------------------" << endl;
     this->setNetList();
+    std::cout << "setNetList end" << std::endl;
+	printMemoryUsage();
+	std::cout << "+++++++++++++++++++" << endl;
 }  
 
 

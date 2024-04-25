@@ -1,6 +1,6 @@
 #!/bin/bash
 
-BENCHMARK_PATH="../../ISPD2024_benchmarks/nangate45"
+BENCHMARK_PATH="../../../ISPD2024_benchmarks/nangate45"
 NTHU_ROUTE_PATH="../"
 
 BENCHMARK_PATH=$(realpath "$BENCHMARK_PATH")
