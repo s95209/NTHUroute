@@ -353,4 +353,5 @@ void dataPreparetionISPD2024(ParameterAnalyzer &ap, Builder *builder)
     std::cout << ap.get_cap_file() << ' ' << ap.get_net_file() << '\n';
     GRParser *parser = new Parser24(ap.get_cap_file(), ap.get_net_file());
     parser->parse(builder);
+    delete parser;
 }
