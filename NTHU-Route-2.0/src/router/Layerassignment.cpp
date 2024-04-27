@@ -508,9 +508,12 @@ void update_cur_map_for_klat_xy(int cur_idx, Coordinate_2d *start, Coordinate_2d
     assert(cur_idx > 0);
     if (start->x != end->x && start->y == end->y) {
         dir_idx = ((end->x > start->x) ? LEFT : RIGHT);
-        cur_map_3d[end->x][end->y][cur_idx].edge_list[dir_idx]->used_net[net_id]++;
+        if(cur_map_3d[end->x][end->y][cur_idx].edge_list[dir_idx]->used_net == nullptr){
+            cur_map_3d[end->x][end->y][cur_idx].edge_list[dir_idx]->used_net = new LRoutedNetTable;
+        }
+        (*(cur_map_3d[end->x][end->y][cur_idx].edge_list[dir_idx]->used_net))[net_id]++;
         cur_map_3d[end->x][end->y][cur_idx].edge_list[dir_idx]->cur_cap =
-            (cur_map_3d[end->x][end->y][cur_idx].edge_list[dir_idx]->used_net.size()); // modified
+            (cur_map_3d[end->x][end->y][cur_idx].edge_list[dir_idx]->used_net->size()); // modified
         if (cur_map_3d[end->x][end->y][cur_idx].edge_list[dir_idx]->cur_cap
             > cur_map_3d[end->x][end->y][cur_idx].edge_list[dir_idx]->max_cap) // need check
         {
@@ -520,9 +523,12 @@ void update_cur_map_for_klat_xy(int cur_idx, Coordinate_2d *start, Coordinate_2d
     }
     else if (start->y != end->y && start->x == end->x) {
         dir_idx = ((end->y > start->y) ? BACK : FRONT);
-        cur_map_3d[end->x][end->y][cur_idx].edge_list[dir_idx]->used_net[net_id]++;
+        if(cur_map_3d[end->x][end->y][cur_idx].edge_list[dir_idx]->used_net == nullptr){
+            cur_map_3d[end->x][end->y][cur_idx].edge_list[dir_idx]->used_net = new LRoutedNetTable;
+        }
+        (*(cur_map_3d[end->x][end->y][cur_idx].edge_list[dir_idx]->used_net))[net_id]++;
         cur_map_3d[end->x][end->y][cur_idx].edge_list[dir_idx]->cur_cap =
-            (cur_map_3d[end->x][end->y][cur_idx].edge_list[dir_idx]->used_net.size()); // modified
+            (cur_map_3d[end->x][end->y][cur_idx].edge_list[dir_idx]->used_net->size()); // modified
         if (cur_map_3d[end->x][end->y][cur_idx].edge_list[dir_idx]->cur_cap
             > cur_map_3d[end->x][end->y][cur_idx].edge_list[dir_idx]->max_cap) // need check
         {
@@ -553,7 +559,10 @@ void update_cur_map_for_klat_z(int pre_idx, int cur_idx, Coordinate_2d *start, i
         j = start->y;
         for (k = pre_idx; k != cur_idx; k += z_dir)
         {
-            cur_map_3d[i][j][k].edge_list[dir_idx]->used_net[net_id]++;
+            if(cur_map_3d[i][j][k].edge_list[dir_idx]->used_net == nullptr){
+                cur_map_3d[i][j][k].edge_list[dir_idx]->used_net = new LRoutedNetTable;
+            }
+            (*(cur_map_3d[i][j][k].edge_list[dir_idx]->used_net))[net_id]++;
             if (z_dir == 1)
             {
                 ++viadensity_map[i][j][k].cur;
@@ -1204,7 +1213,10 @@ void DP(int x, int y, int z) {
         // B F R L D U
 
         if (x >= 0 && x < max_xx && y >= 0 && y < max_yy && z >= 0 && z < max_zz) {
-            if (cur_map_3d[x][y][z].edge_list[anti_dir[dir]]->used_net.find(net_id) != cur_map_3d[x][y][z].edge_list[anti_dir[dir]]->used_net.end()) {
+            if(cur_map_3d[x][y][z].edge_list[anti_dir[dir]]->used_net == nullptr){
+                cur_map_3d[x][y][z].edge_list[anti_dir[dir]]->used_net = new LRoutedNetTable;
+            }
+            if (cur_map_3d[x][y][z].edge_list[anti_dir[dir]]->used_net->find(net_id) != cur_map_3d[x][y][z].edge_list[anti_dir[dir]]->used_net->end()) {
                 return true;
             }
             else
@@ -1817,20 +1829,25 @@ void DP(int x, int y, int z) {
         for (k = 0; k < max_zz; ++k) {
             for (i = 1; i < max_xx; ++i)
                 for (j = 0; j < max_yy; ++j)
-                    if (cur_map_3d[i][j][k].edge_list[LEFT]->used_net.size()) {
-                        xy += cur_map_3d[i][j][k].edge_list[LEFT]->used_net.size();
+                    if(cur_map_3d[i][j][k].edge_list[LEFT]->used_net != nullptr){
+                        if (cur_map_3d[i][j][k].edge_list[LEFT]->used_net->size()) {
+                            xy += cur_map_3d[i][j][k].edge_list[LEFT]->used_net->size();
+                        }
                     }
             for (i = 0; i < max_xx; ++i)
                 for (j = 1; j < max_yy; ++j)
-                    if (cur_map_3d[i][j][k].edge_list[BACK]->used_net.size()) {
-                        xy += cur_map_3d[i][j][k].edge_list[BACK]->used_net.size();
+                    if(cur_map_3d[i][j][k].edge_list[BACK]->used_net != nullptr){
+                        if (cur_map_3d[i][j][k].edge_list[BACK]->used_net->size()) {
+                            xy += cur_map_3d[i][j][k].edge_list[BACK]->used_net->size();
+                        }
                     }
         }
         for (i = 0; i < max_xx; ++i)
             for (j = 0; j < max_yy; ++j)
                 for (k = 1; k < max_zz; ++k)
-                    z += (via_cost * cur_map_3d[i][j][k].edge_list[DOWN]->used_net.size());
-
+                    if(cur_map_3d[i][j][k].edge_list[DOWN]->used_net != nullptr){
+                        z += (via_cost * cur_map_3d[i][j][k].edge_list[DOWN]->used_net->size());
+                    }
     printf("total wirelength = %d + %d = %d\n", xy, z, xy + z);
     }
 
@@ -1841,18 +1858,21 @@ void DP(int x, int y, int z) {
             for (j = 0; j < max_yy; ++j)
                 for (k = 0; k < max_zz; ++k) {
                     cur_map_3d[i][j][k].edge_list[LEFT]->cur_cap = 0;
-                    cur_map_3d[i][j][k].edge_list[LEFT]->used_net.clear();
+                    if(cur_map_3d[i][j][k].edge_list[LEFT]->used_net != nullptr)
+                        cur_map_3d[i][j][k].edge_list[LEFT]->used_net->clear();
                 }
         for (i = 0; i < max_xx; ++i)
             for (j = 1; j < max_yy; ++j)
                 for (k = 0; k < max_zz; ++k) {
                     cur_map_3d[i][j][k].edge_list[BACK]->cur_cap = 0;
-                    cur_map_3d[i][j][k].edge_list[BACK]->used_net.clear();
+                    if(cur_map_3d[i][j][k].edge_list[BACK]->used_net != nullptr)
+                        cur_map_3d[i][j][k].edge_list[BACK]->used_net->clear();
                 }
         for (k = 1; k < max_zz; ++k)
             for (i = 0; i < max_xx; ++i)
                 for (j = 0; j < max_yy; ++j)
-                    cur_map_3d[i][j][k].edge_list[DOWN]->used_net.clear();
+                    if(cur_map_3d[i][j][k].edge_list[DOWN]->used_net != nullptr)
+                        cur_map_3d[i][j][k].edge_list[DOWN]->used_net->clear();
     }
 
     void multiply_viadensity_map_by_times(double times) {

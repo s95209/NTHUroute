@@ -233,7 +233,7 @@ public:
     float max_cap;
     float cur_cap;
     float cur_dem = 0;
-    LRoutedNetTable used_net;
+    LRoutedNetTable* used_net;
 };
 
 typedef Edge_2d* Edge_2d_ptr;

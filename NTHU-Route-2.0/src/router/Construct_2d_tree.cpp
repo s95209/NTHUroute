@@ -141,7 +141,7 @@ Edge_3d::Edge_3d()
 
 	  cur_cap(0),
 
-	  used_net()
+	  used_net(nullptr)
 
 {
 }
